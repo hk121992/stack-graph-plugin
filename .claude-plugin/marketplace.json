@@ -1,0 +1,14 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "stack-graph",
+  "owner": {
+    "name": "Be Civic"
+  },
+  "description": "stack-graph plugin marketplace — the agentic-devops factory.",
+  "plugins": [
+    {
+      "name": "stack-graph",
+      "source": "./"
+    }
+  ]
+}
