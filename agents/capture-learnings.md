@@ -1,6 +1,6 @@
 ---
 name: "capture-learnings"
-description: "Generative curation agent that surfaces durable learnings from a sprint and routes each to its appropriate knowledge home (recall, curated canon, or code-map) as reconcile-gated proposals. Returns a structured proposals list; writes nothing directly. Use when: The debrief stage needs a curated proposals list of durable learnings from the sprint before the operator decides which to enact."
+description: "Generative curation agent that surfaces durable learnings from a sprint and routes each to its knowledge home as a proposal. Returns a proposals list; writes nothing. Use when: The debrief stage needs a curated proposals list of durable learnings from the sprint before the operator decides which to enact."
 ---
 
 

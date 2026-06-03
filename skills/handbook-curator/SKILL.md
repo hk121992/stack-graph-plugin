@@ -1,6 +1,6 @@
 ---
 name: "handbook-curator"
-description: "Maintains the curated-canon home (handbook + decisions) via the raise → queue → integrate loop. Modes — sweep (scan for drift), raise (author a labelled PR for an amendment, with duplicate detection), queue (list open canon PRs + collisions), refresh-index (regenerate the page index). The vendored, general curator; a harness points it at its own canon via overlay. Use when: A session surfaced canon drift, a broken cross-reference, stale terminology, or a missing canonical page; or a node proposed a durable finding that belongs in curated canon; or the operator wants to inspect/integrate the open-PR queue. NOT for context-loading — readers navigate the canon directly via its page index."
+description: "Maintains the curated-canon home (handbook + decisions). Modes — sweep (scan for drift), raise (author a labelled PR for an amendment, with duplicate detection), queue (list open canon PRs + collisions), refresh-index (regenerate the page index). The vendored, general curator; a harness points it at its own canon via overlay. Use when: A session surfaced canon drift, a broken cross-reference, stale terminology, or a missing canonical page; or a node proposed a durable finding that belongs in curated canon; or the operator wants to inspect/integrate the open-PR queue. NOT for context-loading — readers navigate the canon directly via its page index."
 ---
 
 

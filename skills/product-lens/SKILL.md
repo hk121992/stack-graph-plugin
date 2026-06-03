@@ -1,6 +1,6 @@
 ---
 name: "product-lens"
-description: "Bring the product/CEO/strategy lens into the dev-sprint's shared front — is this the right problem, and does the solution serve the value proposition, the target user, and the objective it claims? Examines the four risks at the item altitude alongside the code/design lenses, surfaces findings into the same design/plan doc, and decides no product strategy by fiat. Use when: A work-item is at the shared design or plan front and its solution needs the product-strategy check — right problem? serves the value prop / target user / the OKR? — alongside the code and design lenses, before it advances toward build."
+description: "Bring the product/CEO/strategy lens into the dev-sprint's shared design or plan front — vets the item against the value proposition, target user, and claimed objective. Decides no product strategy by fiat. Use when: A work-item is at the shared design or plan front and its solution needs the product-strategy check — right problem? serves the value prop / target user / the OKR? — alongside the code and design lenses, before it advances toward build."
 ---
 
 

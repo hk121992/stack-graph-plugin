@@ -1,6 +1,6 @@
 ---
 name: "ship"
-description: "Run the test suite, enforce the coverage gate, bump the version (if configured), commit the staged changes, and open a pull request — ending when the PR is open and ready. Invoked by land; also standalone. Use when: A change is ready to move from a working implementation to a pull request — tests should pass, coverage gate should hold, and a PR should be opened for review and downstream merge/deploy."
+description: "Run the test suite, enforce the coverage gate, bump the version (if configured), commit the staged changes, and open a pull request. Invoked by land; also standalone. Use when: A change is ready to move from a working implementation to a pull request — tests should pass, coverage gate should hold, and a PR should be opened for review and downstream merge/deploy."
 ---
 
 

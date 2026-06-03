@@ -1,6 +1,6 @@
 ---
 name: "log-decision"
-description: "Mechanical agent that performs a two-layer write for a decision — conclusion appended to docs/decisions.md (the curated decisions store, D11) and surrounding reasoning written to gbrain (the recall substrate, D31). Returns a write-receipt. Invoked by design, reconcile, and debrief. Use when: A significant decision has been made and must be durably recorded — both the conclusion (for quick lookup) and the reasoning (for future recall). Called from design, reconcile, or debrief after the decision is settled."
+description: "Mechanical agent that writes a decision in two layers — conclusion to the decisions store, reasoning to gbrain. Returns a write-receipt. Invoked by design, reconcile, and debrief. Use when: A significant decision has been made and must be durably recorded — both the conclusion (for quick lookup) and the reasoning (for future recall). Called from design, reconcile, or debrief after the decision is settled."
 ---
 
 

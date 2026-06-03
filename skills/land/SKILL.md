@@ -1,6 +1,6 @@
 ---
 name: "land"
-description: "Take the built and reconciled change through to a live, health-confirmed deployment. Holds the commit-to-land intake gate and the live-confirmed exit gate — both operator decisions. Sequences ship → deploy (wave-1 sub-arc); canary follows in wave 2. Modes — staging-first (default), prod-direct, staging-only. Use when: A change has cleared the commit-to-land gate (reconcile confirmed spec = reality and the change is ready to ship). Invoked after reconcile in the dev-sprint; also reachable directly when the gate decision is already recorded in the carrier."
+description: "Take the built and reconciled change through to a live, health-confirmed deployment. Holds the commit-to-land intake gate and the live-confirmed exit gate — both operator decisions. Modes — staging-first (default), prod-direct, staging-only. Use when: A change has cleared the commit-to-land gate (reconcile confirmed spec = reality and the change is ready to ship). Invoked after reconcile in the dev-sprint; also reachable directly when the gate decision is already recorded in the carrier."
 ---
 
 

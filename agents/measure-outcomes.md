@@ -1,6 +1,6 @@
 ---
 name: "measure-outcomes"
-description: "Deterministic measurement agent that computes per-work-item and per-node metrics against each node's earns-keep criterion, reading the instrumentation timeline. Returns a structured metrics report; writes nothing and makes no judgments. Use when: The debrief stage needs hard numbers against the earns-keep of each node the sprint touched, before the operator assesses whether outcomes were met."
+description: "Deterministic measurement agent that computes per-work-item and per-node metrics against each node's earns-keep criterion. Returns a structured metrics report; writes nothing and makes no judgments. Use when: The debrief stage needs hard numbers against the earns-keep of each node the sprint touched, before the operator assesses whether outcomes were met."
 ---
 
 

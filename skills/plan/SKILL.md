@@ -1,6 +1,6 @@
 ---
 name: "plan"
-description: "Produce a staged, dependency-annotated plan for a settled work-item — one implementation unit per buildable workstream, lens-vetted, with planning principles taught. The plan artifact is what the commit-to-build gate decides against. Use when: A design is settled and its spec amendment is through — decompose the work into implementation units, sequence them, dispatch the lens family over the plan doc, and surface it for the operator's commit-to-build decision."
+description: "Produce a staged, dependency-annotated, lens-vetted plan for a settled work-item. The plan artifact is what the commit-to-build gate decides against. Use when: A design is settled and its spec amendment is through — decompose the work into implementation units, sequence them, dispatch the lens family over the plan doc, and surface it for the operator's commit-to-build decision."
 ---
 
 
