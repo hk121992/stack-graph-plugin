@@ -1,6 +1,6 @@
 ---
 name: "design"
-description: "Run the shared product + engineering/design front for a work-item — resolve the load-bearing design questions by intended outcome, dispatch the lens family over the design doc, produce a design doc with a Spec touchpoints table, and author/refine the experience-contract. Use when: A work-item's intent is aligned and you need to resolve its design by outcome before specify/plan/build — frame the solution, vet it with the lens panel over the design doc, and (for an experience-bearing item) author or refine its experience-contract."
+description: "Run the shared product + engineering/design front for a work-item — resolve design questions by intended outcome, produce a design doc with a Spec touchpoints table, and author/refine the experience-contract. Use when: A work-item's intent is aligned and you need to resolve its design by outcome before specify/plan/build — frame the solution, vet it with the lens panel over the design doc, and (for an experience-bearing item) author or refine its experience-contract."
 ---
 
 

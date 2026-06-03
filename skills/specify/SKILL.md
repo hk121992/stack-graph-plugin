@@ -1,6 +1,6 @@
 ---
 name: "specify"
-description: "Turn a settled design doc and its Spec touchpoints into a canonical spec amendment — scan the touchpoints for drift, author the amendment, and open a labelled PR into the shared canon queue the curator gates. Modes — spec-layout (the canon-author path), null (no spec layout — record inline, no PR), amend-existing (revise a section). Use when: A design doc with Spec touchpoints is settled and the work needs the spec made canonical before plan/build — either by raising a labelled amendment PR (spec-layout) or by recording touchpoints inline when the product has no spec layout (null)."
+description: "Turn a settled design doc and its Spec touchpoints into a canonical spec amendment — scan for drift, author the amendment, and open a labelled PR. Modes — spec-layout (the canon-author path), null (no spec layout — record inline, no PR), amend-existing (revise a section). Use when: A design doc with Spec touchpoints is settled and the work needs the spec made canonical before plan/build — either by raising a labelled amendment PR (spec-layout) or by recording touchpoints inline when the product has no spec layout (null)."
 ---
 
 

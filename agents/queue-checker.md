@@ -1,6 +1,6 @@
 ---
 name: "queue-checker"
-description: "Stateless mechanical agent that returns the open canon-PR queue (the set of open labelled PRs) in one call — mode list (the whole queue) or check-duplicate (the subset overlapping a target file set). No model judgment. Use when: The curator needs the live canon-PR queue — to detect a duplicate before raise authors a second PR, or to list the batch before integrate merges it."
+description: "Stateless mechanical agent that returns the open canon-PR queue — mode list (the whole queue) or check-duplicate (the subset overlapping a target file set). No model judgment. Use when: The curator needs the live canon-PR queue — to detect a duplicate before raise authors a second PR, or to list the batch before integrate merges it."
 ---
 
 

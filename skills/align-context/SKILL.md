@@ -1,6 +1,6 @@
 ---
 name: "align-context"
-description: "Establish a shared, correct intent and the constraints for a work-item before design — read the carrier for context, fan explore out to gather the front's context once, interrogate the intent with the operator until it is agreed, and hand a settled intent + a reusable context digest forward to design. Modes — lightweight / standard / deep / spec. Use when: A work-item has entered the in-delivery window and its intent must be made shared and correct before design begins — align on what the item is and why, gather its context once, and settle the constraints so the rest of the front does not re-explore or build on a mis-stated intent."
+description: "Establish a shared, correct intent and constraints for a work-item before design begins. Modes — lightweight / standard / deep / spec. Use when: A work-item has entered the in-delivery window and its intent must be made shared and correct before design begins — align on what the item is and why, gather its context once, and settle the constraints so the rest of the front does not re-explore or build on a mis-stated intent."
 ---
 
 

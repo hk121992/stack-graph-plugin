@@ -1,6 +1,6 @@
 ---
 name: "strategy-curator"
-description: "Maintains the strategy canvas (value-proposition canvas + business-model canvas + product strategy) via the evidence-first test-and-learn loop. Modes — hypothesise (frame testable claims), gather-evidence (run evidence via explore + real discovery), assess (record findings, confirm/kill/supersede/pivot, graduate a labelled PR), refresh-canvas (regenerate the view). The vendored, general curator; a harness points it at its own canvas via overlay. Use when: A canvas claim needs framing or putting to evidence; a finding has landed that confirms, kills, supersedes, or pivots a hypothesis; the riskiest value/viability assumption is unaddressed; or the canvas view has drifted from its sources. NOT for delivery (the product-dashboard/gates) or the outcome layer (OKRs) — those are adjacent surfaces."
+description: "Maintains the strategy canvas (value-proposition canvas + business-model canvas + product strategy). Modes — hypothesise (frame testable claims), gather-evidence (run evidence), assess (record findings, confirm/kill/supersede/pivot), refresh-canvas (regenerate the view). The vendored, general curator; a harness points it at its own canvas via overlay. Use when: A canvas claim needs framing or putting to evidence; a finding has landed that confirms, kills, supersedes, or pivots a hypothesis; the riskiest value/viability assumption is unaddressed; or the canvas view has drifted from its sources. NOT for delivery (the product-dashboard/gates) or the outcome layer (OKRs) — those are adjacent surfaces."
 ---
 
 

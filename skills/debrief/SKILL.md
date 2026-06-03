@@ -1,6 +1,6 @@
 ---
 name: "debrief"
-description: "The loop-close stage of the dev-sprint. Measures outcomes vs the work-item's outcome_link, captures learnings, routes any amendments, and seeds the next sprint. Modes — measure (compute metrics vs earns-keep), learn (curate durable learnings for their knowledge homes), seed-next (surface the next sprint candidate and close the loop). Does NOT advance lifecycle_state — the live-confirmed gate at land exit already did; the loop closes through shared authored homes the curators read, not through a direct curator edge. Use when: A work item has passed the live-confirmed gate (land exit) and is now in the shipped → live state. Run debrief to close the sprint loop — read outcomes back, capture learnings, and surface what comes next."
+description: "Loop-close stage of the dev-sprint — measures outcomes vs the work-item's outcome_link, captures learnings, routes amendments, and seeds the next sprint. Modes — measure (compute metrics vs earns-keep), learn (curate durable learnings for their knowledge homes), seed-next (surface the next sprint candidate and close the loop). Does NOT advance lifecycle_state. Use when: A work item has passed the live-confirmed gate (land exit) and is now in the shipped → live state. Run debrief to close the sprint loop — read outcomes back, capture learnings, and surface what comes next."
 ---
 
 
