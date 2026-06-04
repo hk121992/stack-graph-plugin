@@ -123,6 +123,10 @@ WIP commits exist); the only halt is the anti-footgun abort below.
    - **Mixed** (WIP and non-WIP commits interleaved) — do an interactive-equivalent rebase that
      squashes **only** the `WIP:` commits into their adjacent logical commit, preserving every
      non-WIP commit and its message. Never collapse a non-WIP commit into a WIP squash.
+     **Clear the index first:** a rebase refuses to run with a dirty tree, and Phase 3 may have
+     staged a version bump. Stash before, restore after — `git stash push --include-untracked`,
+     rebase, `git stash pop` — so the staged bump and any delivery changes survive into the
+     Phase 5 commit. (The WIP-only soft-reset path needs no stash — it preserves the index.)
 3. **Anti-footgun guards (non-negotiable):**
    - **Never** blind `git reset --soft` past a non-WIP commit — that destroys delivered work.
      A soft-reset is only valid when the branch is WIP-only.

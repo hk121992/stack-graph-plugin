@@ -39,11 +39,17 @@ gate, so the gate is not confirmed on stale evidence:
 
 1. **Read the most-recent reconcile/review pass** from the carrier's `gate_decisions[]` and
    `transition_history` — which pass last certified the change, and when.
-2. **Compute its commit distance from HEAD** — how many commits have landed since that pass.
-   A zero distance means the certified state is HEAD; a growing distance means HEAD has moved
-   past the last verification, and the gate would be confirming stale evidence.
-3. **Surface both** to the operator at the gate: "Last reconcile/review pass: `<pass>` at
-   `<n>` commits behind HEAD."
+2. **Compute its commit distance from HEAD** — *if* that pass recorded the `head_sha` it
+   certified, count commits landed since (`git rev-list --count <head_sha>..HEAD`). Zero
+   distance means the certified state is HEAD; a growing distance means HEAD has moved past the
+   last verification, and the gate would be confirming stale evidence.
+   - **Degrade explicitly when the SHA is absent.** Today review/reconcile do not always record
+     the certified `head_sha`, so the distance can be uncomputable. Do **not** fabricate one from
+     a timestamp — surface the pass and its time and state "certified SHA not recorded — freshness
+     by time only, commit distance unavailable." (The durable fix is review/reconcile emitting a
+     verified `head_sha` in their gate record — a separate upstream amendment.)
+3. **Surface what you have** to the operator at the gate: "Last reconcile/review pass: `<pass>`
+   at `<time>`, `<n>` commits behind HEAD" (or "distance unavailable" per the degrade path).
 
 You **read and surface** this evidence — you do not produce it. `reconcile` and `review` (the
 upstream backbone stages, D50) own producing the verification; land surfaces its freshness at
@@ -154,10 +160,12 @@ event log, **not** a bespoke deploy-report store. The mechanism (D59):
   `node-exit` event** the instrumentation preamble already fires (exactly as `tokens_per_iu`
   rides the unit-complete event, D57). It lands in the **product-outcomes / deploy stream** of
   the event log.
-- **You (land) contribute the `live_confirmed` gate outcome** to that same carrier-keyed event.
-  You **read** the deploy-event for context; you do **not** create a second store. The
-  `references instrumentation-preamble` edge (`load: import`) single-sources the emit behaviour
-  into you.
+- **You (land) emit your own carrier-keyed `live-confirmed` event** carrying `live_confirmed`,
+  on your node-exit, referencing the deploy by `merge_sha`. The event log is **append-only**
+  (per `instrumentation-preamble`) — you do **not** mutate deploy's already-appended row, and you
+  do **not** create a second store. The **projection joins** your live-confirmed event with
+  deploy's deploy-event by carrier id. The `references instrumentation-preamble` edge
+  (`load: import`) single-sources the emit behaviour into you.
 - **Current deploy-state is projected** derived-on-read into `.stack-graph/` — never
   hand-written.
 - **The recorder freezes** the deploy outcome onto the carrier's closed record at the terminal

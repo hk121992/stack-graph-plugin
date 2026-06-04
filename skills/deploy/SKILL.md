@@ -56,7 +56,12 @@ deploy** stream of the local event log:
 - `timing` — the merge→live duration.
 - `smoke_health` — the inline smoke-check result (Phase 3). `land`'s `live-confirmed`
   signal **consumes this** rather than re-opening the URL.
-- `live_confirmed` — null here (the `live-confirmed` gate is `land`'s; it fills this).
+
+This event carries **deploy's** knowledge only. The **live-confirmed** outcome is **not** a
+field you leave for `land` to fill: the event log is **append-only** (per
+`instrumentation-preamble`), so no one mutates this row after you emit it. `land` emits its
+**own** carrier-keyed live-confirmed event; the projection **joins** the two by carrier id
+(`merge_sha`) into the full deploy outcome.
 
 Do **not** write any of this to the carrier file. Current deploy-state is **projected on
 read** from the event log into `.stack-graph/`; the **recorder** (debrief's, keyed off
@@ -146,9 +151,14 @@ Poll the pipeline at a reasonable interval (harness-configured; default 30s) unt
   decide to revert and you write no carrier field (D44). But once the operator chooses
   revert, **offer to execute the mechanical git steps** so the rollback is frictionless:
 
+  - **First get onto the deploy target.** After `gh pr merge`, `<merge-sha>` lives on the
+    target branch, but the working tree is often still on the (now-merged) PR branch — a
+    `git revert` here can fail or land the rollback on the wrong branch. Fetch and check out
+    the target first: `git fetch origin <target>` + `git checkout <target>` + `git pull --ff-only`.
   - If `branch_protection` is **false**: `git revert <merge-sha> --no-edit` + push.
-  - If `branch_protection` is **true** (direct push blocked): open a **revert-PR** for
-    the revert commit instead of pushing directly.
+  - If `branch_protection` is **true** (direct push blocked): branch from the target
+    (`git checkout -b revert-<short-sha> <target>`), `git revert <merge-sha> --no-edit`, and
+    open a **revert-PR** instead of pushing to the target directly.
 
   Then wait for the revert to deploy before reporting, and report the revert commit (or
   revert-PR) so `land` can re-enter the loop. You execute the git action; `land` /
