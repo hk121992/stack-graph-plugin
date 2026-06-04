@@ -26,7 +26,7 @@ decisions_made: [<string>, ...]       # list of decisions logged this sprint (fr
 metrics_report: <object> | null       # output of measure-outcomes for this sprint, if available
 graph_record: <path>                  # path to graph-record.json (for earns-keep / node goals)
 decisions_store_path: <path>          # path to docs/decisions.md
-learnings_archive_path: <path> | null # the committed prior-proposals archive (the gate's `learnings-archive` surface, D60); null on a first sprint / fresh harness
+learnings_archive_path: <path> | null # the committed prior-proposals archive file (the gate's `learnings-archive` surface, D60); a freshly-scaffolded harness passes the empty file (non-null); null only when the binding is unset
 ```
 
 ## Procedure
@@ -82,9 +82,10 @@ Score against three sources:
 3. **Prior proposals:** read the prior-proposals archive at `learnings_archive_path` — the
    committed `learnings-archive` surface the gate writes (D60); `metrics_report.prior_proposals`
    is only an optional inline copy. If a finding **recurs there without enactment**, flag
-   `recurring_unacted`. If neither the archive nor the inline copy is present (first sprint /
-   fresh harness), treat the prior set as empty and emit **no** `recurring_unacted` flags —
-   degrade cleanly.
+   `recurring_unacted`. If the archive is **empty** (a freshly-scaffolded harness) or **unset**
+   (no `learnings-archive` bound) and there is no inline copy, treat the prior set as empty and
+   emit **no** `recurring_unacted` flags — degrade cleanly. (An empty *scaffolded* archive is
+   still passed by the gate, non-null, so the gate can write to it after curation.)
 
 **Supersession check:** also test whether a *new* finding **invalidates** a prior learning (makes
 it wrong, not merely refines it). List those prior ids in `supersedes_candidates` on the proposal

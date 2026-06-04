@@ -38,7 +38,7 @@ target does not resolve.
 | `items-root` | the work-items dir | `items/` under the surface; holds `<id>.md` |
 | `manifest-path` | the work-items manifest | committed derived index (`items/manifest.json`) |
 | `sprint-records-root` | the sprint-records dir | `sprints/`; assembled views |
-| `learnings-archive` | the committed prior-proposals archive | `capture-learnings`' surviving-but-unenacted proposals — the gate writes it, `capture-learnings` reads it next sprint (D60); committed (generative/non-replayable), **not** `.stack-graph/`; scaffold creates it empty |
+| `learnings-archive` | the prior-proposals archive **file** (`learnings/archive.md`) | `capture-learnings`' surviving-but-unenacted proposals — the gate writes it, `capture-learnings` reads it next sprint (D60); committed (generative/non-replayable), **not** `.stack-graph/`; scaffold creates the file empty |
 | `strategy-doc` | the vision & strategy doc | `strategy.md` (vision · guiding policy · JTBD) |
 | `objectives-doc` | the objectives / OKR doc | `objectives.md` per `okr-schema` |
 | `okr-binding` | how `outcome_link` resolves to an objective id | resolution rule, not a path |

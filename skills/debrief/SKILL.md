@@ -137,12 +137,15 @@ independently.
    ratified divergence is logged through the `log-decision` invoke in step 3; this surfaces the
    divergence so it is signed off rather than buried.
 2.6. **Persist the proposals archive (D60).** You are the gate that writes the committed
-   `learnings-archive` (`learnings_archive_path`): write the **surviving-but-unenacted**
+   `learnings-archive` file (`learnings_archive_path`): write the **surviving-but-unenacted**
    proposals (the parked canon / node-amend items + any deferred low-priority ones — *not* the
    recall items already enacted to gbrain in step 2) to the archive, so next sprint's
-   `capture-learnings` reads them to detect `recurring_unacted`. Carry forward prior archive
-   entries that are still open; drop entries now enacted. `capture-learnings` only *reads* this
-   file — the write is yours. If `learnings_archive_path` is null, skip and note it.
+   `capture-learnings` reads them to detect `recurring_unacted`. Reconcile against the prior
+   archive: **carry forward** entries still open; **drop** entries now enacted; **drop or mark
+   superseded** any entry named in a proposal's `supersedes_candidates` (a new finding invalidated
+   it — it must not re-surface as a stale duplicate). `capture-learnings` only *reads* this file —
+   the write is yours. The path is the empty scaffolded file on a first sprint (write to it
+   normally); only when `learnings_archive_path` is null (binding unset) do you skip and note it.
 3. **Invoke `log-decision`** for any decisions that surfaced during `learn` itself — the
    operator's verdict on which proposals to enact, and each ratified divergence from step 2.5,
    is a decision worth logging.
