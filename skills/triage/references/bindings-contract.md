@@ -92,9 +92,9 @@ product-dashboard work-ledger (see `incremental-improvement-design` §6, Fork C)
 ```
 
 **Surfacing reconciliation.** Standalone IUs are **stored** here, separate from the work-ledger,
-and **rendered** in the dashboard's **incremental channel** — the IU's `channel: incremental` field
-drives that render, so they appear as a distinct improvements log, **not** mixed into the work-ledger
-items. Derived/runtime state (the event log) stays under the existing `event-log` / `.stack-graph/`
+and **rendered** as a **distinct improvements-log lane in the portal, off the work-ledger** — the
+IU's `channel: incremental` field drives that render, so they appear as a distinct improvements log,
+**not** mixed into the work-ledger items. Derived/runtime state (the event log) stays under the existing `event-log` / `.stack-graph/`
 (gitignored), unchanged — a standalone IU's `current_stage` projects from the same carrier-tagged
 event stream as a work-item's (`06-analytics` conforms-to).
 

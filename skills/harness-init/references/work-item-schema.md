@@ -26,7 +26,8 @@ modelling risk):
 Plus the **curator-maintained content** (PR-gated): the problem/opportunity (the *why*), `outcome_link`
 (the OKR it serves → vision; an **authored** link, D38), `value_prop_link` (VPC job/pain/gain), `risk_state`
 (the four-risks evidence state, strength × maturity bar), `tier` (T1/T2/T3, D45), the solution (once
-`committed`), `links` (spec PR / build PRs / experience-contract / debrief), `disposition` (for
+`committed`), `links` (spec PR / build PRs / experience-contract / debrief / `promoted_from` — the
+source standalone-IU id(s) a promoted work-item cites, R5 provenance), `disposition` (for
 parked/killed: the reason — kept, the anti-portfolio).
 
 ## 2. Projected facts — derived from the event log, NOT committed

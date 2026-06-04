@@ -83,11 +83,14 @@ the single `land` gate writes the terminal state.
 When the route is wholesale, hand off to the dev-sprint front via the `escalates align-context` edge.
 This is a one-way cross-arc handoff, **not** ordinary next-stage flow:
 
-1. **Create or reuse a work-item carrier** at the dev-sprint front (per the work-item schema). If a
-   matching work-item already exists, reuse it rather than duplicating.
-2. **Record the two-way provenance link** — the work-item cites the source improvement, and the
-   source (the drift finding / note / the standalone IUs that motivated it) is linked from the
-   work-item. A promoted work-item without its source link is a defect (design doc §9 R5).
+1. **Create or reuse a work-item carrier** at the dev-sprint front — via
+   **`product-dashboard-curator` (its `add-item` mode)**, per `work-item-schema`. If a matching
+   work-item already exists, reuse it rather than duplicating.
+2. **Record the two-way provenance** — the new work-item cites the source improvement
+   (`promoted_from`), and the source (the drift finding / note / the standalone IUs that motivated
+   it) is linked from the work-item. When a *standalone IU* was promoted, close it `dropped`
+   (reason: promoted) with a pointer to the work-item. A promoted work-item without its source link
+   is a defect (design doc §9 R5).
 3. **Create no standalone IU.** Escalation means the change goes through the full front
    (`align-context → design → specify → plan`); a standalone carrier-lite is wrong for it. (When a
    *standalone IU already exists* and is being promoted mid-loop, that is the promote path: the

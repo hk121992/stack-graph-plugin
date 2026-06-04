@@ -65,10 +65,10 @@ fields below over the common set:
 
 | field | required | meaning |
 |---|---|---|
-| `improves` | yes | **The target this slice improves** — a typed pointer to the existing thing the change touches: `{ kind: node \| reference \| handbook-reference \| behaviour, id: <slug-or-path> }`. Because the factory improves *itself*, this is most often a graph node or a `_refs/` reference. Replaces the work-item's `outcome_link` (a standalone IU serves an existing thing, not an OKR). |
+| `improves` | yes | **The target this slice improves** — a typed pointer to the existing thing the change touches: `{ kind: node \| reference \| handbook-reference \| behaviour, id: <slug-or-path> }`. Because the factory improves *itself*, this is most often a graph node or a `_refs/` reference. Replaces the work-item's `outcome_link` (a standalone IU serves an existing thing, not an OKR). The **improvements-manifest is the queryable `improves` history**: "which slices changed node X" = the manifest entries whose `improves.id == X` — the target-queryable half of the provenance bridge (R5). |
 | `lifecycle_state` | yes | **Minimal carrier lifecycle** — `proposed → in-delivery → landed → (parked \| dropped)`. Far shorter than the work-item's seven-state lifecycle: no `discovery`/`defined`/`committed` (no front to clear) and no `shipped`/`live` split (a `landed` item that deploys folds `live` into the same land gate). See the writer split in Invariants. |
 | `slice_type` | yes | **`AFK \| HITL`** (Pocock). `AFK` = the loop can build → review → land it unattended; `HITL` = it carries a human decision/review point the agent must stop at. The loop **prefers AFK**; a HITL slice names *what* + *where* in `hitl_point`. |
-| `hitl_point` | when `slice_type: HITL` | **Where build must stop** — `{ stage, decision }`: the stage the human decision/review falls at and what is decided. **Required when `slice_type: HITL`**, omitted for `AFK`. Without it a HITL slice cannot tell `build` where to pause. |
+| `hitl_point` | when `slice_type: HITL` | `{ stage, decision }` — the stage that must run **attended** (where the human decision/review falls) and what is decided. **The node composing into that stage honours it** (pauses / forces interactive) — e.g. `{ stage: review }` is honoured by `review`, not `build`. **Required when `slice_type: HITL`**, omitted for `AFK`. Without it a HITL slice cannot tell the loop where to run attended. |
 | `gate_decisions[]` | yes (empty until landed) | The append-only gate log — **same entry shape as the work-item's**: `{seq, hash, gate, decision, owner, timestamp, evidence_refs, confidence}` (`seq` a monotonic 0-based integer; `hash` a content hash of the entry excluding `seq`/`hash`). The loop fires a **single** `commit-to-land` gate; no commit-to-build (there is no plan to commit to). Empty until the slice lands. |
 | `verification` | yes | **The vertical-slice proof** — `{ end_to_end: <the complete observable behaviour the slice delivers>, tests: [<the tests that prove that path>] }`. Names the tracer bullets and the end-to-end behaviour they exercise. The structured home for "demoable/verifiable on its own." |
 
@@ -84,9 +84,11 @@ fields below over the common set:
     `children[]`, and any child-IU id in `dependencies`.
   - `channel: sprint` with no `parent`, or `channel: incremental` with a `parent`, is illegal.
   - **HITL contract.** When `slice_type: HITL`, `hitl_point` (`{stage, decision}`) is **required** —
-    the stage + decision `build` pauses on; an `AFK` slice omits it. A HITL slice without
-    `hitl_point` fails validate (build would not know where to stop). `hitl_point` is part of the
-    carrier interface reused nodes read (see `carrier-interface`).
+    the stage that must run **attended** (where the human decision/review falls) and what is decided;
+    an `AFK` slice omits it. **The node composing into that stage honours it** (pauses / forces
+    interactive); e.g. `{ stage: review }` is honoured by `review`, not `build`. A HITL slice without
+    `hitl_point` fails validate (the loop would not know which stage to run attended). `hitl_point` is
+    part of the carrier interface reused nodes read (see `carrier-interface`).
   - **Staged completeness — the `proposed` stub is valid (R-build).** A standalone IU is scaffolded
     by `triage` at `lifecycle_state: proposed` carrying only **identity** (`id`, `title`), `channel:
     incremental`, `improves`, `lifecycle_state: proposed`, `status: planned`, and an empty

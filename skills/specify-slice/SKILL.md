@@ -123,10 +123,11 @@ specify time, that is itself an escalate signal — it is wholesale.
 
 A standalone IU that turns out to need a **design decision** or to **decompose into more than one
 slice** is not a standalone IU. **Escalate** it: follow the `escalates` edge to the dev-sprint
-front entry (`align-context`). This is a one-way cross-arc handoff — it creates or reuses a
-work-item carrier, closes this standalone IU as `dropped` (reason: promoted), and records the
-two-way provenance link (the work-item cites the slice that triggered it; the slice cites the
-work-item). Escalation is a first-class outcome, not a failure — the light loop never silently
+front entry (`align-context`). This is a one-way cross-arc handoff — it creates the work-item via
+**`product-dashboard-curator` (its `add-item` mode)**, per `work-item-schema` (or reuses a matching
+one), closes this standalone IU as `dropped` (reason: promoted) with a pointer to the work-item, and
+records the two-way provenance: the new work-item cites this slice (`promoted_from`); the slice cites
+the work-item. Escalation is a first-class outcome, not a failure — the light loop never silently
 grows into a sprint. The escalate edge is excluded from arc traversal and stage projection, so a
 promote never reads as ordinary next-stage flow.
 

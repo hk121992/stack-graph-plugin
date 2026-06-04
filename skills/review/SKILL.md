@@ -84,7 +84,9 @@ vertical-slice + testing invariants **held in the delivered code** — every acc
 condition is an observable passing test, `verification.end_to_end` is demonstrable, and the
 slice is a complete path, not a horizontal layer fragment. Confirmed defects loop back to
 `build` (the one corrective `can-follow`, reused unchanged). For a small **AFK** slice the
-operator may run review in a cheaper mode (`autofix` / `headless`).
+operator may run review in a cheaper mode (`autofix` / `headless`). If the carrier is a standalone
+IU with `slice_type: HITL` and `hitl_point.stage == review`, run **interactive** (honour the pause)
+and surface `hitl_point.decision` — do not run a cheaper unattended mode.
 
 Read the carrier through the **`carrier-interface`** (`load: on-demand`): branch on
 `carrier_kind`, and read no work-item-only field (`outcome_link`, `children[]`, `risk_state`)

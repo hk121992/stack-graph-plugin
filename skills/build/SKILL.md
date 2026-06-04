@@ -37,9 +37,11 @@ advance `current_stage`; you write no carrier field.
 
 Before the autonomous span begins, run the kick-off collaboratively with the operator:
 
-1. **Read the carrier and all IU children.** Surface the unit count and dependency order. Flag now
-   (not mid-span) any IU whose `acceptance` is thin, whose `acceptance_check` is missing, or whose
-   `files` scope looks broader than `size` suggests.
+1. **Read the carrier and all IU children.** **If `arc: incremental` / `carrier_kind:
+   standalone-iu`:** skip the children / unit-count read — the single slice *is* the unit; go
+   straight to the **Incremental arc — build mode** section below. Otherwise (dev-sprint): surface
+   the unit count and dependency order. Flag now (not mid-span) any IU whose `acceptance` is thin,
+   whose `acceptance_check` is missing, or whose `files` scope looks broader than `size` suggests.
 2. **Flag horizontal IUs.** When an IU's `files` span a single layer (only model, only view) and its
    `acceptance` carries no integration check, suggest expanding it to a thin end-to-end slice — one
    interface path through the affected layers — before the span begins. A horizontal layer that defers
@@ -170,11 +172,12 @@ the addition is the *ordering* and *minimal-code* rules, not a new schema field 
 
 ### HITL pause
 
-A standalone IU carries `slice_type: AFK | HITL`. When it is **HITL**, build reads `hitl_point`
-and **pauses at `hitl_point.stage`** — the named human decision point the slice records — surfacing
-`hitl_point.decision`; it does not run past it unattended. An **AFK** slice runs
-the loop above unattended end-to-end. (A HITL point that turns out to be a genuine design fork is a
-*promote* signal, not a build decision.)
+A standalone IU carries `slice_type: AFK | HITL`. When `slice_type == HITL` **and
+`hitl_point.stage == build`**, build pauses at the decision point — surfacing `hitl_point.decision`;
+it does not run past it unattended. If `hitl_point.stage` is a **downstream** stage (e.g. `review`),
+build does **not** pause — it hands off, and the owning stage honours the pause. An **AFK** slice
+runs the loop above unattended end-to-end. (A HITL point that turns out to be a genuine design fork
+is a *promote* signal, not a build decision.)
 
 ### Carrier consumption (the carrier interface)
 

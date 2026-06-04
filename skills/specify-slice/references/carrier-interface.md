@@ -20,16 +20,30 @@ them.
 
 ## The common interface (read by every reused node)
 
-A reused node may read **only** these fields. They are present for **both** kinds:
+A reused node may read **only** these fields. They are present for **both** kinds. Three of them —
+`carrier_kind`, `arc`, `current_stage` — are **derived, not stored frontmatter fields** (see
+"Deriving carrier_kind and arc" + "The projection key"); the rest are **stored** (read from the
+carrier file):
 
-| field | kind | meaning |
-|---|---|---|
-| `carrier_id` | both | The carrier instance id — the projection key (with kind + arc). |
-| `carrier_kind` | both | `work-item \| standalone-iu`. The shape discriminator. A reused node branches on this where the kinds differ; it never assumes one. |
-| `arc` | both | `dev-sprint \| incremental`. The traversal this run belongs to — part of the projection key. |
-| `current_stage` | both | **Projected**, never written by the node — the arc stage the carrier is at (`carrier-interface` projection key). Read-only to every node. |
-| `lifecycle_state` | both | The carrier's life-phase. Value sets differ per kind (work-item: the seven-state `idea→…→live` + `parked\|killed`; standalone-IU: `proposed → in-delivery → landed → parked\|dropped`); a reused node reads it but writes only the terminal transition via its gate. |
-| `gate_decisions[]` | both | Append-only gate log, **same entry shape** for both kinds: `{seq, hash, gate, decision, owner, timestamp, evidence_refs, confidence}`. A reused node appends one entry when it holds a gate. |
+| field | kind | stored? | meaning |
+|---|---|---|---|
+| `carrier_id` | both | **stored** | The carrier instance id — the projection key (with kind + arc). |
+| `carrier_kind` | both | **derived** | `work-item \| standalone-iu`. The shape discriminator — **not a stored field**; derived from the IU-schema discriminator (`channel: incremental` + no `parent` ⇒ `standalone-iu`; otherwise `work-item`). See "Deriving carrier_kind and arc". A reused node branches on it where the kinds differ; it never assumes one. |
+| `arc` | both | **derived** | `dev-sprint \| incremental`. The traversal this run belongs to — **not a stored field**; a traversal property (which `composes-into` arc the current node belongs to for this run). Part of the projection key. See "Deriving carrier_kind and arc". |
+| `current_stage` | both | **derived** | **Projected**, never written by the node — the arc stage the carrier is at (the projection key below). Read-only to every node. |
+| `lifecycle_state` | both | **stored** | The carrier's life-phase. Value sets differ per kind (work-item: the seven-state `idea→…→live` + `parked\|killed`; standalone-IU: `proposed → in-delivery → landed → parked\|dropped`); a reused node reads it but writes only the terminal transition via its gate. |
+| `gate_decisions[]` | both | **stored** | Append-only gate log, **same entry shape** for both kinds: `{seq, hash, gate, decision, owner, timestamp, evidence_refs, confidence}`. A reused node appends one entry when it holds a gate. |
+
+### Deriving carrier_kind and arc
+
+`carrier_kind` and `arc` are **not** carrier frontmatter fields — a node derives each:
+
+- **`carrier_kind`** = `standalone-iu` **iff** the carrier file has `channel: incremental` and no
+  `parent` (the IU-schema standalone discriminator); otherwise `work-item`. There is **no stored
+  `carrier_kind` field** — a node derives it from the discriminator. So node-facing language like
+  "branch on `carrier_kind`" means: **derive `carrier_kind` from the discriminator, then branch.**
+- **`arc`** = the traversal the carrier entered on — i.e. which `composes-into` arc the current node
+  belongs to for this run. It is a **traversal property**, not a stored carrier field.
 
 ## Per-kind fields — present on only one kind
 
@@ -43,7 +57,7 @@ kind-specific fields, named so the seam is explicit:
 | `risk_state`, `tier`, `frozen_timeline` | work-item only | **must not assume** — tracked-product-work machinery; absent on a carrier-lite. |
 | `improves` | standalone-IU only | the typed pointer to the thing this slice changes (`{kind, id}`). Replaces `outcome_link` for the incremental arc. |
 | `slice_type` | standalone-IU only | `AFK \| HITL` — governs the loop's autonomy. `build`/`review`/`land` read it to decide attended vs unattended modes and the HITL pause. |
-| `hitl_point` | standalone-IU only | `{stage, decision}` — present when `slice_type: HITL`. Names **where** to pause and **what** the human decides. `build` reads `hitl_point.stage` to stop at the right stage; absent on AFK slices. |
+| `hitl_point` | standalone-IU only | `{stage, decision}` — present when `slice_type: HITL`. Names **where** to pause and **what** the human decides. Read by the node that **owns `hitl_point.stage`** — `build` pauses if `stage == build`; `review` runs interactive if `stage == review` — **not** unconditionally `build`. Absent on AFK slices. |
 | `verification` | standalone-IU only | `{end_to_end, tests}` — the vertical-slice proof `build` delivers against and `review`'s tests lens checks. |
 
 **The rule:** a reused node reads the **common interface** freely; it reads a **per-kind field only
@@ -70,11 +84,10 @@ Events carry the carrier id today (see `instrumentation-preamble`). For the trip
 correctly across the shared nodes, an event must also be resolvable to its **carrier kind** and
 **arc** — see the instrumentation note below.
 
-> **Instrumentation seam (flag).** `instrumentation-preamble`'s event shape carries `carrier`
-> (the id) but **not** `carrier_kind` or `arc`. With the incremental arc reusing `build`/`review`/
-> `land`, the projector needs all three to key correctly. Either the event gains `carrier_kind` +
-> `arc` fields, or they are resolved from the carrier file at projection time. This reference does
-> not resolve that choice; it names the dependency.
+> **Instrumentation seam (resolved).** The instrumentation preamble (v0.2.0) now carries
+> `carrier_kind` + `arc` on the enter/exit events, so the projector can key by the
+> (id, kind, arc) triple. (Implementing that key in `publish-projection.ts` is the input-gated
+> follow-up — no incremental-arc carrier events exist yet.)
 
 ## Related
 
