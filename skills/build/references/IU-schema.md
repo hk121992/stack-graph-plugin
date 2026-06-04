@@ -3,7 +3,7 @@ kind: reference
 id: IU-schema
 title: Implementation-Unit schema — the plan↔build field contract
 description: The field contract for an implementation unit (IU) — the child work item a plan produces and build consumes. Defines the fields a plan's impl-unit carries into build so build can operate autonomously against a well-specified, single-agent-sized unit without re-asking what plan already settled.
-status: v0.2.0 — 2026-06-03
+status: v0.4.0 — 2026-06-04
 ---
 
 # Implementation-Unit schema
@@ -29,6 +29,11 @@ and `build` calibrates against the measured `tokens_per_iu`.
 | `acceptance` | yes | **Verification criteria** — what must be true for build to call this unit done. Stated as observable conditions (tests pass, behaviour X holds, endpoint returns Y), not effort ("implement Z"). |
 | `acceptance_check` | yes | **The runnable command(s) that prove `acceptance`** — the test/build/diff command `build` executes and whose **raw output** it attaches as the done-evidence (e.g. `npm test src/middleware/auth.test.ts`). `acceptance` is the criteria; `acceptance_check` is what proves them. When no runnable command exists (e.g. a pure-doc change), name the explicit manual verification instead — build still **shows** what it did, never asserts a bare pass. |
 | `size` | yes | **Single-agent fit signal** — `XS \| S \| M \| L \| XL`. Estimates whether one fresh agent can build the unit within its best-work context budget (see Invariants). `L`/`XL` read as "probably too big — consider splitting." Calibrated against the measured `tokens_per_iu`. Not a commitment; updated at build if the estimate was wrong. |
+| `title` | yes | Short human label for the unit (shown on the dashboard IU card). |
+| `parent` | no | Parent work-item id. **Omitted ⇒ standalone** — an IU with no parent carrier (the incremental-improvement workflow). |
+| `channel` | yes | `sprint` (decomposed from a work item) \| `incremental` (standalone improvement). Drives which dashboard channel renders the unit. |
+| `status` | yes | Build-tracking state — `planned \| building \| done \| blocked`. **Lightweight tracking, not carrier lifecycle** (no gates). |
+| `improves` | no | For incremental IUs: the node / surface id this improvement targets. |
 
 ## Invariants
 
@@ -52,10 +57,16 @@ and `build` calibrates against the measured `tokens_per_iu`.
   `acceptance_check` and attaches the **raw output** (stdout, exit code) as the unit-complete
   evidence — shown, not asserted. Weak or absent criteria are a plan quality gap, flagged at
   review.
-- **The IU is not the carrier.** It is a child record of the parent work item — a decomposition
-  artefact the plan produces. The parent carrier's `children[]` field tracks the IUs; the IUs
-  themselves are not independent lifecycle entities. They do not hold `lifecycle_state` or
-  `gate_decisions`.
+- **IUs are first-class, self-documented, and trackable — but not carriers.** Each IU has its own
+  file (`ius/<id>.md`) with its own documentation and a lightweight `status` (planned / building /
+  done / blocked). This applies to **all** work, not just incremental: a work item's `children[]`
+  lists its **sprint** IUs (the dashboard renders them as a drill-down under the carrier), while a
+  **standalone** IU (no `parent`, `channel: incremental`) has no carrier at all and renders in the
+  incremental channel. IUs do **not** hold carrier `lifecycle_state` or `gate_decisions` — those stay
+  the carrier's; the IU `status` is build-tracking only.
+- **Shared schema — coordinate with the incremental-improvement workflow.** The standalone-IU half of
+  this schema is co-designed with the incremental session (`docs/incremental-improvement-design.md`);
+  this file is the single source of truth, and both halves must agree before either ships.
 
 ## Measured calibration — `tokens_per_iu`
 
@@ -71,6 +82,10 @@ means IUs are being drawn too coarse (the same shape as "weak acceptance is a *p
 
 ```yaml
 id: auth-jwt-validation
+title: JWT validation + structured error surfacing
+parent: wi-auth-hardening      # omit for a standalone (incremental) IU
+channel: sprint
+status: planned
 goal: Authentication errors are surfaced to the API client in a form the UI can act on — expired, invalid, and missing tokens each return a distinct, documented response.
 files:
   - src/middleware/auth.ts
