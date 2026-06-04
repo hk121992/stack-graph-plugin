@@ -64,7 +64,11 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
 3. **Write `bindings.yaml`** — flat keys per the contract, values relative to the org root. Do not
    overwrite an existing `bindings.yaml`: if one exists and the rest of the harness is complete, this
    is a re-point — switch to `bind`; if the harness is partial (step 0), keep the existing bindings
-   and continue with the missing artefacts.
+   and continue with the missing artefacts. In **either** case, if the existing `bindings.yaml` is
+   **missing keys now required** by `bindings-contract` (e.g. a vendored-plugin update added a key
+   such as `learnings-archive`), **add the missing required keys** — infer + confirm each — before
+   `validate`; never leave a stale key set that `validate` will then reject. This is how an existing
+   harness adopts a plugin that introduced a new required binding (the plugin-update migration path).
 4. **Write the org-root `CLAUDE.md`** from the `bindings-contract` template — the harness's
    **ambient surface**: the `handbook-index` pointer (made ambient so it cascades to every child),
    the pointer to the bindings reference, and the how-to-use-the-graph navigation. Structure only;
