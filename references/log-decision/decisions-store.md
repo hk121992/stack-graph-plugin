@@ -3,7 +3,7 @@ kind: reference
 id: decisions-store
 title: Decisions store — the durable conclusion-layer contract
 description: "The contract for the factory's durable decision store. docs/decisions.md is the conclusion layer (settled D-numbered decisions, terse, self-contained); gbrain is the recall layer (reasoning, context). log-decision is the only writer — the two-layer write per D11. Entries supersede in place, never reorder. Every settled decision, including reconcile's accept-path adjudications, is traceable here. Read by measure-outcomes / capture-learnings for prior context; written only through log-decision."
-status: v0.1.0 — 2026-06-04
+status: v0.2.0 — 2026-06-04
 ---
 
 # Decisions store
@@ -31,9 +31,13 @@ Each conclusion entry is **D-numbered**, terse, and self-contained:
 
 ```
 **<id> — <first sentence as heading>** <remainder>. Why: <rationale>.
-Rejected: <alternatives, or omitted if none>. Status: <accepted | provisional | supersedes:<id>>.
+Rejected: <alternatives, or omitted if none>. Consequences: <what it commits us to downstream —
+omitted entirely if none>. Status: <accepted | provisional | supersedes:<id>>.
 ```
 
+- `Consequences` is **optional** (ADR's downstream-effects field — positive, negative, neutral);
+  omit the clause when absent. It is carried in **both** layers — the conclusion entry and the
+  gbrain recall record.
 - Keep each entry terse — the **narrative lives in `design-history.md`**, not here.
 - A reader with no recall access must be able to act on the conclusion alone. Never write
   "see gbrain for context".
