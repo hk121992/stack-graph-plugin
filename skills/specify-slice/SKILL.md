@@ -64,6 +64,10 @@ shape:
 - **`acceptance_check`** — the runnable command(s) that prove `acceptance`; build runs it and
   attaches the raw output as done-evidence. For a pure-doc slice, name the explicit manual
   verification instead.
+- **`dependencies`** — other standalone IU ids this slice depends on (empty if none); **never** a
+  child-IU id (the single-slice invariant).
+- **`size`** — the single-agent fit signal (`XS…XL`). If the slice will not fit one fresh agent's
+  context budget, that is a **promote** signal, not an `XL`.
 - **`slice_type`** — `AFK` or `HITL` (Phase 4).
 - **`verification`** — `{ end_to_end: <the complete observable behaviour the slice delivers>,
   tests: [<the tests that prove that path>] }`. This is the vertical-slice proof — the structured
@@ -142,8 +146,8 @@ You write **no carrier lifecycle field** and **no gate decision**. The projectio
 
 ## Output
 
-- A **standalone IU with its content fields authored** (`goal`, `files`, `acceptance`,
-  `acceptance_check`, `slice_type`, `verification`) and the vertical-slice / testing / single-slice
+- A **standalone IU with its content fields authored** (`goal`, `files`, `dependencies`,
+  `acceptance`, `acceptance_check`, `size`, `slice_type`, `verification`) and the vertical-slice / testing / single-slice
   invariants enforced — build-ready, handed to `build`.
 - **Or** an **escalation** to the dev-sprint front (`align-context`): a work-item created/reused,
   this standalone IU closed as `dropped` (reason promoted), provenance linked both ways.
@@ -163,4 +167,5 @@ Read these at the step of need (single-sourced into this primitive's bundle):
 
 - `references/carrier-interface.md` — `carrier-interface`
 - `references/lens-dispatch.md` — `lens-dispatch`
+- `references/work-item-schema.md` — `work-item-schema`
 

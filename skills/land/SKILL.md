@@ -43,10 +43,10 @@ holds no recorded gate yet, so surface it (with the readiness surface above). Th
 writes the terminal `lifecycle_state` (`landed | parked | dropped`) and appends the
 `gate_decisions` entry on the standalone IU — the carrier-lite is its own carrier.
 
-**The dial governs how the gate fires.** For an AFK / low-tier slice in a mature harness, the
-D45 maturity × tier dial lets the gate auto-record on green (cheap, still logged); a HITL /
-high-tier slice raises a hard operator gate. The gate is always in the model — the record
-always shows a deliberate land decision.
+**The dial governs how the gate fires.** A standalone IU has no work-item `tier`, so `slice_type`
++ the harness maturity drive it: for an **AFK** slice in a mature harness, the maturity dial lets
+the gate auto-record on green (cheap, still logged); a **HITL** slice raises a hard operator gate.
+The gate is always in the model — the record always shows a deliberate land decision.
 
 Then sequence the sub-arc as usual: invoke **ship** (tests → coverage → PR) then **deploy** per
 your modes. On a **non-deploying harness**, run `staging-only` / PR-and-merge — the item reaches

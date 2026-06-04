@@ -33,7 +33,7 @@ exit (after deploy and canary both clear) — the gate belongs to `land`, not to
 
 ## You do not write the carrier
 
-Read the carrier (the work-item) for context — the `commit-to-land` gate decision and
+Read the carrier for context — kind-agnostic, reading only the common `commit-to-land` gate decision and
 `lifecycle_state` confirm the change was cleared to land before `land` invoked ship,
 and ship before you. You do not write any carrier field. Your completion is the signal:
 the settled deployment URL is the artefact that `canary` (and `land`) observe as your

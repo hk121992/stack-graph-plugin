@@ -116,4 +116,5 @@ The following references are single-sourced into this primitive's bundle and spl
 Read these at the step of need (single-sourced into this primitive's bundle):
 
 - `references/bindings-contract.md` — `bindings-contract`
+- `references/work-item-schema.md` — `work-item-schema`
 
