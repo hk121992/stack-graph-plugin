@@ -75,6 +75,22 @@ panel over the corrected diff. (The process edges that express this loop — `pr
 behaviour holds now: confirmed defects return to build, and review re-runs.) Continue until
 the actionable set is resolved (fixed or deliberately deferred) and you can issue a verdict.
 
+## Incremental arc
+
+The same lens panel vets a **standalone IU** (the incremental loop's carrier-lite) before it
+lands — same `lens-dispatch`, same finding contract, same fix-loop, then straight to `land`
+(no `reconcile`). Here the **`lens-tests` panel is load-bearing**: it checks the
+vertical-slice + testing invariants **held in the delivered code** — every acceptance
+condition is an observable passing test, `verification.end_to_end` is demonstrable, and the
+slice is a complete path, not a horizontal layer fragment. Confirmed defects loop back to
+`build` (the one corrective `can-follow`, reused unchanged). For a small **AFK** slice the
+operator may run review in a cheaper mode (`autofix` / `headless`).
+
+Read the carrier through the **`carrier-interface`** (`load: on-demand`): branch on
+`carrier_kind`, and read no work-item-only field (`outcome_link`, `children[]`, `risk_state`)
+when `carrier_kind` is `standalone-iu`. Events stay carrier-keyed — `(carrier_id, carrier_kind,
+arc)` — so the dev-sprint and incremental arcs do not bleed through this shared node.
+
 ## Modes
 
 Render as branches of this one skill. The differences are purely in operator-interaction
@@ -127,5 +143,6 @@ The following references are single-sourced into this primitive's bundle and spl
 
 Read these at the step of need (single-sourced into this primitive's bundle):
 
+- `references/carrier-interface.md` — `carrier-interface`
 - `references/lens-dispatch.md` — `lens-dispatch`
 

@@ -3,7 +3,7 @@ kind: reference
 id: instrumentation-preamble
 title: Instrumentation preamble — node enter/exit emit contract
 description: "The deterministic enter/exit emit contract every backbone node depends on. On entry, record a node-enter event; on exit, a node-exit event carrying the outcome and any gates touched. Carrier-tagged when a carrier is in context. Events append as JSONL to the .stack-graph/ event log in the workspace. Single-sourced into every consumer at build via @-import (load: import)."
-status: v0.1.0 — 2026-06-01
+status: v0.2.0 — 2026-06-04
 ---
 
 # Instrumentation preamble
@@ -19,7 +19,8 @@ directory if absent).
 
 ```json
 { "ts": "<ISO-8601 timestamp>", "session": "<session-id>", "kind": "enter",
-  "node": "<your-node-id>", "carrier": "<carrier-id-or-null>" }
+  "node": "<your-node-id>", "carrier": "<carrier-id-or-null>",
+  "carrier_kind": "<carrier-kind-or-null>", "arc": "<arc-id-or-null>" }
 ```
 
 - `ts` — the current UTC timestamp in ISO-8601 format (`YYYY-MM-DDTHH:MM:SSZ`).
@@ -30,6 +31,12 @@ directory if absent).
 - `carrier` — the carrier id if a carrier is in context (the work item this traversal
   serves); `null` if no carrier is active. Do not invent a carrier id; if there is no
   carrier binding in scope, emit `null`.
+- `carrier_kind` — the carrier's kind (`work-item` / `standalone-iu`); `null` when
+  `carrier` is `null`. Lets the projection key by (id, kind, arc) without re-reading the
+  carrier file.
+- `arc` — the arc this traversal belongs to (the `composes-into` arc id, e.g.
+  `dev-sprint` / `incremental`); `null` if no arc is in context. The third element of the
+  projection key, so a node shared by two arcs never bleeds stage between them.
 
 Emit this event before reading the carrier or performing any phase work.
 
@@ -41,10 +48,11 @@ At the end of your run — after all phases complete, before you return control 
 ```json
 { "ts": "<ISO-8601 timestamp>", "session": "<session-id>", "kind": "exit",
   "node": "<your-node-id>", "carrier": "<carrier-id-or-null>",
+  "carrier_kind": "<carrier-kind-or-null>", "arc": "<arc-id-or-null>",
   "outcome": "<outcome-string>", "gates": ["<gate-name>:<pass|fail>", ...] }
 ```
 
-- `ts`, `session`, `node`, `carrier` — same as the enter event.
+- `ts`, `session`, `node`, `carrier`, `carrier_kind`, `arc` — same as the enter event.
 - `kind` — literal `"exit"`.
 - `outcome` — a short string describing the result of this node's run. Use one of the
   canonical outcome labels the node's goals name (e.g. `"intent-settled"`,
@@ -71,15 +79,18 @@ Events are JSONL — one JSON object per line, newline-terminated. The log path 
 
 ## Carrier tagging
 
-When a carrier is in context, every event is tagged with the carrier id. This makes the
-carrier's stage-position a derived projection from the event log — the analytics layer
-reads the latest stage event for a given carrier id to compute `current_stage`. Do not
-write `current_stage` to the carrier file; let the projection compute it from these events.
+When a carrier is in context, every event is tagged with the carrier id, its kind, and the
+arc. This makes the carrier's stage-position a derived projection from the event log — the
+analytics layer reads the latest stage event matching the **(carrier id, carrier kind, arc)**
+triple to compute `current_stage`. Keying by carrier id alone would let one carrier's stage
+bleed between arcs at a node shared by two arcs (see `carrier-interface`); the kind + arc in
+the tag keep each arc's projection separate. Do not write `current_stage` to the carrier file;
+let the projection compute it from these events.
 
 If no carrier is in context (a standalone invocation, a factory-loop traversal, or any
-run that does not serve a specific work item), emit `"carrier": null`. The event is still
-valid and is counted in factory conformance metrics; it simply does not contribute to any
-carrier's stage projection.
+run that does not serve a specific work item), emit `"carrier": null` (and `carrier_kind`/`arc`
+`null`). The event is still valid and is counted in factory conformance metrics; it simply
+does not contribute to any carrier's stage projection.
 
 ## Method note
 

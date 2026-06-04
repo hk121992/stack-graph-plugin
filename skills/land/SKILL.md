@@ -20,12 +20,44 @@ visible to the operator.
 
 ## You do not write the carrier
 
-Read the carrier (the work-item) for context: its `lifecycle_state`, the `commit-to-land`
+Read the carrier for context: its `lifecycle_state`, the `commit-to-land`
 gate decision already recorded, the prior `transition_history`. You **do not write any carrier
 field** (D44). The gates advance `lifecycle_state` and append to `gate_decisions[]` — that is
 the gate mechanism's job, not yours. Your completion (and the live-confirmed gate decision) is
 what the projection picks up to advance `current_stage` from `land` and to record `shipped →
 live` in the carrier.
+
+Consume the carrier through the **carrier-interface** (`graph/_refs/carrier-interface.md`).
+You are shared across two arcs, so the carrier is **either** a work-item (`carrier_kind:
+work-item`, `arc: dev-sprint`) **or** a standalone IU (`carrier_kind: standalone-iu`, `arc:
+incremental`). Read only the common-interface fields freely; read a work-item-only field
+(`outcome_link`, `children`, `risk_state`) **behind a `carrier_kind` check** — never assume
+work-item fields when `carrier_kind` is `standalone-iu`.
+
+## Incremental arc
+
+When the carrier is a standalone IU (`carrier_kind: standalone-iu`, `arc: incremental`) there
+is no upstream `reconcile`/`commit-to-land` from a sprint — the incremental loop has no
+reconcile stage. So you **fire your own single `commit-to-land` gate directly**: the carrier
+holds no recorded gate yet, so surface it (with the readiness surface above). This one gate
+writes the terminal `lifecycle_state` (`landed | parked | dropped`) and appends the
+`gate_decisions` entry on the standalone IU — the carrier-lite is its own carrier.
+
+**The dial governs how the gate fires.** For an AFK / low-tier slice in a mature harness, the
+D45 maturity × tier dial lets the gate auto-record on green (cheap, still logged); a HITL /
+high-tier slice raises a hard operator gate. The gate is always in the model — the record
+always shows a deliberate land decision.
+
+Then sequence the sub-arc as usual: invoke **ship** (tests → coverage → PR) then **deploy** per
+your modes. On a **non-deploying harness**, run `staging-only` / PR-and-merge — the item reaches
+`landed` without a prod deploy (the standalone lifecycle folds `live` into the same land gate;
+there is no separate `shipped → live` split). Emit your carrier-keyed live-confirmed event
+carrying the carrier id + `carrier_kind` + `arc`, so projection keeps the incremental traversal
+separate from the sprint's (carrier-interface projection key).
+
+**No debrief.** The incremental arc closes at `land`. A standalone IU has no `outcome_link` to
+read back (it `improves` an existing node/reference, it serves no OKR), so there is nothing for
+`debrief` to read. The `precedes debrief` edge is the dev-sprint exit only.
 
 ## Intake — the commit-to-land gate
 
@@ -260,10 +292,22 @@ The following process edges are wired in the frontmatter (backbone wiring pass, 
 - **`invokes canary`** (wave 2): canary is the third delivery sub-arc step, input-gated on
   live prod traffic. This `invokes` edge is added via `amend` when canary is authored; until
   then deploy's inline smoke check is the live-confirmed signal (see Step 3).
+- **`composes-into incremental @land`** (D56): land is shared with the `incremental` arc — it is
+  the same primitive, reused, not duplicated. The forward edge `review → land` is declared on
+  `review`'s side (review precedes land); land holds no inbound entry for it. See Incremental arc.
+- **`references carrier-interface`** (`load: on-demand`): the explicit field-set land reads about
+  its carrier, so it serves both the work-item (dev-sprint) and standalone-IU (incremental)
+  kinds without assuming work-item-only fields. Wired.
 
 ## Imported references
 
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
 @references/instrumentation-preamble.md
+
+## On-demand references
+
+Read these at the step of need (single-sourced into this primitive's bundle):
+
+- `references/carrier-interface.md` — `carrier-interface`
 

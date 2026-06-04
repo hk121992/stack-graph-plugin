@@ -2,8 +2,8 @@
 kind: reference
 id: bindings-contract
 title: Bindings contract — the keys a harness supplies, and the surface template
-description: The factory contract the plugin ships so a consuming workspace can instantiate a harness — the complete set of binding keys the vendored graph may require, the bindings.yaml file format, the org-root CLAUDE.md ambient-surface template, and the dashboard surface-structure template harness-init scaffolds. The plugin carries this contract; the harness supplies the values. No product data.
-status: v0.2.0 — 2026-06-04
+description: The factory contract the plugin ships so a consuming workspace can instantiate a harness — the complete set of binding keys the vendored graph may require, the bindings.yaml file format, the org-root CLAUDE.md ambient-surface template, and the dashboard + improvements surface-structure templates harness-init scaffolds. The plugin carries this contract; the harness supplies the values. No product data.
+status: v0.3.0 — 2026-06-04
 ---
 
 # Bindings contract
@@ -52,6 +52,9 @@ target does not resolve.
 | `terminal-recorder` | who freezes the timeline at a terminal state | the recorder binding (`work-item-schema` §frozen) |
 | `maturity` | the maturity-dial setting | `pre-launch | first-users | scale` (D45) — default gate rigour |
 | `stale-projection-policy` | degraded-mode policy | how surfaces render when the projection is absent/stale |
+| `improvements-root` | the standalone-IU surface dir | **sibling of `surface-root`** (not under it); holds `<id>.md` + the manifest — the incremental loop's own surface, off the work-ledger (§3) |
+| `improvements-manifest` | the standalone-IU manifest | committed derived index: `[{id, file, improves, slice_type, lifecycle_state}]` |
+| `triage-source` | where improvements are raised from | **optional** — the handbook-curator drift queue / a `learn` store / an operator note. **Input-gated (Fork D):** bind it now; the auto-feed turns on only once those queues carry findings. `triage` still applies the route rule and the operator confirms before a standalone IU is created |
 
 ## 3. The dashboard surface-structure template
 
@@ -74,6 +77,26 @@ content is added later via `product-dashboard-curator`). Matches `artefacts-desi
 Derived/runtime state (the event log, the projection) lives under `.stack-graph/` (gitignored) —
 **not** in the surface — and is reached via `event-log`. The `learnings/` archive is **committed**
 (a proposals list is generative/non-replayable, so it cannot live in `.stack-graph/`, D60).
+
+### The improvements surface-structure (standalone IUs)
+
+The incremental loop's unit — a **standalone IU** — is stored in its **own** surface at
+`improvements-root` (a sibling of `surface-root`, **not** under it), so it stays off the
+product-dashboard work-ledger (see `incremental-improvement-design` §6, Fork C). Same instance-file
++ manifest pattern as the work-items dir, a different surface:
+
+```
+<improvements-root>/
+  manifest.json        # committed derived index: [{id,file,improves,slice_type,lifecycle_state}]
+  <id>.md              # one standalone IU per file (frontmatter per IU-schema standalone shape; body = the slice narrative)
+```
+
+**Surfacing reconciliation.** Standalone IUs are **stored** here, separate from the work-ledger,
+and **rendered** in the dashboard's **incremental channel** — the IU's `channel: incremental` field
+drives that render, so they appear as a distinct improvements log, **not** mixed into the work-ledger
+items. Derived/runtime state (the event log) stays under the existing `event-log` / `.stack-graph/`
+(gitignored), unchanged — a standalone IU's `current_stage` projects from the same carrier-tagged
+event stream as a work-item's (`06-analytics` conforms-to).
 
 ## 4. The org-root CLAUDE.md template
 
