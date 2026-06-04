@@ -23,8 +23,9 @@ experience-contract**.
 
 Invoke when a work-item's intent is aligned (typically handed forward by `align-context`) and its
 design must be resolved before it can be specified, planned, and built. The operator may pass a
-**mode token** (`lightweight` / `standard` / `deep` / `experience`), the **carrier** (the work item), and an intent or design-question summary. Default to `standard` when no mode is
-given. Reach for `experience` (in addition to the others) whenever the item bears a user-facing
+**mode token** (`lightweight` / `standard` / `deep` / `experience`), the **carrier** (the work item), and an intent or design-question summary. The mode token is a **suggestion**, not the only
+signal — Phase 1 infers the mode from the carrier and reconciles it with any operator token (below).
+Reach for `experience` (in addition to the others) whenever the item bears a user-facing
 experience whose contract must be authored or refined here.
 
 ## What you read, and what you must not write
@@ -48,6 +49,14 @@ recording a `gate_decision` are **PM / operator** decisions at a gate — not de
 
 ## Phase 1 — Frame the design question
 
+**Mode-inference pre-flight.** Before framing, read the carrier and **infer the mode** from its
+`lifecycle_state`, its complexity signals (decomposition depth, blast radius, novelty), and the
+aligned-intent summary. Reconcile the inferred mode with any operator-supplied token: where they
+agree, proceed; where they diverge, **surface the inferred mode and the reason** and let the
+operator confirm or override. The operator's token is a suggestion, not the only signal — this
+keeps a trivial change off the full lens dispatch and a genuinely novel item out of `lightweight`.
+Default to `standard` when neither a token nor a clear carrier signal points elsewhere.
+
 1. Read the carrier and the aligned intent. State the item's **load-bearing design questions** —
    the decisions that, left unresolved, would force rework at specify/plan/build.
 2. Fill any context gaps by **invoking `explore`** (scoped, read-only): pass it a scope/mode
@@ -58,12 +67,23 @@ recording a `gate_decision` are **PM / operator** decisions at a gate — not de
    achieve to the design decision, not from implementation convenience. Surface assumptions and
    take them to the operator where the question is novel or contested.
 
+### Confirm-framing gate (hard) — affirm or redirect before the lens dispatch
+
+Surface the **load-bearing design questions and the framing/scope** to the operator as one
+affirm-or-redirect summary, and **block on it** via the platform's blocking-question tool. The lens
+fan-out does not run until the operator affirms or redirects. This is a hard gate, not an
+invitation: the lens pass is the expensive step, so the operator confirms the frame *before* it
+fires — a design question or a scope boundary the operator doubts is caught here, not after the
+fan-out. On redirect, re-frame and re-surface; only an affirm advances to Phase 2. `lightweight` is
+one-pass by design and is exempt — it resolves inline without the hard gate. (This mirrors `plan`'s
+Confirm-framing gate so the two front nodes stay consistent.)
+
 ## Phase 2 — Vet the design with the lens panel
 
-Once the design is framed enough to examine, **dispatch the lens family over the design doc** by
-**following the `lens-dispatch` reference** with `target: doc`. The reference gives you lens
-selection, the fan-out, and the deterministic merge / dedup / corroborate / confidence-gate /
-severity-route reduction.
+Once the operator has **affirmed the framing at the Phase 1 gate** (`lightweight` excepted),
+**dispatch the lens family over the design doc** by **following the `lens-dispatch` reference** with
+`target: doc`. The reference gives you lens selection, the fan-out, and the deterministic merge /
+dedup / corroborate / confidence-gate / severity-route reduction.
 
 - Run the lenses **strategy-first, then parallel**: lead with the design-altitude lenses, then fan
   the remaining active lenses out in parallel.
@@ -96,8 +116,14 @@ the seam, leave the strategy judgement to it.
 
 Produce the **design doc** to a harness surface:
 
-- Record the **resolved design decisions** — each load-bearing question and the outcome-driven
-  decision that settles it.
+- Record the **resolved design decisions** — each as a structured row: the **design question**, the
+  **decision** that settles it (outcome-driven), its **confidence** (a `confidence-anchors` value —
+  the same discrete rubric you hold from the imported finding contract, applied to your own
+  resolution), and the **primary alternative** considered. A low-confidence decision recorded as
+  such travels with its uncertainty into specify/plan instead of reading as settled; the alternative
+  is the record specify needs when a touchpoint supersedes a prior spec section. (This mirrors the
+  experience-contract's own evidence discipline; it reuses the `confidence-anchors` reference design
+  already imports — no new reference.)
 - Carry an explicit **Spec touchpoints** table — for each touched spec area, the *spec doc*, the
   *section*, and the *relationship* (amend / add / supersede / reference). This table is what
   `specify` turns into the canonical amendment; produce it here so `specify` does not reconstruct
@@ -138,13 +164,14 @@ runs.
 
 A known, small item. Resolve the design questions **inline** (thin or no `explore`), produce a
 **light design doc** with its touchpoints, and run **always-on doc lenses only** through the
-dispatch (no conditional/adversarial lenses). One-pass operator interaction.
+dispatch (no conditional/adversarial lenses). One-pass operator interaction — **exempt from the
+hard framing-confirm gate** (the inline pass is the confirmation).
 
 ### standard (default)
 
-`explore` for context gaps; resolve the design questions by outcome; **dispatch the lens family
-over the doc strategy-first then parallel**; author the design doc + the Spec touchpoints table.
-The default front pass.
+`explore` for context gaps; resolve the design questions by outcome; **affirm the framing at the
+hard gate**; **dispatch the lens family over the doc strategy-first then parallel**; author the
+design doc + the Spec touchpoints table. The default front pass.
 
 ### deep
 
@@ -170,8 +197,9 @@ budgets + intended tool-path, to the harness surface, conforming to the schema. 
 
 ## Output
 
-- A **design doc** on a harness surface, recording the outcome-driven design decisions and carrying
-  an explicit **Spec touchpoints** table, ready for `specify`.
+- A **design doc** on a harness surface, recording the outcome-driven design decisions — each with
+  its `confidence-anchors` confidence and primary alternative — and carrying an explicit **Spec
+  touchpoints** table, ready for `specify`.
 - The **ranked, routed lens findings** over that doc (from the dispatch), surfaced and actioned
   in-session, folded back into the doc.
 - In `experience` mode: an **authored or refined experience-contract** on the harness surface,

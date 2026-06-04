@@ -84,9 +84,22 @@ is the finding that most justifies this lens — surface it at the front, not at
 2. Read the **strategy canvas** (on-demand) for the value proposition, the target user/segment, and
    the relevant business-model blocks the item touches. Read the **handbook/decisions** for settled
    strategy and any prior decision on this problem.
+   - **Stop-and-resolve if the canvas is missing.** If the `strategy-canvas` binding is absent, empty,
+     or unresolved, do **not** proceed to a value-risk check against nothing. Surface a
+     *stop-and-resolve* finding — "no readable strategy canvas; the value/viability check has no source
+     of truth" — and route it for resolution (bind/populate the canvas, or the discovery loop) before
+     running any check below. A product-strategy check against an absent canvas is not a
+     product-strategy check; findings raised against nothing look grounded but are not.
 3. State, in one line each, **what value proposition and target user this item is being designed
-   for** and **which objective it serves** — the frame you will check the solution against. If the
-   item names no objective, or names a feature dressed as an objective, that is already a finding.
+   for** and **which objective it serves** — the frame you will check the solution against. Check the
+   objective on **two axes**, using `okr-schema`:
+   - **Type** — is it an *outcome* (a problem to move), not a feature dressed as one? If it can only be
+     stated as a feature, that is already a finding.
+   - **Quality (SMART)** — is it specific and measurable (does it name a metric, a target, and the
+     current read — `okr-schema`'s key-result shape)? A vague objective ("improve the experience",
+     "increase engagement") may pass the type check yet fail here: a non-specific / non-measurable
+     objective is **itself a value-risk finding**, because the value risk it anchors is *unfalsifiable*
+     — you cannot later confirm or kill what was never measurable. Raise it, do not wave it through.
 
 ## Phase 2 — Run the product check and surface findings
 
@@ -104,6 +117,27 @@ it.
 
 Lead with the **strategy-altitude findings** (right-problem, wrong-objective, value/viability mis-fit)
 — these are the ones that, unsurfaced here, become a launch or debrief surprise.
+
+### Evidence-strength pushback
+
+When the operator (or the doc) offers **weak or *said*-evidence** for a value or viability risk, do
+**not** record it as cleared — push back first. A lens that accepts weak evidence gracefully is
+strategy theatre, not signal. The bar is anti-sycophancy: name the gap, do not rubber-stamp. At least
+these patterns:
+
+- **Said-yes offered as did-yes** → demand the behavioural signal. "They said they'd use it" is
+  *moderate* at best; ask what *observed* behaviour (usage, retention, payment, a real conversion)
+  would move it to *strong*, and record the risk as **open** until there is one. Interest is not demand.
+- **Opinion / hypothetical offered as evidence** → "people would love this", a synthetic or simulated
+  run, a confident assertion with no source is **weak** — it can support a hypothesis, never *clear* a
+  risk. Name it as weak and keep the risk open.
+- **Low maturity bar used to launder weak evidence** → a pre-launch item may *move* on weak/moderate
+  evidence, but never record that as if the risk *cleared*. "How strong must it be here?" is not "how
+  strong is it?" — hold the two axes apart and record both.
+
+Two challenge rounds at most, then record the risk's state honestly (cleared / open / stop) with the
+evidence as it actually stands — an unresolved push-back is an **open** risk and a finding, not a
+silent pass.
 
 ## Phase 3 — Action into the doc, decide no gate
 
@@ -148,7 +182,10 @@ is intended, so do not suppress your strategy angle to avoid it.
 - The **recorded strategy frame** folded into the doc: the value proposition and target user the item
   serves, the objective it moves, and the **four-risks evidence-state at item altitude** (per risk:
   evidence, strength rung, maturity bar, cleared/open/stop) — the durable proof the right-problem
-  question was examined.
+  question was examined. This recorded frame is what **`debrief`'s post-ship confirm/kill** reads
+  downstream to test whether the shipped item delivered the objective it claimed — the connection runs
+  through the carrier record the PM/operator gate owns, not a direct edge from you (you write no
+  carrier).
 - **No carrier write and no gate decision.** Completing the front is the signal the projection picks
   up; advancing `lifecycle_state` and recording a `gate_decision` remain the PM/operator gate, which
   reads your findings but is not yours to make.

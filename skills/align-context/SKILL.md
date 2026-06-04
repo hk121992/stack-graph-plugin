@@ -87,21 +87,69 @@ the search methodology. The front gathers context once — what you settle here 
 ## Phase 3 — Interrogate the intent to alignment
 
 This is the judgment core of the stage. With the operator, **interrogate the draft intent against
-the context** until it is shared and correct:
+the context** until it is shared and correct. Work the **rigor-gap taxonomy** below, hold the
+**dialogue discipline**, and close on the **two-part exit condition**.
 
-- Surface the **assumptions** beneath the stated request — what is being taken for granted that, if
-  wrong, would send design down the wrong path.
-- Ask the **disambiguating questions** where the intent is unclear, and resolve the constraints that
-  the explore digest or the operator's answers expose.
-- Reconcile the intent with the **personas and value proposition** you read: does this item serve a
-  real user and the stated value, or has it drifted? Name the mismatch if there is one.
-- Settle **scope** here — what is in, what is explicitly out — so it is decided at alignment, not
-  discovered late at design, specify, or build. A real alignment gate settles scope; a rubber stamp
-  defers it.
+### Rigor-gap taxonomy
 
-Continue until the operator agrees the intent statement is correct and the constraints are settled.
-On a `lightweight` item this is a single confirming turn; on a `deep` item it can take several
-rounds.
+Probe these four gap classes — each is a category of ambiguity that, left open, causes rework
+downstream. For each, the named probe is what closes it:
+
+- **Intent gap** — is the stated intent actually what the operator wants, or a proxy for it? Surface
+  the **assumptions** beneath the request — what is being taken for granted that, if wrong, sends
+  design down the wrong path.
+- **Scope-boundary gap** — what is in, and what is **explicitly out**? Settle scope here, so it is
+  decided at alignment, not discovered late at design, specify, or build. A real gate settles
+  scope; a rubber stamp defers it.
+- **Constraint gap** — what binds this item technically, product-wise, or in time? Resolve the
+  constraints the explore digest or the operator's answers expose.
+- **User-alignment gap** — does this item serve a real persona and the stated value, or has it
+  drifted? Reconcile the intent with the **personas and value proposition** you read; name the
+  mismatch if there is one.
+
+Match the depth to the mode: on `lightweight`, a fast scan that usually closes with zero open gaps;
+on `standard`, work all four; on `deep`, surface and test the assumptions under each gap explicitly
+before settling; in `spec`, add the canon-consistency check (does the intent match settled handbook
+intent?).
+
+### Dialogue discipline
+
+When you ask the operator a question, hold this discipline:
+
+- **One question per turn.** Do not stack several questions or sub-questions into one turn — it
+  dilutes the answers and lets gaps pass half-closed.
+- **Use the blocking question tool** (`AskUserQuestion`) so the alignment waits on the answer.
+- **Prefer specific, answerable questions** over open-ended sweeps; ask an open question only when
+  the matter is genuinely open and the question is specific enough to elicit a substantive answer.
+
+### Peer posture
+
+You are a peer, not an order-taker. If the stated intent has a detectable gap — misaligned to a
+persona, scope broader than the mode warrants, or an assumption that, if wrong, would send design
+off-track — **name it** and give the operator the chance to correct it or explicitly accept it. Take
+a position; do not rubber-stamp a confident first statement. (This is the same pushback posture the
+factory uses elsewhere: state the gap, do not defer to confidence.)
+
+### Exit condition
+
+The alignment closes only when **both** hold:
+
+1. **Every identified rigor gap is closed** — the operator has explicitly addressed it, or you have
+   verified it does not apply.
+2. **The operator explicitly agrees** the intent statement is correct and the constraints are
+   settled.
+
+On a `lightweight` item condition (1) may have zero gaps — that is fine and fast; the point is that
+the check is explicit, not a one-word acknowledgment waved through. On a `deep` item it can take
+several rounds.
+
+## Integration check — before you settle
+
+Before closing, **combine the settled intent + constraints** and surface any non-obvious
+interaction between them that the one-question-at-a-time dialogue did not probe. Two facts each fine
+alone can combine into a downstream effect the operator has not tracked — *"ships by Friday"* plus
+*"touches auth"* makes the scope negotiation urgent in a way neither raised separately. If you find
+one, raise it as a final probe and resolve it before you hand forward.
 
 ## Phase 4 — Settle and hand forward
 
