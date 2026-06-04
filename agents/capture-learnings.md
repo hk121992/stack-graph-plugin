@@ -82,10 +82,13 @@ Score against three sources:
 3. **Prior proposals:** read the prior-proposals archive at `learnings_archive_path` — the
    committed `learnings-archive` surface the gate writes (D60); `metrics_report.prior_proposals`
    is only an optional inline copy. If a finding **recurs there without enactment**, flag
-   `recurring_unacted`. If the archive is **empty** (a freshly-scaffolded harness) or **unset**
-   (no `learnings-archive` bound) and there is no inline copy, treat the prior set as empty and
-   emit **no** `recurring_unacted` flags — degrade cleanly. (An empty *scaffolded* archive is
-   still passed by the gate, non-null, so the gate can write to it after curation.)
+   `recurring_unacted`. **Enactment wins:** a prior-archive entry now present in canon/recall
+   (checks 1–2) was *enacted between sprints* — classify the match `duplicate_canon`/
+   `duplicate_recall`, **not** `recurring_unacted`; the flag fires only when the prior proposal is
+   still absent from every home. If the archive is **empty** (a freshly-scaffolded harness) or
+   **unset** (no `learnings-archive` bound) and there is no inline copy, treat the prior set as
+   empty and emit **no** `recurring_unacted` flags — degrade cleanly. (An empty *scaffolded*
+   archive is still passed by the gate, non-null, so the gate can write to it after curation.)
 
 **Supersession check:** also test whether a *new* finding **invalidates** a prior learning (makes
 it wrong, not merely refines it). List those prior ids in `supersedes_candidates` on the proposal
