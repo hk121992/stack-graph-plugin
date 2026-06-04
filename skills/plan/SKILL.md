@@ -29,8 +29,9 @@ Read for context; write only to harness surfaces.
   (or the operator's invocation, in `re-plan` mode). Read them for the scope, the resolved
   design decisions, and the spec touchpoints.
 - **The IU-schema** — you hold it via a `references` edge (`load: import`). Read it at the
-  start of every session; it is always present. It defines the six fields every
-  implementation unit must carry: `id`, `goal`, `files`, `dependencies`, `acceptance`, `size`.
+  start of every session; it is always present. It defines the seven fields every
+  implementation unit must carry: `id`, `goal`, `files`, `dependencies`, `acceptance`,
+  `acceptance_check`, `size`.
 
 You **do not write the carrier**. You write the plan doc to a harness surface. Completing
 this stage is the signal the projection/curator picks up to advance the carrier's
@@ -53,8 +54,14 @@ plan doc, not the carrier.
    - **One unit, one goal**: each unit has a single stated outcome in outcome-framed language.
    - **Files is the scope contract**: name the files and directories explicitly. No unit
      owns an unbounded scope.
-   - **One human-in-loop turn or one autonomous span**: a unit that would require multiple
-     operator turns to build is too large; split it.
+   - **Single-agent-implementable**: size each unit so one fresh agent can build it within
+     its best-work context budget — one agent, bounded fresh context, split diligently. The
+     budget is a harness-tunable dial (~100k tokens by default; the principle is durable, the
+     number model-dependent — verify it, do not bake it in). A unit whose context (its files +
+     tests + implementation) would overflow the budget is too coarse: split it. This anchors
+     the `size` field — `size` is a single-agent-fit signal, so `L`/`XL` read as "probably
+     split", not a raw effort estimate. Build emits `tokens_per_iu` per unit; a persistently
+     high over-budget share is the signal that plan drew IUs too coarse.
    - **Teach as you go**: state the sequencing rationale for each dependency relationship as
      you add it, not after the fact.
 
@@ -73,8 +80,12 @@ For each unit, fill the IU-schema fields completely:
   is unfinished or broken.
 - **`acceptance`**: observable conditions (tests pass, behaviour X holds, endpoint returns Y).
   Not effort ("implement Z"). Build evaluates these before emitting a unit-complete event.
-- **`size`**: `XS | S | M | L | XL` — a rough effort signal. State the rationale for any
-  `L` or `XL` unit and consider splitting it.
+- **`acceptance_check`**: the runnable command that proves the unit's `acceptance` — build
+  runs it and shows the raw output as the done-evidence. A unit with `acceptance` but no
+  `acceptance_check` is an incomplete IU; flag it at lens review.
+- **`size`**: `XS | S | M | L | XL` — the single-agent-fit signal (Phase 1), not a raw effort
+  estimate. `L`/`XL` read as "probably split". State the rationale for any `L`/`XL` unit and
+  split a unit whose context overflows the single-agent budget.
 
 Surface the draft units to the operator before advancing to the lens phase. Invite them to
 challenge the decomposition — a unit the operator doubts will produce a re-ask at build.
@@ -106,7 +117,8 @@ phase: surface it here, not at build.
 
 Produce the **plan doc** to a harness surface:
 
-- The ordered **implementation units**, each with all six IU-schema fields populated.
+- The ordered **implementation units**, each with all seven IU-schema fields populated
+  (including `acceptance_check`).
 - Explicit **sequencing rationale** — the dependency graph and the stated reason for each
   ordering decision.
 - A **scope summary**: what the plan covers, what it explicitly defers, and any items the
@@ -161,8 +173,9 @@ Re-state the full plan (not a diff) so build starts clean.
 ## Output
 
 - A **plan doc** on a harness surface: an ordered set of implementation units, each
-  conforming to the IU-schema (id, goal, files, dependencies, acceptance, size), with
-  sequencing rationale and a scope summary.
+  conforming to the IU-schema (id, goal, files, dependencies, acceptance, `acceptance_check`,
+  size), with sequencing rationale and a scope summary. `acceptance_check` is the runnable
+  command that proves each unit's `acceptance` — build runs it and shows the raw output.
 - The **ranked, routed lens findings** over the plan doc (from the dispatch), surfaced and
   actioned in-session, folded back into the plan.
 - **No carrier write.** Completing plan is the signal the projection/curator picks up to

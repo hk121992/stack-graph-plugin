@@ -20,7 +20,15 @@ touched_nodes: [<node-id>, ...]          # nodes the sprint traversed
 timeline_source: <path>                   # path to the local event log for this sprint
 graph_record: <path>                      # path to graph-record.json
 baseline: <path> | null                   # path to prior debrief metrics output, or null
+context_budget: <int> | null              # harness-tunable per-IU context budget, in tokens
+                                          # (~100k documented default); READ-ONLY — passed in,
+                                          # never written out. Needed only for the over-budget
+                                          # share. Absent → over-budget share is n/a.
 ```
+
+`context_budget` is the harness's tunable dial value, not yours to set. It is model/version-dependent,
+so the harness owns it and passes it in; you only read it. If it is `null` or omitted, still compute the
+`tokens_per_iu` distribution from the stream, but report the over-budget share as `n/a` — degrade cleanly.
 
 ## Procedure
 
@@ -70,7 +78,25 @@ If `baseline` is non-null, load it. For each metric that appears in both runs, c
 (severity: `warn`) or threshold breached (severity: `breach`). No baseline → all deltas
 `n/a`.
 
-### 5. Emit the report
+### 5. Derive the per-IU cost block
+
+If the sprint built IUs, derive a per-IU cost block from the product-outcomes event stream —
+the same stream the timeline carries `tokens_per_iu` measures on (one measure per IU built this
+sprint). Two derived values:
+
+- **`tokens_per_iu` distribution** — compute the distribution across the sprint's IUs. Report the
+  `median` and `p90`.
+- **`over_budget_share`** — the fraction of the sprint's IUs whose `tokens_per_iu` exceeded
+  `context_budget`. Report `n/a` when `context_budget` is `null` or absent — do not invent a budget.
+
+These are read-and-arithmetic, exactly like every other metric here: read the stream, compute the
+distribution and the share. Compute and return them — do not write them anywhere.
+
+The over-budget share is a **decomposition-quality** signal. A persistently high share means `plan`
+drew IUs too coarse — the same shape as "weak acceptance is a *plan* gap, not a *build* gap." You do
+not judge it; you surface the number and `debrief`/the operator reads it.
+
+### 6. Emit the report
 
 Return one structured report. Do not summarise, narrate, or interpret results — your
 consumer (debrief) does that.
@@ -87,6 +113,11 @@ rows:
         unit: <count | % | ms | dimensionless>
         delta: <+N | -N | n/a>
         severity: ok | warn | breach | n/a
+per_iu_cost:                              # present when the sprint built IUs; omit otherwise
+  tokens_per_iu:
+    median: <number>
+    p90: <number>
+  over_budget_share: <rate | n/a>          # fraction of IUs over context_budget; n/a if budget absent
 skipped:
   - node_id: <string>
     reason: missing_earns_keep | timeline_unavailable | node_not_found
@@ -98,5 +129,8 @@ warnings: [<string>, ...]
 - Do not emit a metrics row without a corresponding earns-keep source. If you cannot locate
   it, add the node to `skipped`.
 - Do not interpret results. "Revenue rose" is an interpretation; "delta: +0.12 (warn)" is
-  a measurement.
-- Do not write to any file. The report is your return value only.
+  a measurement. The over-budget share is a number you surface, not a verdict you reach.
+- Treat `context_budget` as read-only. Read it from the spawn bundle; never write it, and never
+  invent a budget when it is absent — report the over-budget share as `n/a` instead.
+- Do not write to any file. The per-IU cost block, like every row, is computed and returned — never
+  written. The report is your return value only.
