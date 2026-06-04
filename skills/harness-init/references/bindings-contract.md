@@ -2,8 +2,8 @@
 kind: reference
 id: bindings-contract
 title: Bindings contract — the keys a harness supplies, and the surface template
-description: The factory contract the plugin ships so a consuming workspace can instantiate a harness — the complete set of binding keys the vendored graph may require, the bindings.yaml file format, and the dashboard surface-structure template harness-init scaffolds. The plugin carries this contract; the harness supplies the values. No product data.
-status: v0.1.0 — 2026-06-02
+description: The factory contract the plugin ships so a consuming workspace can instantiate a harness — the complete set of binding keys the vendored graph may require, the bindings.yaml file format, the org-root CLAUDE.md ambient-surface template, and the dashboard surface-structure template harness-init scaffolds. The plugin carries this contract; the harness supplies the values. No product data.
+status: v0.2.0 — 2026-06-04
 ---
 
 # Bindings contract
@@ -38,6 +38,7 @@ target does not resolve.
 | `items-root` | the work-items dir | `items/` under the surface; holds `<id>.md` |
 | `manifest-path` | the work-items manifest | committed derived index (`items/manifest.json`) |
 | `sprint-records-root` | the sprint-records dir | `sprints/`; assembled views |
+| `learnings-archive` | the committed prior-proposals archive | `capture-learnings`' surviving-but-unenacted proposals — the gate writes it, `capture-learnings` reads it next sprint (D60); committed (generative/non-replayable), **not** `.stack-graph/`; scaffold creates it empty |
 | `strategy-doc` | the vision & strategy doc | `strategy.md` (vision · guiding policy · JTBD) |
 | `objectives-doc` | the objectives / OKR doc | `objectives.md` per `okr-schema` |
 | `okr-binding` | how `outcome_link` resolves to an objective id | resolution rule, not a path |
@@ -66,12 +67,36 @@ content is added later via `product-dashboard-curator`). Matches `artefacts-desi
     <id>.md              # one per work item (added by product-dashboard-curator, not scaffolded)
   sprints/
     <id>.md              # sprint-records (assembled views)
+  learnings/
+    archive.md           # capture-learnings' surviving proposals (committed; gate-written, D60)
 ```
 
 Derived/runtime state (the event log, the projection) lives under `.stack-graph/` (gitignored) —
-**not** in the surface — and is reached via `event-log`.
+**not** in the surface — and is reached via `event-log`. The `learnings/` archive is **committed**
+(a proposals list is generative/non-replayable, so it cannot live in `.stack-graph/`, D60).
 
-## 4. How the graph consumes it
+## 4. The org-root CLAUDE.md template
+
+The harness's **ambient surface** — the one file that loads automatically at every session because
+the operator always launches at the org root, and it cascades to every child (see the harness
+directory topology). `harness-init scaffold` writes it from this template; it carries pointers, not
+content:
+
+```markdown
+# <workspace> — harness root
+
+Handbook (canonical reference): <handbook-index>      # the handbook-index binding; made ambient here
+Bindings: ./.claude/bindings.yaml                     # how vendored nodes resolve this workspace's surfaces
+How to use the graph: read the handbook index at task start, then the sections your task needs.
+```
+
+This is **structure only** — the `handbook-index` value comes from the binding; the rest is fixed
+navigation. The **per-session runtime self-check** (a session-start precondition sequence) is a
+harness **hook or ambient rule**, authored separately — **not** part of this template and **not** a
+`harness-init` mode. `harness-init validate` checks this file exists, reaches the bindings reference,
+and carries the `handbook-index` pointer.
+
+## 5. How the graph consumes it
 
 - A node that reads a surface resolves its key here, then reads `bindings.yaml` for the value —
   it **never** hardcodes a path or restates this list.

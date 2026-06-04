@@ -23,9 +23,10 @@ values from the workspace and **confirm with the operator** — you never assume
 
 You create the **bound, empty structure**; the curator family fills the **content**:
 
-- **You write** `<org-root>/.claude/bindings.yaml` (the binding values) and the **surface
-  skeleton** under `surface-root` (the `strategy.md` / `objectives.md` templates, `items/` +
-  an empty `manifest.json`, `sprints/`).
+- **You write** `<org-root>/.claude/bindings.yaml` (the binding values), the org-root **`CLAUDE.md`**
+  (the harness's **ambient surface** — the handbook-index pointer + the bindings-reference pointer +
+  the how-to-use-the-graph navigation), and the **surface skeleton** under `surface-root` (the
+  `strategy.md` / `objectives.md` templates, `items/` + an empty `manifest.json`, `sprints/`).
 - **You do NOT author work items.** Work-item content is **`product-dashboard-curator`**'s
   (`add-item`/`triage`). You scaffold an empty `items/` + manifest; the first work item is added
   through the curator, under its PR gating.
@@ -43,24 +44,45 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
 
 ### `scaffold` — greenfield bootstrap
 
+0. **Detect partial state (crash-window recovery).** Before bootstrapping, check what already
+   exists: the org-root `bindings.yaml`, the org-root `CLAUDE.md`, and the surface skeleton. A prior
+   run interrupted *between* these writes leaves a **half-written** harness — the crash windows:
+   bindings written but the surface not yet scaffolded; the surface present but bindings absent; the
+   `CLAUDE.md` written but bindings not. On a partial state, **do not error and do not overwrite** —
+   switch to **targeted repair**: keep what exists (confirm it with the operator), create only the
+   missing artefacts via the steps below (idempotently), then `validate`. A fully-absent harness is a
+   clean greenfield run; a fully-present, consistent one routes to `bind` / `validate`.
 1. **Locate the org root** and confirm it with the operator (this anchors every relative binding).
 2. **Resolve each binding key** from `bindings-contract`. Infer where you can and **propose the
    value** for the operator to confirm or correct: the `surface-root` (where the work ledger should
    live), `handbook-index` (an existing handbook `index.json`), `personas` (an existing profiles
-   doc, optional pre-launch), `event-log` (the `.stack-graph/` stream — generated/local), `renderer`
-   + `deploy-config` (the workspace portal, optional), and the scalar dials (`maturity`,
-   `plan-policy`, `okr-binding`, `stale-projection-policy`, `terminal-recorder`). Mark optional keys
-   that don't apply yet rather than inventing targets.
+   doc, optional pre-launch), `event-log` (the `.stack-graph/` stream — generated/local),
+   `learnings-archive` (the committed prior-proposals surface, D60), `renderer` + `deploy-config`
+   (the workspace portal, optional), and the scalar dials (`maturity`, `plan-policy`, `okr-binding`,
+   `stale-projection-policy`, `terminal-recorder`). Mark optional keys that don't apply yet rather
+   than inventing targets.
 3. **Write `bindings.yaml`** — flat keys per the contract, values relative to the org root. Do not
-   overwrite an existing `bindings.yaml` silently; if one exists, switch to `bind` (merge + confirm).
-4. **Scaffold the surface skeleton** under `surface-root` per the template: `strategy.md` (vision ·
+   overwrite an existing `bindings.yaml`: if one exists and the rest of the harness is complete, this
+   is a re-point — switch to `bind`; if the harness is partial (step 0), keep the existing bindings
+   and continue with the missing artefacts.
+4. **Write the org-root `CLAUDE.md`** from the `bindings-contract` template — the harness's
+   **ambient surface**: the `handbook-index` pointer (made ambient so it cascades to every child),
+   the pointer to the bindings reference, and the how-to-use-the-graph navigation. Structure only;
+   **idempotent** — never clobber an existing authored `CLAUDE.md`; if one exists, confirm it carries
+   the ambient pointers and warn on anything missing rather than overwriting. (The per-session
+   runtime self-check is a harness hook / ambient rule, **not** your job — you scaffold the file; you
+   do not embed a session-start procedure.)
+5. **Scaffold the surface skeleton** under `surface-root` per the template: `strategy.md` (vision ·
    guiding policy · JTBD · open questions — empty headings), `objectives.md` (per `okr-schema` —
    empty objective/north-star headings), `items/` with an **empty** `manifest.json` (`[]`),
    `sprints/`. **Idempotent:** never clobber existing content — create only what's missing and warn
    on what's already there.
-5. **Run `validate`** (below) and report. Then tell the operator the next steps: **work items are
-   added via `product-dashboard-curator`**; the OKRs are filled in `objectives.md`; the loop runs
-   once validate passes.
+6. **Run `validate`** (below) and report, then hand off with the **load canary**: tell the operator
+   what a correctly-loaded harness looks like next session — launch at the org root, and the first
+   message should show the harness was picked up (the handbook index is reachable by name and a
+   `bindings.yaml`-bound node resolves its surface). Then the next steps: **work items are added via
+   `product-dashboard-curator`**; the OKRs are filled in `objectives.md`; the loop runs once validate
+   passes.
 
 ### `bind` — (re)author the bindings only
 
@@ -75,24 +97,28 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
 1. **bindings.yaml present** at `<org-root>/.claude/bindings.yaml` and parseable as flat YAML.
 2. **Every required key resolves** (per `bindings-contract`) to a real path/target; optional keys
    either resolve or are explicitly marked not-yet. Report each missing/dangling key by name.
-3. **The surface exists**: `surface-root`, `items-root` + a parseable `manifest.json`,
+3. **The org-root `CLAUDE.md` is present and wired** — it exists at the org root, reaches the
+   bindings reference, and carries the `handbook-index` ambient pointer. This is the runtime
+   pre-flight: a harness whose ambient surface does not load the bindings + handbook index will not
+   orient on the next session.
+4. **The surface exists**: `surface-root`, `items-root` + a parseable `manifest.json`,
    `objectives-doc`, `strategy-doc`, `sprints-root`. The `event-log` location is reachable (the
    `.stack-graph/` parent exists or can be created).
-4. **Report pass/fail with the specific gaps.** A fail means the loop must not run yet — surface
-   exactly what to fix (a missing binding, a dangling path, an absent surface dir). This is the
-   gate the first traversal depends on.
+5. **Report pass/fail with the specific gaps.** A fail means the loop must not run yet — surface
+   exactly what to fix (a missing binding, a dangling path, an absent surface dir, an unwired
+   `CLAUDE.md`). This is the gate the first traversal depends on.
 
 ## Hard constraints
 
 - **Structure only — never content.** You scaffold the bound, empty surface; you never author work
   items (`product-dashboard-curator`), the strategy canvas (`strategy-curator`), or OKR values. You
   leave valid empty templates.
-- **Harness-local writes only.** You write `bindings.yaml` + the surface skeleton under
-  `surface-root` — nothing else, and **never** the vendored graph. Instantiation is an additive
-  overlay.
+- **Harness-local writes only.** You write `bindings.yaml`, the org-root `CLAUDE.md`, and the
+  surface skeleton under `surface-root` — nothing else, and **never** the vendored graph.
+  Instantiation is an additive overlay.
 - **Idempotent.** Re-running `scaffold` fills only what is missing and warns on what exists; it
-  never clobbers authored content or an existing `bindings.yaml` (that is `bind`'s job, with
-  confirmation).
+  never clobbers authored content, an existing `bindings.yaml`, or an existing `CLAUDE.md` (re-pointing
+  bindings is `bind`'s job, with confirmation). A partial harness is *repaired*, never overwritten.
 - **Carry no product literals.** Paths, ids, tiers, stage names, and toolchain are inferred from
   the workspace and confirmed by the operator — never hardcoded. The key set + format live in
   `bindings-contract`, the objective shape in `okr-schema`, the work-item shape in `work-item-schema`.
