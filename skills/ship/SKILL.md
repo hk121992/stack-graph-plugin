@@ -26,6 +26,27 @@ The `land` backbone stage invokes you as its first step. Once you surface the PR
 exact handoff prose is in the `land` node — `deploy` is authored in the same wave and
 will be edged into `land` once both nodes exist).
 
+## Confirmation model — auto-proceed by default, halt only at gates
+
+You are **collaborative**, but collaborative does not mean confirm-every-step. The default is
+**auto-proceed**: run each phase, present its result, and move on **without waiting** unless
+the operator intervenes. Reserve a halt-and-wait gate for the few decisions that are genuinely
+the operator's:
+
+- **Operator gates (halt and wait):**
+  - A `minor` or `major` version bump (a `patch` bump auto-proceeds).
+  - A coverage-gate **regression** — present the delta and the override choice, then wait.
+  - A **test failure** — surface and wait; never proceed to commit or PR.
+  - An **unstaged working tree** at preflight — surface and wait.
+- **Auto-proceed (present and continue):** the test run on pass, the coverage report when the
+  gate holds, the WIP squash, the version `patch` bump, the drafted commit message, and the
+  drafted PR title + body. Present each, then proceed — the operator can interrupt, but you do
+  not block on a confirmation.
+
+Each phase below names its mode. This keeps the collaborative gates that matter while removing
+the every-step ceremony. (A pre-PR code-review pass is **not** a ship gate — review is the
+upstream `review` backbone stage that runs before `land` invokes ship; ship does not re-run it.)
+
 ## You do not write the carrier
 
 You read the carrier (the work-item) for context only — its `lifecycle_state`, the
@@ -52,8 +73,8 @@ Before running, confirm:
 
 Run the test suite using the harness-configured command. Report the result:
 
-- **Pass** — proceed to Phase 2.
-- **Fail** — surface the failure output to the operator. Do **not** proceed to commit
+- **Pass** (auto-proceed) — report the summary and continue to Phase 2 without waiting.
+- **Fail** (gate) — surface the failure output to the operator. Do **not** proceed to commit
   or PR. Ask: "Tests failed — fix and re-invoke ship, or abort?" The operator decides.
   If the failure warrants a return to `build` or `reconcile`, name it — you do not
   invoke those stages yourself, but you can recommend the arc re-entry path.
@@ -62,9 +83,10 @@ Run the test suite using the harness-configured command. Report the result:
 
 Compute the coverage delta against the harness-configured threshold. Report:
 
-- **Gate holds** (coverage at or above threshold, or no regression) — proceed to
-  Phase 3.
-- **Regression** — surface the delta and the specific files/lines below threshold.
+- **Gate holds** (auto-proceed) — coverage at or above threshold, or no regression.
+  Report the delta and continue to Phase 3 without waiting. (Keep the delta — Phase 6
+  carries it into the PR body.)
+- **Regression** (gate) — surface the delta and the specific files/lines below threshold.
   Ask: "Coverage gate failed — fix the coverage gap and re-invoke ship, or proceed
   anyway (override)?" The operator decides. **Do not silently proceed past a coverage
   regression** — every override is explicit and logged.
@@ -75,45 +97,82 @@ If the harness overlay specifies a version bump strategy:
 
 1. Determine the bump level (`patch`/`minor`/`major`) from the overlay or the operator's
    instruction (if passed as an argument).
-2. Apply the bump to the version file(s) the overlay names (e.g. `package.json`,
+2. **Gate on the level.** A `patch` bump auto-proceeds. A `minor` or `major` bump is an
+   operator gate — present the proposed level and the resulting version, and wait for
+   confirmation before applying (a major/minor bump is a release decision, not a mechanical step).
+3. Apply the bump to the version file(s) the overlay names (e.g. `package.json`,
    `pyproject.toml`). Stage the version bump.
-3. Report the old and new version numbers.
+4. Report the old and new version numbers.
 
 If the overlay specifies "no bump" or is silent on versioning, skip this phase entirely.
 
-## Phase 4 — Commit
+## Phase 4 — Squash WIP checkpoint commits
+
+The `build` stage uses continuous checkpointing, so the branch may carry `WIP:`-prefixed
+commits. The delivery commit must open a **clean** PR — no `WIP:` commits in the history. This
+phase detects and squashes them **before** the delivery commit. It auto-proceeds (no-op when no
+WIP commits exist); the only halt is the anti-footgun abort below.
+
+1. **Detect.** List the commits on the branch ahead of the harness-configured base
+   (`git log <base>..HEAD`). Identify the `WIP:`-prefixed commits.
+   - **None** — nothing to squash; auto-proceed to Phase 5.
+2. **Choose the squash path by branch shape:**
+   - **WIP-only** (every commit ahead of base is `WIP:`) — soft-reset to the base
+     (`git reset --soft <base>`), which preserves the working tree and staged changes for the
+     single delivery commit in Phase 5.
+   - **Mixed** (WIP and non-WIP commits interleaved) — do an interactive-equivalent rebase that
+     squashes **only** the `WIP:` commits into their adjacent logical commit, preserving every
+     non-WIP commit and its message. Never collapse a non-WIP commit into a WIP squash.
+3. **Anti-footgun guards (non-negotiable):**
+   - **Never** blind `git reset --soft` past a non-WIP commit — that destroys delivered work.
+     A soft-reset is only valid when the branch is WIP-only.
+   - **Confirm the base** before resetting (the base the overlay names is the reset target —
+     verify it, do not assume `main`).
+   - If the WIP/non-WIP boundary is **ambiguous** (e.g. a non-WIP commit sits below a WIP commit
+     you would have to reset past), **abort to the operator** with the commit list and the
+     proposed plan — do not guess. This is the one halt in this phase.
+
+After squashing, the working tree holds the change to deliver as one clean commit in Phase 5.
+
+## Phase 5 — Commit
 
 Author a **descriptive commit message** from the staged diff and any context the
 operator has provided (the work-item title, the design doc pointer, key decisions).
 Follow the project's commit convention (read from the harness overlay if specified;
 otherwise use the `<type>: <summary>` convention).
 
-Present the draft commit message to the operator for confirmation. On confirmation,
-commit the staged changes. Report the commit SHA.
+Present the draft commit message and **auto-proceed** — commit the staged changes unless the
+operator intervenes. Report the commit SHA. This is the **delivery commit** — the clean commit
+that opens the PR (WIP checkpoints were squashed in Phase 4).
 
-**Checkpoint discipline:** if the change is large, the checkpoint has already happened
-incrementally during `build`. The ship commit is the **delivery commit** — the one that
-opens the PR. It should be clean (not a WIP stash). If there are WIP commits in the
-history that should be squashed before the PR opens, surface them to the operator and
-squash on confirmation.
+## Phase 6 — Open the pull request
 
-## Phase 5 — Open the pull request
+Author a **PR description** that is a **delivery record** — it carries the verification evidence
+the earlier phases already produced, not just a human-facing summary. Read the
+`pr-description-shape` reference for the canonical body shape, then compose:
 
-Author a **PR description** from:
+- **`## Summary`** — what is shipping, in one or two sentences, from the commit history since
+  the base diverged (what changed and why).
+- **`## Trigger`** — the work-item context: the carrier's `outcome_link` and title (via the
+  overlay if available) — why this is shipping now.
+- **`## Recommended decision`** — merge this PR; state any notable trade-off or deferred item
+  the reviewer should weigh, as a recommendation (not an open question).
+- **Verification evidence** — fold in the evidence ship already has at hand, so the reviewer
+  does not re-derive it: the **test-suite result** (Phase 1) and the **coverage delta** (Phase 2,
+  including any logged override). Add a short **test plan** (what the reviewer should verify).
+- **`## Read set`** — the files/areas this change touches, bounding its scope.
 
-- The commit history (since the base branch diverged), summarising what changed and why.
-- The work-item context (the carrier's `outcome_link` and title, if available via the
-  overlay).
-- Key decisions or trade-offs the reviewer should know about.
+For an **operator-facing change** (visible UI / CLI / API behaviour), optionally capture
+evidence (a screenshot or a link) if the harness supplies a capture path. A harness may also
+supply its own PR-description guide via the overlay — read it in addition to `pr-description-shape`.
 
-Present the draft PR title and body to the operator. On confirmation, open the PR
-against the harness-configured target branch using PR tooling. Report the **PR URL**.
+Present the draft PR title and body and **auto-proceed** — open the PR against the
+harness-configured target branch using PR tooling unless the operator intervenes. Report the
+**PR URL**.
 
-**PR description discipline:** the description should let a reviewer judge the change
-without reading the full diff. Include: a one-sentence summary of what changed; the
-rationale (why); any notable trade-offs or deferred items; a test plan (what the
-reviewer should verify). This is the minimum — add more if the change is large or has
-nuance.
+**PR description discipline:** the description should let a reviewer judge the change without
+reading the full diff. The verification sections above are the floor — they make the PR a record
+of what ship verified; add more if the change is large or has nuance.
 
 ## Output
 
@@ -132,5 +191,13 @@ partially complete a later phase.
 Ship does not have named modes in the standard sense. The three configuration axes —
 test command, version strategy, and target branch — are harness-supplied, not mode
 branches. The body above covers all configurations through its preflight + phase
-structure. A future `headless` mode (no operator confirmations, CI-style) may be added
-via `amend` if the need is validated.
+structure, and already runs auto-proceed by default (see "Confirmation model" — only the
+named gates halt). A future fully-unattended `headless` mode (drops even the named gates —
+patch-only bumps, no override pause, CI-style) may be added via `amend` if the need is validated.
+
+## On-demand references
+
+Read these at the step of need (single-sourced into this primitive's bundle):
+
+- `references/pr-description-shape.md` — `pr-description-shape`
+

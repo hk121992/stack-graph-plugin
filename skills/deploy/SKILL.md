@@ -14,10 +14,13 @@ URL is reachable — not when production health is confirmed. Health confirmatio
 
 You are **general and harness-agnostic**. The merge tooling, the pipeline trigger
 command, the environment URLs, and the deploy timeout are all **harness-supplied** via
-the **deploy-config** overlay — a reference the harness binds to this product's deploy
-configuration. No factory file exists for deploy-config; when no such overlay exists in
-the harness, describe the expected configuration shape to the operator and stop — you
-cannot proceed with assumed defaults for a pipeline trigger.
+the **deploy-config** overlay. The factory names the required field set — read
+`deploy-config` (the on-demand reference: `deploy_platform`, `merge_tooling`,
+`deploy_command`, `prod_url`, `staging_url`, `health_endpoint`, `branch_protection`,
+`merge_queue`, `deploy_timeout`, …); the harness supplies the values via the
+`deploy-config` binding. When the overlay is absent or a **required** field is missing,
+describe the field the harness must supply and stop — you cannot proceed with assumed
+defaults for a pipeline trigger.
 
 You have three **modes** (body branches of this one skill, not separate nodes per D34):
 `staging-first` (default), `prod-direct`, and `staging-only`. They differ in which
@@ -36,14 +39,45 @@ and ship before you. You do not write any carrier field. Your completion is the 
 the settled deployment URL is the artefact that `canary` (and `land`) observe as your
 output.
 
+## The deploy event (D59)
+
+The deploy outcome is **emitted on the existing carrier-keyed `node-exit` event** the
+imported `instrumentation-preamble` already fires at your exit — **not** a new store and
+**not** a carrier write. This is the same pattern as `tokens_per_iu` riding the
+`unit-complete` event (D57): a body emit on an event that already exists.
+
+When you exit, carry these fields on the node-exit event, into the **product-outcomes /
+deploy** stream of the local event log:
+
+- `merge_sha` — the merge commit SHA (Phase 1).
+- `deploy_url` — the settled deployment URL.
+- `mode` — `auto` | `immediate` | `queued` (the merge path taken in Phase 1).
+- `status` — settled | failed | staging-only-complete.
+- `timing` — the merge→live duration.
+- `smoke_health` — the inline smoke-check result (Phase 3). `land`'s `live-confirmed`
+  signal **consumes this** rather than re-opening the URL.
+- `live_confirmed` — null here (the `live-confirmed` gate is `land`'s; it fills this).
+
+Do **not** write any of this to the carrier file. Current deploy-state is **projected on
+read** from the event log into `.stack-graph/`; the **recorder** (debrief's, keyed off
+the terminal transition) freezes the deploy outcome onto the carrier's closed record as a
+`frozen_*` field, beside `frozen_timeline` / `frozen_metrics` — the one point a derived
+value enters a committed file. **DORA/MTTR is a derivation across carriers' deploy
+events** (the measure-outcomes family), never a stored aggregate. D44 holds: the preamble
+emits, the recorder freezes; no stage writes the carrier.
+
 ## Preflight
 
 Before any action, confirm:
 
-1. **Harness deploy-config is reachable.** Read the deploy-config overlay: merge
-   tooling (e.g. `gh pr merge`), pipeline trigger command, environment URLs (staging,
-   prod), deploy timeout, and any credentials path. Surface any missing required field
-   to the operator and stop.
+1. **Deploy-config validates against the field set.** Resolve the `deploy-config`
+   binding and read the values. Check **every required field** the `deploy-config`
+   reference names is present and resolvable: `deploy_platform`, `merge_tooling`,
+   `deploy_command`, `prod_url`, `branch_protection` (and `staging_url` whenever the
+   mode targets staging). **A missing required field is a STOP** — name the field the
+   harness must supply and halt; never assume a default for a pipeline trigger. Optional
+   fields (`health_endpoint`, `deploy_timeout`, `merge_queue`, `credentials`) take their
+   documented defaults when absent.
 2. **PR is open and mergeable.** Confirm the PR (received from ship) is open, all
    required checks have passed, and there are no merge conflicts. If the PR is not
    mergeable, surface the blocker to the operator — do not force-merge.
@@ -58,7 +92,19 @@ Merging is **irreversible** — confirm with the operator before proceeding:
 
 On confirmation, merge the PR using the harness-configured merge tooling. Use a
 **squash-merge** unless the overlay specifies otherwise (squash keeps main clean for a
-product that used WIP checkpoint commits during build). Report the merge commit SHA.
+product that used WIP checkpoint commits during build).
+
+**Immediate merge vs merge queue.** After issuing the merge, detect which path the
+platform took:
+
+- **Immediate** — the merge lands now; report the merge commit SHA and proceed.
+- **Queued** — when `merge_queue` is set or the merge was issued with `--auto`, the PR
+  enters a **merge queue** and lands later, after an additional CI run. Poll the
+  **queue** on its own timeout (separate from the Phase-3 pipeline poll; queues routinely
+  take several minutes). On queue completion, report the merge commit SHA and proceed.
+  If the PR is **dropped from the queue** (a PR ahead introduced a conflict), surface
+  this **as a queue-conflict failure, distinct from a CI or deploy failure** — the change
+  was never merged; stop and let the operator decide whether to rebase and re-queue.
 
 If the merge fails (e.g. a conflict appeared after preflight, or a required check
 fails), surface the error and stop — do not retry automatically. The operator decides
@@ -78,18 +124,35 @@ error and stop.
 
 Poll the pipeline at a reasonable interval (harness-configured; default 30s) until:
 
-- **Success** — pipeline complete, environment reachable (basic HTTP check on the
-  environment URL). Report the deployment URL and proceed to the output.
-- **Failure** — pipeline reports an error or times out (harness-configured timeout;
-  default 10 min). Surface the failure signal — the pipeline run URL, the last status,
-  any error output — to the operator. Ask:
+- **Success** — pipeline complete, then run the **inline single-pass smoke check** on
+  the environment URL (`health_endpoint` if set, else `/`) before reporting settled:
+  **HTTP 200** + **console-error scan** (no critical errors) + **content present** (a
+  real page, not a blank or error page) + a **screenshot** as evidence. A 200 on a blank
+  error page is **not** a settled deploy. This single-pass check is **deploy's own output
+  gate** — distinct from `canary`'s extended monitoring loop (`precedes canary` covers
+  that 10-minute baseline watch, not this check). On pass, report the deployment URL and
+  the smoke result and proceed to the output.
+- **Failure** — pipeline reports an error, the smoke check fails, or the poll times out
+  (harness-configured `deploy_timeout`; calibrate per platform — real pipelines vary
+  widely, so an aggressive default produces false failures). Surface the failure signal —
+  the pipeline run URL, the last status, any error output, the smoke result — to the
+  operator. Ask:
 
   > "Deploy failed. Options: (a) investigate the pipeline and re-trigger, (b) revert
   > the merge, (c) escalate and hold. Which path?"
 
-  Do not pick a path automatically. The operator decides; if they choose revert, name
-  the arc re-entry path (back through `land` → `reconcile` revert loop) but do not
-  invoke it yourself.
+  Do not pick a path automatically. The **revert decision** is the operator's, and the
+  **arc re-entry** (back through `land` → `reconcile`) is `land`'s to surface — you do not
+  decide to revert and you write no carrier field (D44). But once the operator chooses
+  revert, **offer to execute the mechanical git steps** so the rollback is frictionless:
+
+  - If `branch_protection` is **false**: `git revert <merge-sha> --no-edit` + push.
+  - If `branch_protection` is **true** (direct push blocked): open a **revert-PR** for
+    the revert commit instead of pushing directly.
+
+  Then wait for the revert to deploy before reporting, and report the revert commit (or
+  revert-PR) so `land` can re-enter the loop. You execute the git action; `land` /
+  `reconcile` own the decision and the re-entry.
 
 ## Modes
 
@@ -141,8 +204,25 @@ No prod deploy. Session ends here. The prod deploy is a future `deploy` invocati
 - **Pipeline run URL** (for operator tracking).
 - **Deployment URL(s)** — staging and/or prod, depending on mode.
 - **Deploy status** — settled / failed / staging-only-complete.
+- **Inline smoke-check result** — the Phase-3 single-pass health verdict + screenshot.
 - In `staging-first` mode: explicit staging-health confirmation before the prod deploy
   triggers.
 
+The durable record of all of this is the **deploy event** (above) — emitted on your
+node-exit event, projected on read, frozen at terminal — not a bespoke report file.
+
 If any phase fails, deploy stops at that phase, surfaces the failure, and asks the
 operator for a path — it does not silently continue or auto-revert.
+
+## Imported references
+
+The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
+
+@references/instrumentation-preamble.md
+
+## On-demand references
+
+Read these at the step of need (single-sourced into this primitive's bundle):
+
+- `references/deploy-config.md` — `deploy-config`
+
