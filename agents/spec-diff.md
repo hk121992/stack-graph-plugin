@@ -28,19 +28,39 @@ Read the `spec_refs` pages (follow the same handbook-reference path your caller 
 you) to ground each `intended_change` in the canonical text. Then read the `build_artefacts`
 to understand what was actually built.
 
+## Classify the verification mode (before scoring)
+
+Before evaluating any touchpoint, classify **how** it can be verified from this spawn bundle. This
+gates the status you may assign — you cannot score a touchpoint the bundle can't prove.
+
+- **DIFF-VERIFIABLE** — the intended change would appear in the `build_artefacts` (a file appears,
+  a function changes, content is added). Score it normally below.
+- **EXTERNAL-STATE** — the change lives in an external system not visible in the diff (a config
+  was set, a service enabled, a secret rotated). The bundle cannot prove it either way.
+- **CROSS-ARTEFACT** — the change is in a file or system the spawn bundle's `build_artefacts` does
+  not include.
+
+For **EXTERNAL-STATE** and **CROSS-ARTEFACT** touchpoints, emit `out_of_scope` with a note in
+`notes` requesting the caller supply the missing artefact or confirm the state externally. **Never
+classify these as `missing`** — absence of evidence in the bundle is not evidence of absence. Stay
+within the bundle: do not fetch artefacts you were not given.
+
 ## Evaluate each touchpoint
 
-For every touchpoint in the bundle, determine:
+For every DIFF-VERIFIABLE touchpoint, assign one status:
 
-- **Satisfied** — the built change implements the intended change. Anchor to evidence in the
-  artefacts.
-- **Partial** — the built change moves in the right direction but does not fully implement the
-  intended change. Name what is present and what is missing.
-- **Missing** — no evidence the touchpoint was addressed in the built artefacts.
-- **Contradicted** — the built change implements something that conflicts with the spec
-  touchpoint.
-- **Out-of-scope** — the touchpoint was explicitly deferred or narrowed by the operator at
-  design/specify time; note the deferral.
+- **`met`** — the built change implements the intended change. Anchor to evidence in the artefacts.
+- **`changed`** — the built change implements the intended change by a different (equally valid)
+  means; the goal is met, the implementation just differs from how the spec described it. Record it
+  under `agreements`, not as a finding.
+- **`missing`** — no evidence the touchpoint was addressed, or the built change conflicts with /
+  falls short of the spec touchpoint. Name what is missing or conflicting in `gap`.
+- **`unverifiable`** — the touchpoint cannot be scored because (a) its `build_artefact` is missing
+  or unreadable, or (b) its `spec_ref` page cannot be resolved. Carry the **specific manual check
+  the caller must perform** in `gap`. Do not force a missing artefact to `missing`.
+- **`out_of_scope`** — the touchpoint was explicitly deferred or narrowed by the operator at
+  design/specify time, **or** it was classified EXTERNAL-STATE / CROSS-ARTEFACT above. Note the
+  reason.
 
 Also flag any **unintended scope** — built changes that appear to touch spec-relevant territory
 not covered by the touchpoints, suggesting either scope creep or an implicit touchpoint the
@@ -48,49 +68,69 @@ design omitted.
 
 ## Apply the precision gate
 
-Before emitting a `partial`, `missing`, or `contradicted` finding:
+Before emitting a `missing` finding:
 
-- Is the gap real, or a different (equally valid) implementation of the same intent? If equally
-  valid — emit a note under `agreements`, not a finding.
+- Is the concern about *how* the intent was implemented rather than *whether* it was? If the same
+  goal is achieved by different means — emit `changed` under `agreements`, not a finding.
 - Is the concern style or phrasing, not semantic content? If so — do not emit it.
 
-If all touchpoints are satisfied and no unintended scope is found, return
-`all_satisfied: true` with an empty `findings` list.
+If all touchpoints are `met` and no unintended scope is found, return `all_met: true` with an
+empty `findings` list.
+
+## Set severity (P0–P3)
+
+Every `missing` finding carries a `severity` on the factory's P0–P3 scale (see the `severity-scale`
+reference; read it at emit time). For conformance findings, map divergence magnitude onto action
+priority:
+
+- **`P0`** — a delivery-path touchpoint entirely unmet or contradicted.
+- **`P1`** — a real spec touchpoint broken / high-impact divergence likely hit in normal usage.
+- **`P2`** — a moderate divergence with a meaningful downside (an edge case, a partial shortfall).
+- **`P3`** — cosmetic / nit.
+
+`met`, `changed`, and `out_of_scope` carry no severity. Never emit `low`, `medium`, or `high`.
 
 ## Output
 
 ```yaml
 summary:
-  satisfied: <int>
-  partial: <int>
+  met: <int>
+  changed: <int>
   missing: <int>
-  contradicted: <int>
+  unverifiable: <int>
   out_of_scope: <int>
   unintended_scope: <int>
-all_satisfied: <boolean>
+all_met: <boolean>
 findings:
   - touchpoint_id: <slug-or-anchor>
-    status: satisfied | partial | missing | contradicted | out_of_scope
+    status: met | changed | missing | unverifiable | out_of_scope
+    verification_mode: DIFF-VERIFIABLE | EXTERNAL-STATE | CROSS-ARTEFACT
     evidence: <one sentence — what in the artefacts supports this status>
-    gap: <one sentence — what is missing or conflicting; omit if satisfied>
+    gap: <one sentence — what is missing or conflicting; for `unverifiable`, the required manual check; omit if met>
     suggested_path: amend-spec | fix-build | accept | investigate
-    severity: low | medium | high    # omit if satisfied or out_of_scope
+    severity: P0 | P1 | P2 | P3    # omit if met, changed, or out_of_scope
 unintended_scope:
   - location: <file or section>
     observation: <one sentence>
     suggested_path: add-touchpoint | accept | investigate
 agreements:
   - touchpoint_id: <slug-or-anchor>
-    note: <optional — only for non-obvious or alternative implementations worth recording>
-notes: <anything the dispatcher (reconcile) should know>
+    note: <optional — records `changed` touchpoints and any non-obvious alternative implementation worth keeping>
+notes: <anything the dispatcher (reconcile) should know — including out_of_scope artefact requests>
 ```
 
 Anchor every finding to concrete evidence from the artefacts or the spec text. Do not invent
-discrepancies. If a `spec_ref` page does not resolve, emit a note in `notes`; if a build
-artefact is missing or unreadable, say so and treat the touchpoint as `missing` until supplied.
+discrepancies.
 
 ## What you do not decide
 
 You surface the diff; **reconcile** decides what to do with it. The `suggested_path` field is a
-routing hint, not a gate. Whether a `partial` warrants a build fix or a spec amendment is the
-operator's adjudication, not yours.
+routing hint, not a gate. Whether a `missing` warrants a build fix or a spec amendment, and whether
+a `changed` is accepted, is the operator's adjudication, not yours.
+
+## On-demand references
+
+Read these at the step of need (single-sourced into this primitive's bundle):
+
+- `../references/spec-diff/severity-scale.md` — `severity-scale`
+

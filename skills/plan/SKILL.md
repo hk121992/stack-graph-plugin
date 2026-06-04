@@ -87,14 +87,38 @@ For each unit, fill the IU-schema fields completely:
   estimate. `L`/`XL` read as "probably split". State the rationale for any `L`/`XL` unit and
   split a unit whose context overflows the single-agent budget.
 
-Surface the draft units to the operator before advancing to the lens phase. Invite them to
-challenge the decomposition — a unit the operator doubts will produce a re-ask at build.
+### Close Phase 2 with a scope-claim
+
+Before any lens fan-out, write a **scope-claim** — a short, structured statement of what the
+draft plan does and does not commit to. Three labelled parts:
+
+- **Covers**: what these units change, create, or remove — the scope the plan commits to.
+- **Defers**: what is explicitly out of this plan, and why — drift the operator should know
+  was left out on purpose, not by omission.
+- **Inferred**: decomposition or sequencing choices you made without an explicit operator
+  instruction that could reasonably go another way — the forks where operator input changes
+  the plan.
+
+The scope-claim is cheap to produce and cheap to redirect against — it is the checkpoint
+before the expensive lens pass. (It is the pre-dispatch sibling of the Phase 4 scope summary,
+which records the *finalised* covers/defers after the lens findings are folded in.)
+
+### Confirm-framing gate (hard) — affirm or redirect before the lens dispatch
+
+Surface the draft units **and** the scope-claim to the operator as one affirm-or-redirect
+summary, and **block on it** via the platform's blocking-question tool. The lens fan-out does
+not run until the operator affirms or redirects. This is a hard gate, not an invitation: the
+lens pass is the expensive step, so the operator confirms the decomposition and scope claim
+*before* it fires — a unit or a boundary the operator doubts is caught here, not after the
+fan-out. On redirect, revise the decomposition and re-surface the scope-claim; only an affirm
+advances to Phase 3.
 
 ## Phase 3 — Dispatch the lens panel over the plan doc
 
-Once the draft plan is stable enough to examine, **follow the `lens-dispatch` reference**
-with `target: plan`. The reference gives you lens selection, the fan-out, and the
-deterministic merge / dedup / corroborate / confidence-gate / severity-route reduction.
+Once the operator has **affirmed the scope-claim at the Phase 2 gate**, **follow the
+`lens-dispatch` reference** with `target: plan`. The reference gives you lens selection, the
+fan-out, and the deterministic merge / dedup / corroborate / confidence-gate / severity-route
+reduction.
 
 - Run the lenses **sequential, plan-review order**: dispatch lenses that check plan-level
   coherence (sequencing, scope, dependency completeness) before fanning out the remainder
@@ -141,9 +165,18 @@ clear scope.
 ### deepen
 
 A hard or novel decomposition. Multiple operator rounds — surface and test the decomposition
-assumptions before finalising units; run the dispatch with the adversarial lens active (and
-any other conditional lenses the complexity triggers). Use when the design carries real
-architectural uncertainty, the scope boundary is contested, or the dependency graph is novel.
+assumptions before finalising units. Use when the design carries real architectural
+uncertainty, the scope boundary is contested, the dependency graph is novel, or the change is
+cross-cutting (touches many surfaces / large blast radius).
+
+In this mode you run the dispatch with **`lens-adversarial` active** — `deepen`'s entry
+condition (any of: architectural uncertainty, a contested scope boundary, a novel dependency
+graph, a cross-cutting change / large blast radius) *is* the adversarial lens's activation
+trigger, so naming the mode names why the lens fires. The other conditional lenses fire on
+their own `lens-dispatch` triggers as the plan's content meets them (e.g. `lens-performance`
+when the work touches DB/loops/IO/async). Selection stays owned by `lens-dispatch`; this mode
+only fixes that the plan is in the adversarial-active class — so the lens neither fires every
+time (waste) nor sits dormant when the decomposition is genuinely hard.
 
 ### re-plan
 

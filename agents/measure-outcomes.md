@@ -41,6 +41,15 @@ For each `node-id` in `touched_nodes`:
   `earns-keep` threshold or direction.
 - If a node's earns-keep is absent from the record, flag it as `missing_earns_keep` and
   skip that node's metrics row — do not invent a metric.
+- If a node's earns-keep is **declared but no instrumentation event type feeds its metric**
+  (the touchpoint exists; nothing measures it yet), skip it with reason `pending_earns_keep`
+  — the metric is awaiting instrumentation, not missing. Distinct from `missing_earns_keep`
+  (no declaration) and `timeline_unavailable` (the whole timeline is absent).
+- If a node's earns-keep is **qualitative** — it needs an operator to assess acceptability,
+  not an event count + arithmetic (e.g. "the operator judges the output is acceptable") — skip
+  it with reason `earns_keep_requires_judgment`. Measuring it is the operator's / `debrief`'s
+  job, not yours. Do not fabricate a number for a judgment criterion: you are deterministic by
+  declaration, and a criterion that needs judgment is out of your scope by design.
 
 ### 2. Read the instrumentation timeline
 
@@ -57,6 +66,14 @@ gate events tagged with `node` id and timestamps. For each touched node:
 If the timeline is absent or empty, flag `timeline_unavailable` and emit partial rows where
 the earns-keep metric can be derived from the work record alone (e.g. decision count from
 `decisions-store`).
+
+If the timeline is present but **partial** — a `node-enter` with no matching `node-exit`,
+which happens when `debrief` fires before all hook events have flushed — raise a
+`timeline_incomplete` warning. Do **not** skip the affected node: still compute its metrics
+from the events present; the warning flags reduced confidence in any duration/closure metric
+over the incomplete span. This is distinct from the degraded-mode case where the carrier
+projection is *absent* (a fresh clone) — here the projection exists but is incomplete at the
+moment of measurement.
 
 ### 3. Compute metrics
 
@@ -77,6 +94,24 @@ If `baseline` is non-null, load it. For each metric that appears in both runs, c
 `delta`. Flag metrics where delta indicates the earns-keep direction is worsening
 (severity: `warn`) or threshold breached (severity: `breach`). No baseline → all deltas
 `n/a`.
+
+Emit **two distinct axes** per metric, not one:
+
+- **`severity: ok | warn | breach | n/a`** — the *baseline-comparison verdict*: where this
+  sprint's value stands against the earns-keep threshold. This is a metric-vs-baseline verdict,
+  a different axis from review-lens findings-severity — it is **not** the P0–P3 scale. `n/a`
+  when there is no baseline.
+- **`trend_direction: improving | stable | degrading | first_point`** — the *direction of
+  travel*: compute it from the **sign of the delta × the metric's earns-keep direction**. A
+  metric whose earns-keep wants the value *down* (e.g. missing-metric rate → zero) is
+  `improving` on a negative delta; one whose earns-keep wants it *up* (e.g. trend-point
+  coverage grows) is `improving` on a positive delta. `degrading` when it moves the wrong way;
+  `stable` when the delta is zero (within rounding); `first_point` when the baseline is null
+  (no delta to read yet).
+
+The two answer different questions: `severity` is where the value stands against the threshold
+*now*; `trend_direction` is whether it is moving toward or away from it. Both are emitted — a
+metric can read `ok` and `degrading` at once. Do not collapse them into one field.
 
 ### 5. Derive the per-IU cost block
 
@@ -112,7 +147,8 @@ rows:
         value: <number or rate>
         unit: <count | % | ms | dimensionless>
         delta: <+N | -N | n/a>
-        severity: ok | warn | breach | n/a
+        severity: ok | warn | breach | n/a                  # value-vs-baseline verdict (not P0–P3)
+        trend_direction: improving | stable | degrading | first_point  # delta sign × earns-keep direction
 per_iu_cost:                              # present when the sprint built IUs; omit otherwise
   tokens_per_iu:
     median: <number>
@@ -121,13 +157,21 @@ per_iu_cost:                              # present when the sprint built IUs; o
 skipped:
   - node_id: <string>
     reason: missing_earns_keep | timeline_unavailable | node_not_found
-warnings: [<string>, ...]
+          | pending_earns_keep | earns_keep_requires_judgment
+warnings: [<string>, ...]                   # e.g. timeline_incomplete (enter without matching exit)
 ```
 
 ## Hard limits
 
 - Do not emit a metrics row without a corresponding earns-keep source. If you cannot locate
   it, add the node to `skipped`.
+- Do not measure a qualitative earns-keep criterion. If a criterion needs an operator to
+  judge acceptability rather than count events, skip it (`earns_keep_requires_judgment`) — do
+  not fabricate a number and do not invoke a model grader. You are deterministic by
+  declaration; qualitative assessment is the operator's / `debrief`'s job.
+- Do not infer events absent from the timeline. A `node-enter` with no matching `node-exit`
+  is a `timeline_incomplete` warning, not a guessed completion — compute from what is present,
+  flag the gap, never substitute inference.
 - Do not interpret results. "Revenue rose" is an interpretation; "delta: +0.12 (warn)" is
   a measurement. The over-budget share is a number you surface, not a verdict you reach.
 - Treat `context_budget` as read-only. Read it from the spawn bundle; never write it, and never

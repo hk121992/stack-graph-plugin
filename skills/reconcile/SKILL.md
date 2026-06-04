@@ -60,19 +60,42 @@ Gather the inputs and dispatch `spec-diff`:
    task_summary: <1-3 sentences — what the build was supposed to do>
    ```
    Receive the structured diff report.
-4. **Interpret and surface.** Present the diff report to the operator — the `summary`
-   counts (satisfied / partial / missing / contradicted / out-of-scope), the per-finding
-   breakdown, and any `unintended_scope` flags. Name your interpretation of each finding:
-   is a `partial` a real gap or an acceptable alternative implementation? Is an
-   `unintended_scope` hit material? You surface the interpretation; the operator confirms.
+4. **Interpret and surface.** Present the diff report to the operator. **You read spec-diff's
+   statuses; you do not re-define them** — the per-touchpoint contract lives in spec-diff's
+   output (consult your `spec-diff` reference on demand). Each touchpoint carries:
 
-If `all_satisfied: true` with no unintended scope and no operator concerns, the diff is
-clean — skip to Phase 3 (`enact`), accept path.
+   - **`status`** — `met` | `changed` | `missing` | `unverifiable` | `out_of_scope`.
+   - **`severity`** — `P0` | `P1` | `P2` | `P3`, the factory-wide scale (your
+     `severity-scale.md` via spec-diff). Surface severity as the within-surface ordering and
+     weight adjudication by it: a `P0` unmet touchpoint is not an "accept" candidate.
+   - **`gap`** — the discrepancy text; for an `unverifiable` touchpoint, the **manual check** to run.
+
+   Name your interpretation per status:
+   - **`met`** — satisfied; no finding.
+   - **`changed`** — the goal is met by **different means** than the spec described. Present it
+     with a default of **"no adjudication needed unless the operator objects"** — do not route
+     a valid alternative implementation into the adjudication fork or the spec-amendment queue
+     unless the operator objects.
+   - **`missing`** — a real gap; carry it into adjudication.
+   - **`unverifiable`** — the touchpoint cannot be checked from the diff alone. **Surface the
+     manual check** spec-diff put in `gap` to the operator; do not silently pass it. It is
+     resolved by the operator's manual confirmation, not by reconcile.
+   - **`out_of_scope`** — spec-diff routed an EXTERNAL-STATE / CROSS-ARTEFACT touchpoint here;
+     note the deferral, no finding.
+
+   Also flag any `unintended_scope` hit and name whether it is material. You surface the
+   interpretation; the operator confirms.
+
+If every touchpoint is `met` (or `changed`/`out_of_scope` with no operator objection) and there
+is no material unintended scope, the diff is clean — skip to Phase 3 (`enact`), accept path.
 
 ## Phase 2 — Adjudicate: operator decides (`adjudicate` mode)
 
-For each `partial`, `missing`, `contradicted`, or `unintended_scope` finding, the operator
-chooses a **path**:
+Adjudicate each `missing` finding, each `unintended_scope` hit, and each `changed` finding
+**the operator objected to** (an un-objected `changed` carries its "no adjudication needed"
+default from Phase 1 and does not enter the fork). An `unverifiable` touchpoint is resolved by
+the operator running its surfaced manual check, not by an adjudication path. For each finding in
+the fork, the operator chooses a **path**:
 
 - **amend-spec** — the build is correct; the spec should be updated to reflect what was
   built. This is a secondary canon-author action: you will raise a spec amendment PR in
@@ -83,12 +106,36 @@ chooses a **path**:
 - **accept** — the finding is not material; accept the drift as-is.
 
 Hold the operator in the loop for each contested finding. Do not silently default to any
-path — the adjudication is always an operator decision. Once every finding is adjudicated,
-**invoke `log-decision`** to record the full adjudication set to the two-layer store:
+path — the adjudication is always an operator decision.
+
+### Decision-context for a finding you cannot confidently recommend a path for
+
+When a finding is ambiguous — the spec reading is unclear, or amend-spec vs fix-build genuinely
+turns on a judgment you cannot make for the operator — do **not** present a wall of analysis.
+Surface a structured **decision-context** that feeds the operator's AskUserQuestion gate:
+
+```yaml
+finding:        <the discrepancy, one line>
+touchpoint:     <spec section / page the touchpoint targets>
+build_does:     <what the built change actually does>
+why_ambiguous:  <why the path is not clear-cut — the spec gap or the tradeoff>
+lean:           <amend-spec | fix-build | accept | none — your lean, if you have one>
+```
+
+This is the input to the gate, not a substitute for it: the operator still decides.
+
+### Log the adjudication — including the accept path
+
+Once every finding is adjudicated, **invoke `log-decision`** to record the full set to the
+two-layer durable store (your `decisions-store` reference is the contract: every settled
+decision — **including an accepted drift** — is traceable in `docs/decisions.md`; an accepted
+drift is a logged decision, never a transient session note). The accept path is part of **this**
+write, not a separate sink:
 
 ```yaml
 decision_id: <sprint-id>-reconcile
-conclusion: <summary of findings + paths chosen>
+conclusion: <summary of findings + paths chosen, including each accepted drift —
+             its finding, touchpoint, and the operator's acceptance rationale>
 rationale: <the operator's reasoning>
 rejected_alternatives: [<any paths not taken>]
 status: accepted
@@ -130,15 +177,26 @@ For findings adjudicated as `fix-build`:
    process-edge pass (F7); the behaviour holds in prose: reconcile re-enters build when
    the fix-build path is taken.
 3. After build completes and review re-runs, reconcile is invoked again (starting at
-   `draft` mode). The loop is bounded — each pass resolves the identified gaps. If the
-   same gaps recur across multiple passes, surface an escalation to the operator before
-   re-entering build again.
+   `draft` mode). The loop is **bounded**:
+   - **Max-pass bound — 2 fix-build passes.** Before re-entering build for a **third** pass,
+     stop and escalate.
+   - **Gap-recurrence criterion.** A gap **recurs** when the **same spec touchpoint + status**
+     (e.g. `missing` on the same touchpoint, or an objected-to `changed` on the same touchpoint)
+     appears in the same slot across **two consecutive** passes. New gaps that merely resemble a
+     prior one do not count — a converging loop closes gaps and surfaces different ones; a stuck
+     loop re-surfaces the same touchpoint+status.
+   - **Escalation brief, routed via `log-decision`.** When the bound is hit or a gap recurs,
+     surface a recurring-pattern brief to the operator — what was fixed across passes, which
+     touchpoints keep re-surfacing, and what that suggests — and record the stall through
+     `log-decision` so the escalation is durable, not a transient session fact. Do not silently
+     re-enter build.
 
 ### Accept path
 
-For findings adjudicated as `accept`: note the accepted drift in the stage output (the
-operator's acknowledgement that the spec and the build are intentionally misaligned on
-this point). No spec amendment, no rework.
+For findings adjudicated as `accept`: the durable record is the `log-decision` write from
+Phase 2 — the accepted drift (finding, touchpoint, operator's acceptance rationale) is logged
+to `docs/decisions.md`, not left as a transient stage note. A future operator or auditor can
+recover which spec-reality gaps were knowingly accepted. No spec amendment, no rework.
 
 ### Clean diff (no findings, or all accepted)
 
@@ -163,13 +221,18 @@ non-existent node.
 
 ## Output
 
-- **`draft`:** the structured spec-diff report (from `spec-diff`), interpreted and
-  surfaced to the operator — per-finding status, severity, and suggested path.
-- **`adjudicate`:** the operator's adjudication on each finding, logged via `log-decision`
-  — amend-spec / fix-build / accept, with rationale, traceable in `docs/decisions.md`.
+- **`draft`:** the structured spec-diff report (from `spec-diff`), interpreted and surfaced to
+  the operator — per-touchpoint `status` (`met`/`changed`/`missing`/`unverifiable`/`out_of_scope`),
+  `severity` (P0–P3), and reconcile's read of each (`changed` defaulted to no-adjudication;
+  `unverifiable`'s manual check surfaced).
+- **`adjudicate`:** the operator's adjudication on each fork finding, logged via `log-decision`
+  — amend-spec / fix-build / **accept** (the accepted drift is part of the same durable write),
+  with rationale, traceable in `docs/decisions.md`; ambiguous findings surfaced as a structured
+  decision-context to the gate.
 - **`enact`:** the chosen path applied — spec amendment PR raised (URL reported) via
-  `pr-author`, or build rework brief produced and the rework loop re-entered, or clean
-  exit surfacing the commit-to-land gate.
+  `pr-author`, or build rework brief produced and the bounded rework loop re-entered (with the
+  recurring-gap escalation routed via `log-decision`), or clean exit surfacing the
+  commit-to-land gate.
 - **All modes:** a **stage-complete signal** — the projection advances `current_stage`.
   You write no carrier field and record no gate decision; the item now sits at the
   commit-to-land gate for the PM / operator.
@@ -178,5 +241,6 @@ non-existent node.
 
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
+@references/decisions-store.md
 @references/instrumentation-preamble.md
 
