@@ -60,6 +60,8 @@ state which tie-breaker is decisive and why.
 2. **Scaffold the instance file** at `improvements-root/<id>.md` (resolve `improvements-root` via the
    bindings). Write the **frontmatter stub** per the IU-schema **standalone shape** — no content
    fields yet (those are `specify-slice`'s):
+   - `id` + `title` — the slice's identity: a stable slug (the manifest key) and a short human
+     label. The schema requires these even on a `proposed` stub.
    - `channel: incremental` (no `parent` — this is the standalone discriminator)
    - `improves:` the target from step 1
    - `lifecycle_state: proposed` (you author this state; it is workflow state, not gated)

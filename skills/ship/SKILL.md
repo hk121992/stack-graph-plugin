@@ -141,7 +141,8 @@ After squashing, the working tree holds the change to deliver as one clean commi
 ## Phase 5 — Commit
 
 Author a **descriptive commit message** from the staged diff and any context the
-operator has provided (the work-item title, the design doc pointer, key decisions).
+operator has provided (a work-item's title + design-doc pointer, or a standalone-iu's `goal` +
+`improves` target — branch on `carrier_kind`; key decisions).
 Follow the project's commit convention (read from the harness overlay if specified;
 otherwise use the `<type>: <summary>` convention).
 
@@ -157,8 +158,10 @@ the earlier phases already produced, not just a human-facing summary. Read the
 
 - **`## Summary`** — what is shipping, in one or two sentences, from the commit history since
   the base diverged (what changed and why).
-- **`## Trigger`** — the work-item context: the carrier's `outcome_link` and title (via the
-  overlay if available) — why this is shipping now.
+- **`## Trigger`** — the carrier context, branching on `carrier_kind` (via `carrier-interface`):
+  a **work-item** contributes its `outcome_link` + title (via the overlay if available); a
+  **standalone-iu** has no `outcome_link`, so use its `improves` target + the slice `goal` —
+  why this is shipping now.
 - **`## Recommended decision`** — merge this PR; state any notable trade-off or deferred item
   the reviewer should weigh, as a recommendation (not an open question).
 - **Verification evidence** — fold in the evidence ship already has at hand, so the reviewer
@@ -203,5 +206,6 @@ patch-only bumps, no override pause, CI-style) may be added via `amend` if the n
 
 Read these at the step of need (single-sourced into this primitive's bundle):
 
+- `references/carrier-interface.md` — `carrier-interface`
 - `references/pr-description-shape.md` — `pr-description-shape`
 

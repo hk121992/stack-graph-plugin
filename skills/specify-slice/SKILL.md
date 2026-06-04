@@ -98,8 +98,10 @@ Set `slice_type`, **preferring `AFK`**:
 - **`AFK`** — the loop can build → review → land it unattended. The default; reach for it whenever
   no human decision point is genuinely required.
 - **`HITL`** — the slice carries a named human decision or review point the agent must stop at.
-  Record **what** the decision is and **which stage** it lands at (e.g. a visual review at
-  `review`, an architectural micro-call at `build`). Downstream honours the pause.
+  **Write the structured `hitl_point: { stage, decision }`** — the stage build pauses at and what
+  the human decides (e.g. `{ stage: review, decision: visual review of the rendered output }`).
+  `build` reads `hitl_point.stage`; the IU-schema **requires** `hitl_point` for a HITL slice, so a
+  prose-only note is not enough. Downstream honours the pause.
 
 If the HITL point is in fact a genuine **design fork**, that is the **escalate** signal, not a
 HITL tag — see below.
