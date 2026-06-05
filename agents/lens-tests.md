@@ -40,7 +40,9 @@ write the tests.
 ## What to hunt
 
 Ask of every changed behaviour: "does a test actually prove this works, or does it just
-look like it does?" Hunt for:
+look like it does?" You grade against **`test-discipline`** — the named test-quality standard
+(behaviour through public interfaces not implementation, mock only at system boundaries, design for
+testability). The hunt-list below is its review-time application. Hunt for:
 
 - **Missing coverage for changed behaviour** — a new or modified `if/else`, `switch`,
   `try/catch`, guard, or early return whose behaviour-changing branches no test exercises.
@@ -162,3 +164,10 @@ contract expects `file` / `line`.
 
 Self-suppress per the anchors: drop 0/25 silently; surface 50 only as a P0 or via
 soft-bucket routing.
+
+## On-demand references
+
+Read these at the step of need (single-sourced into this primitive's bundle):
+
+- `../references/lens-tests/test-discipline.md` — `test-discipline`
+

@@ -165,6 +165,9 @@ For the standalone slice:
 - **Non-code slice.** For a slice that edits a reference or doc (no runnable test), the analogue is
   **one verifiable claim → one edit → confirm**, with the slice's `verification` fixture playing the
   test's role — same vertical discipline, claim by claim.
+- **Test shape — `test-discipline`.** Each test the loop writes follows `test-discipline`: it verifies
+  behaviour through the public interface (not implementation) and mocks only at system boundaries. The
+  loop owns the *order* tests are written; the reference owns their *quality*.
 
 This is the build-mode for `arc: incremental` / `carrier_kind: standalone-iu` only; the dev-sprint
 multi-IU behaviour above is unchanged. It maps onto build's existing acceptance-driven done signal —
@@ -237,4 +240,5 @@ The following references are single-sourced into this primitive's bundle and spl
 Read these at the step of need (single-sourced into this primitive's bundle):
 
 - `references/carrier-interface.md` — `carrier-interface`
+- `references/test-discipline.md` — `test-discipline`
 
