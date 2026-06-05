@@ -105,9 +105,9 @@ land surfaces the evidence the bar is read against.
    > from `in-delivery` to `shipped`. Confirm to proceed, or return to reconcile if more
    > alignment is needed."
 
-   On confirmation, the gate is recorded. On decline, return to `reconcile` (the process edge
-   is deferred — see the F7 seam below — but the arc re-entry path is: return to `reconcile`
-   and run its `adjudicate` or `enact` mode as needed).
+   On confirmation, the gate is recorded. On decline, return to `reconcile` (the re-entry edge is
+   wired as `reconcile can-follow land`, declared on reconcile's side — see the seam below — and the
+   arc re-entry path is: return to `reconcile` and run its `adjudicate` or `enact` mode as needed).
 3. **Do not re-ask an already-recorded gate** — but do still surface the readiness evidence.
    If the carrier shows a cleared commit-to-land decision and the readiness bar (per the dial)
    is met, proceed directly to ship.
@@ -153,21 +153,32 @@ This is a **deploy smoke test, not canary** — single-pass, no baseline, no tra
 In `staging-only` mode the change is not live, so the live-confirmed gate is deferred (see
 Exit); the smoke result still confirms the staging URL is healthy.
 
-**Canary (wave 2)** — the extended monitoring loop with a baseline — is not authored in wave 1
-(input-gated: BC is pre-launch, with no live prod traffic to watch — the canonical wave-2
-criterion, not reflexive deferral). When canary is authored, it slots here as the third sub-arc
-step and the `invokes canary` edge is added via `amend`. Until then, deploy's smoke check is the
-live-confirmed signal.
+### Step 4 — Canary (post-deploy live health, input-gated)
+
+**`canary`** is the third delivery sub-arc step: an autonomous agent that watches the just-shipped
+deployment against a **pre-deploy baseline** across consecutive checks and returns a
+**HEALTHY / DEGRADED / BROKEN verdict** that feeds the live-confirmed gate. It is the extended
+monitoring loop the single-pass smoke check is not. The `invokes canary` edge is **wired**.
+
+Canary is **input-gated on live prod traffic** — built dormant, it activates only when there is a
+**real deployment with traffic** to watch (it never fabricates a baseline). So invoke it after a
+**`prod-direct` or prod-`staging-first` deploy with live traffic**; for a `staging-only` deploy, or
+a pre-launch product with no prod traffic yet, do **not** invoke it — **deploy's inline smoke check
+remains the live-confirmed signal**. When canary runs, carry its verdict (alongside deploy's
+`smoke_health`) into the live-confirmed gate; when it is dormant, the gate fires on `smoke_health`
+alone.
 
 ## Exit — the live-confirmed gate
 
-After the deploy settles and deploy's smoke check clears (wave 2: canary):
+After the deploy settles and deploy's smoke check clears (plus canary's verdict, when live
+prod traffic makes canary active — see Step 4):
 
-1. **Surface the live-confirmed gate** to the operator, carrying deploy's `smoke_health`:
+1. **Surface the live-confirmed gate** to the operator, carrying deploy's `smoke_health` (and
+   canary's verdict when it ran):
 
-   > "Live-confirmed gate: the deployment is settled at `<url>`, smoke check `<smoke_health>`.
-   > Is the change confirmed healthy and live? This advances the work-item from `shipped` to
-   > `live`."
+   > "Live-confirmed gate: the deployment is settled at `<url>`, smoke check `<smoke_health>`
+   > (canary `<verdict>`, when active). Is the change confirmed healthy and live? This advances
+   > the work-item from `shipped` to `live`."
 
 2. On confirmation: the gate is recorded. The carrier's `lifecycle_state` advances to `live`.
    The projection picks up the stage exit; `current_stage` clears from `land`. The
@@ -289,9 +300,11 @@ The following process edges are wired in the frontmatter (backbone wiring pass, 
   This loop is expressed as `reconcile can-follow land` (declared on reconcile's side — the
   canonical model declares corrective `can-follow` on the node that re-runs). `land` itself holds
   no `can-follow reconcile` entry, and the seam is **not** a `references` edge.
-- **`invokes canary`** (wave 2): canary is the third delivery sub-arc step, input-gated on
-  live prod traffic. This `invokes` edge is added via `amend` when canary is authored; until
-  then deploy's inline smoke check is the live-confirmed signal (see Step 3).
+- **`invokes canary`** (wired): canary is the third delivery sub-arc step (see Step 4) — the
+  inbound invoke is authored here, on land's side; canary declares no inbound edge. It is
+  **input-gated on live prod traffic**: built dormant, invoked only when a real deployment with
+  traffic exists. Until prod traffic exists, deploy's inline smoke check is the live-confirmed
+  signal (see Step 3).
 - **`composes-into incremental @land`** (D56): land is shared with the `incremental` arc — it is
   the same primitive, reused, not duplicated. The forward edge `review → land` is declared on
   `review`'s side (review precedes land); land holds no inbound entry for it. See Incremental arc.

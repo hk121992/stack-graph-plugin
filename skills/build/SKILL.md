@@ -204,17 +204,40 @@ issue, receive a decision, resume. All other IUs continue if they have no depend
    and the options. **Never resolve a spec conflict by unilaterally reinterpreting the spec** — the spec
    is the plan's settled decision, not yours to rewrite mid-span.
 
-## Process seams (deferred edges)
+## Invoked sub-paths (within the span)
 
-- **← `plan`** (`can-follow`, wiring pass): build follows a settled plan; deferred until `plan` exists.
-- **→ `review`** (`precedes`, wiring pass): build hands off to review after stage-complete.
-- **← `review`** (fix loop, `can-follow`, wiring pass): a review finding re-enters build at a specific IU.
-- **← `reconcile`** (rework loop, `can-follow`, wiring pass): a reconcile rework decision re-enters build.
-- **← `plan`** (re-plan loop, `can-follow`, wiring pass): a re-plan re-enters build.
-- **→ `debug`** (Iron-Law fix path, wave 2): when a failing check or runtime error cannot be diagnosed
-  quickly, build invokes `debug` (root-cause-first). `debug` is not yet authored; the `invokes debug`
-  edge is deferred until it exists.
-- **`.worktreeinclude` reference** (wiring pass): the committed file-copy list for worktree isolation
+Build reaches into three sub-path nodes from inside the autonomous span. Each is an `invokes` edge
+(authored on build's side); control returns to the build span, which then emits the unit's
+acceptance evidence as usual. Reach for one only when the unit warrants it:
+
+- **→ `debug`** (Iron-Law fix path): when a unit fails its `acceptance_check` (a failing test,
+  runtime error, or regression) **and the cause is not diagnosable quickly in-span**, invoke `debug`
+  rather than guess-patching. `debug` runs the root-cause-first loop (reproduce → confirm one cause →
+  fix) and hands the fixed, re-verified unit back to the span. A quick, obvious fix stays inline;
+  escalate into `debug` when the failure resists a fast diagnosis.
+- **→ `design-implement`** (UI implementation unit): when the IU builds **user-facing UI from an
+  approved design** (an approved mockup, a design doc, or a from-scratch UI description in the IU's
+  `goal`), invoke `design-implement` to produce the production-quality surface. It returns the built,
+  viewport-verified UI to the span, which proves the unit against its `acceptance_check` as normal.
+- **→ `optimise`** (perf-critical unit): when a built unit has a **measurable objective worth
+  improving** (runtime perf, or agent-traversal cost) and its baseline is already correct, invoke
+  `optimise` — generate-measure-select across N variants, keeping the variant that beats the baseline
+  while still passing the unit's gate. Reach for it only where the objective justifies the
+  variant-generation cost; most units never need it.
+
+## Process seams
+
+Wired now (in the frontmatter):
+
+- **→ `review`** (`precedes`, wired): build hands off to review after stage-complete.
+- **← `review`** (fix loop, `can-follow`, wired): a review finding re-enters build at a specific IU.
+- **← `reconcile`** (rework loop, `can-follow` [arc=dev-sprint], wired): a reconcile rework decision re-enters build.
+
+Still deferred (F7 — wired once the endpoint/ref lands):
+
+- **← `plan`** (`can-follow` + re-plan loop): build follows a settled plan and a re-plan re-enters build;
+  the forward edge is carried on `plan`'s side (`plan precedes build`), so build declares no `plan` edge.
+- **`.worktreeinclude` reference**: the committed file-copy list for worktree isolation
   (`graph/_refs/.worktreeinclude`); the `references` edge is deferred until the ref is on disk.
 
 ## Output

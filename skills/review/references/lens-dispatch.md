@@ -20,7 +20,12 @@ Always run the always-on lenses: `lens-correctness`, `lens-security` (lower repo
 `lens-performance` (DB/loops/IO/async touched), `lens-design` (UI surface), `lens-dx`
 (public API/CLI/docs changed), `lens-runtime` (error handling/retries/migrations),
 `lens-adversarial` (high risk or large blast radius), `lens-external` (cross-model second
-opinion requested). Skipping a conditional lens is the default, not a finding.
+opinion requested). Two of these conditional lenses are **autonomous measurement agents**, not
+diff-judgment lenses: `benchmark` (perf — dispatch when the change could move page-load /
+Core-Web-Vitals / bundle size) and `health` (code-quality — dispatch when a whole-tree quality
+re-score is warranted). They compare against a stored baseline and return a regression /
+quality verdict that folds into the same finding set. Skipping a conditional lens is the
+default, not a finding.
 
 ## 2. Fan out
 

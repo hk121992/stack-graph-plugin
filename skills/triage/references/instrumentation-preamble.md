@@ -2,8 +2,8 @@
 kind: reference
 id: instrumentation-preamble
 title: Instrumentation preamble — node enter/exit emit contract
-description: "The deterministic enter/exit emit contract every backbone node depends on. On entry, record a node-enter event; on exit, a node-exit event carrying the outcome and any gates touched. Carrier-tagged when a carrier is in context. Events append as JSONL to the .stack-graph/ event log in the workspace. Single-sourced into every consumer at build via @-import (load: import)."
-status: v0.2.0 — 2026-06-04
+description: "The deterministic enter/exit emit contract every backbone node depends on. On entry, record a node-enter event; on exit, a node-exit event carrying the outcome, any gates touched, and optional ax / trend-metrics aggregates. Carrier-tagged when a carrier is in context. Events append as JSONL to the .stack-graph/ event log in the workspace. Single-sourced into every consumer at build via @-import (load: import)."
+status: v0.3.0 — 2026-06-05
 ---
 
 # Instrumentation preamble
@@ -49,7 +49,8 @@ At the end of your run — after all phases complete, before you return control 
 { "ts": "<ISO-8601 timestamp>", "session": "<session-id>", "kind": "exit",
   "node": "<your-node-id>", "carrier": "<carrier-id-or-null>",
   "carrier_kind": "<carrier-kind-or-null>", "arc": "<arc-id-or-null>",
-  "outcome": "<outcome-string>", "gates": ["<gate-name>:<pass|fail>", ...] }
+  "outcome": "<outcome-string>", "gates": ["<gate-name>:<pass|fail>", ...],
+  "metrics": { "<series-name>": <number>, ... } }
 ```
 
 - `ts`, `session`, `node`, `carrier`, `carrier_kind`, `arc` — same as the enter event.
@@ -62,6 +63,21 @@ At the end of your run — after all phases complete, before you return control 
 - `gates` — an array of gate records for every explicit gate this run touched. Each entry
   is `"<gate-name>:<pass|fail>"` — e.g. `"commit-to-build:pass"` or
   `"live-confirmed:fail"`. Emit an empty array `[]` if no gates were explicitly checked.
+- `metrics` — **optional**. An object of named scalar **trend measurements** this run
+  produced, each a finite number, keyed by a canonical series name (e.g.
+  `{ "benchmark.perf": 2310 }` from `benchmark`, `{ "health.quality": 8.6 }` from `health`).
+  Omit the field entirely when the node produces no trend measurement. Only nodes whose goals
+  name a trend series emit this; the analytics layer projects each series across runs as a
+  *metric-trend*. The projection publisher reads `metrics` by a **closed series allowlist**
+  with a finite-number guard and never copies the object verbatim — an unknown series name or
+  a non-numeric value is dropped (the same sanitisation discipline as the `ax` aggregate).
+
+Note on `ax`: an experience-verification node (`simulate-users`) also attaches an optional
+`ax` aggregate object on its exit event — its allowlisted numeric agent-experience metrics
+(see that node's *Instrumentation* section). Like `metrics`, `ax` is read by a closed numeric
+allowlist, never spread verbatim. `metrics` carries **trend measurements**; `ax` carries the
+**per-run agent-experience profile**. Both are optional and only the nodes whose goals name
+them emit them.
 
 Emit this event after all phase work is done and any final operator output has been
 delivered. Never emit a node-exit before the work is complete.

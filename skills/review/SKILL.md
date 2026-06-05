@@ -48,6 +48,15 @@ confidence anchors, which you hold from your imported references — so every le
 same contract. Each lens returns the compact finding tier; `lens-dispatch` reduces those
 returns to one ranked, routed finding set, which you consume in the phases below.
 
+The four always-on lenses run every time. The **conditional measurement lenses — `benchmark`
+(perf) and `health` (code-quality)** — run only when their trigger is met: dispatch `benchmark`
+when the change could move page-load / Core-Web-Vitals / bundle size, and `health` when a
+whole-tree quality re-score is warranted (broad refactor, dependency change, or an operator
+ask). Each is an autonomous measurement agent that compares against a stored baseline and
+returns a regression / quality verdict; their returns fold into the same ranked finding set.
+Skipping either when its trigger is unmet is the default, not a finding — note it in the
+coverage note. Most reviews run neither.
+
 ## Phase 3 — Present the findings
 
 In modes that engage the operator (`interactive`, `report-only`), present what the panel
@@ -70,10 +79,11 @@ Route each actionable finding by its `autofix_class` and `owner`:
 - `advisory` — surface only; no fix.
 
 On a **confirmed defect**, loop back to `build` so the change is reworked, then re-run the
-panel over the corrected diff. (The process edges that express this loop — `precedes` /
-`can-follow` to `build` and `reconcile` — are deferred until those nodes exist, but the
-behaviour holds now: confirmed defects return to build, and review re-runs.) Continue until
-the actionable set is resolved (fixed or deliberately deferred) and you can issue a verdict.
+panel over the corrected diff. (The review → build fix loop is a `can-follow` declared on
+**build's** side; review re-runs over the corrected diff. On the dev-sprint happy path review
+`precedes verify` — the running build is proven next — and on the incremental arc review
+`precedes land` directly.) Continue until the actionable set is resolved (fixed or
+deliberately deferred) and you can issue a verdict.
 
 ## Incremental arc
 

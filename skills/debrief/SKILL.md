@@ -81,11 +81,20 @@ independently.
    metrics baseline" below), or `null` on a first run. It returns a structured metrics
    report — per-node metrics against earns-keep, a `trend_delta` against the baseline, and
    an explicit outcome verdict (`confirmed` / `partial` / `missed`) for the work-item.
-2. **Surface the verdict and the trend to the operator.** Present the metrics report, the
-   outcome verdict, and the **`trend_delta` explicitly** — not just where the numbers sit
-   but which direction they moved. No baseline (first run) → surface `first point — no
-   trend yet`, not a failure. This is measurement, not judgment; the operator reads it.
-3. **Record outcome evidence — a minimum verdict schema, authored into the work-item file.**
+2. **Read the perf + quality trends at close.** Invoke `benchmark` (mode `trend`) and `health`
+   on the shipped tree to read the two crystallising trend series — the accumulated
+   `benchmark.perf` slope (load-time / bundle-size / request-count drift) and the
+   `health.quality` composite direction. These are the across-run trend points the sprint's work
+   bore on; reading them at close tells the operator whether shipping moved perf/quality up, flat,
+   or down — the slow-drift signal a point-in-time verdict misses. Both degrade cleanly: a missing
+   harness manifest or a first-run series with no second point surfaces as `no trend yet`, not a
+   failure.
+3. **Surface the verdict and the trends to the operator.** Present the metrics report, the
+   outcome verdict, the **`trend_delta` explicitly** — not just where the numbers sit but which
+   direction they moved — and the **perf + quality trend reads** from step 2 alongside it. No
+   baseline (first run) → surface `first point — no trend yet`, not a failure. This is
+   measurement, not judgment; the operator reads it.
+4. **Record outcome evidence — a minimum verdict schema, authored into the work-item file.**
    Write the verdict evidence into the work-item record (`items/<id>.md` per
    `artefacts-design §2` — authored facts only, never a projected field, never a second
    store). The minimum schema:
@@ -95,7 +104,9 @@ independently.
    - `metric_deltas` — the key earns-keep numbers, lifted verbatim from `measure-outcomes`.
 
    This is the evidence the `product-dashboard-curator` reads on its next sweep. Write
-   nothing else — no carrier fields, no curator calls.
+   nothing else here — no carrier fields, no curator calls. (The strategy-hypothesis evidence
+   and the reprioritise signal that close the PM loop are written by `seed-next` into these same
+   authored homes — see below.)
 
 ### `learn` — curate and route durable learnings
 
@@ -161,16 +172,35 @@ independently.
      the earns-keep line it misses, and the proposed next step.
    - A new work item seeded by a learning — name the learning, why it warrants a sprint,
      and what outcome it would move.
-2. **Frame the seed.** Write the candidate as a single framed item: a proposed
+2. **Close the PM discovery loop — write the confirm/kill + reprioritise evidence to the
+   shared homes (D38).** The shipped outcome bears on the strategy hypothesis (or opportunity)
+   the work item carried — and on the forward-view priority that hypothesis implied. You **write**
+   that evidence into the authored homes the curators already sweep; you do **not** call a curator
+   (D38 — no edge; the loop closes through shared homes). Two writes:
+   - **Shipped-outcome → strategy-hypothesis evidence.** State whether the shipped work
+     **confirmed** or **killed** the strategy hypothesis / opportunity it bore on, grounded in the
+     outcome verdict from `measure`. Write it where `strategy-curator` reads it on its next sweep:
+     the **work-item record's outcome fields** (`items/<id>.md` — name the hypothesis the
+     `outcome_link`/`value_prop_link` resolves to and the confirm/kill verdict against it), and a
+     dated line in **`docs/decisions.md`** plus a **gbrain recall** write (capability-gated per
+     D31; fall back to the decisions log alone when gbrain is absent). `strategy-curator`'s
+     `assess` mode reads this as the outside-in finding that confirms or kills the canvas claim.
+   - **Reprioritise signal.** State the outcome's implication for the forward view — does the
+     confirm/kill change what should be in *now* / *next* / *later*, raise a new bet, or retire a
+     stale one? Write it where `product-dashboard-curator`'s `reprioritise` mode reads it: the same
+     **work-item record** (the item's content/disposition note) and the **`docs/decisions.md`**
+     reprioritise line. The curator picks it up at its rolling start-of-sprint `reprioritise`
+     sweep. You write the signal; you do not move the item or open the ledger PR (the curator
+     does, through its gated path).
+3. **Frame the seed.** Write the candidate as a single framed item: a proposed
    `outcome_link` (what outcome would it move), a one-sentence description, and the
    evidence from this sprint that grounds it. This is the material `align-context` opens
    with on the next sprint — the `debrief → align-context can-follow` process edge is the
-   wiring for this handoff. (That process edge is declared in prose here and deferred to
-   the wiring pass — F7 — until `align-context` exists as a built sibling the edge can
-   resolve to. The behaviour holds regardless.)
-3. **Surface to the operator.** Present the seed candidate(s) — typically one, at most
-   two. Let the operator confirm or redirect. A confirmed seed is the close of this sprint's
-   loop.
+   wiring for this handoff. (That process edge is wired on `align-context`'s side as
+   `can-follow: debrief`; the behaviour holds regardless.)
+4. **Surface to the operator.** Present the seed candidate(s) — typically one, at most
+   two — and the confirm/kill + reprioritise evidence written in step 2. Let the operator
+   confirm or redirect. A confirmed seed is the close of this sprint's loop.
 
 ## Process seams (backbone wiring pass — wave 1c)
 
@@ -187,17 +217,22 @@ independently.
 
 Debrief does not invoke, composes-into, or hold any edge to `product-dashboard-curator`
 or `strategy-curator`. The loop closes through the **shared authored homes** those curators
-read (D38): the work-item record (outcome evidence), `docs/decisions.md` (decisions log),
-and gbrain recall (learnings). The curators sweep those homes on their own cadence. There
-is no pipeline; there is a shared substrate.
+read (D38): the work-item record (outcome evidence + the confirm/kill verdict + the
+reprioritise note), `docs/decisions.md` (decisions log + the strategy-evidence and
+reprioritise lines), and gbrain recall (learnings + the confirm/kill finding). Debrief
+**writes** that evidence at `seed-next`; the curators **read** it on their own cadence —
+`strategy-curator`'s `assess` consumes the confirm/kill finding, `product-dashboard-curator`'s
+`reprioritise` consumes the priority signal. There is no pipeline and no curator call; there
+is a shared substrate. This is the discovery loop closing: the shipped outcome flows back to
+the hypothesis it tested and the forward view it implied, without a direct edge.
 
 ## Output summary
 
 | mode | primary output | written to |
 |---|---|---|
-| `measure` | metrics report + `trend_delta` + verdict schema (`verdict` / `outcome_link` / `evidence` / `metric_deltas`) | work-item record (`items/<id>.md`, authored evidence); surfaced to operator |
+| `measure` | metrics report + `trend_delta` + verdict schema (`verdict` / `outcome_link` / `evidence` / `metric_deltas`); the perf + quality trend reads (`benchmark.perf` slope, `health.quality` direction) | work-item record (`items/<id>.md`, authored evidence); trend reads surfaced to operator |
 | `learn` | proposals list (`priority`+rationale, `target_sprint`); ratified divergences; enacted recall writes; the updated `learnings-archive` (surviving-but-unenacted proposals, D60) | gbrain (recall writes, inline); the committed `learnings-archive` (gate write); divergences via `log-decision`; canon proposals parked for curator raise |
-| `seed-next` | next-sprint candidate(s) | surfaced to operator; no write |
+| `seed-next` | next-sprint candidate(s); the shipped-outcome → strategy-hypothesis **confirm/kill** evidence + the **reprioritise** signal (the PM loop close, D38) | candidate surfaced to operator; confirm/kill + reprioritise evidence written to the work-item record + `docs/decisions.md` + gbrain recall (the shared homes the curators sweep — no curator edge) |
 | **terminal transition** | `frozen_metrics` baseline (the next sprint's `measure-outcomes` `baseline:`) | closed work-item record (`items/<id>.md`); recorder freeze, once at close |
 | **all modes** | stage-complete signal | projection advances `current_stage`; no carrier field written by this node |
 
