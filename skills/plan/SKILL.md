@@ -31,7 +31,8 @@ Read for context; write only to harness surfaces.
 - **The IU-schema** — you hold it via a `references` edge (`load: import`). Read it at the
   start of every session; it is always present. It defines the seven fields every
   implementation unit must carry: `id`, `goal`, `files`, `dependencies`, `acceptance`,
-  `acceptance_check`, `size`.
+  `acceptance_check`, `size`. When the harness uses the zone matrix, an IU also carries the
+  optional **`zone: {vertical, horizontal?}`** dispatch coordinate (see the decomposition criteria).
 
 You **do not write the carrier**. You write the plan doc to a harness surface. Completing
 this stage is the signal the projection/curator picks up to advance the carrier's
@@ -46,9 +47,14 @@ plan doc, not the carrier.
    **implementation scope** — what the work-item changes, creates, or removes — and the
    boundaries (files, modules, API surfaces) it touches.
 2. Fill any context gaps by **invoking `explore`** (scoped, read-only): pass it a
-   scope/mode selector (`repo` / `learnings` / `framework-docs` / `web` / `best-practices`),
+   scope/mode selector (`repo` / `learnings` / `framework-docs` / `web` / `best-practices` / `zone`),
    the target question, and a scope summary. Consume its distilled digest; do not
-   re-explore ground `design` or `specify` already covered.
+   re-explore ground `design` or `specify` already covered. **When the design carries a zone
+   footprint** (the harness uses the zone matrix), invoke `explore`'s **`zone` mode with a column
+   query `(V, *)`** for each vertical in the footprint — it returns that vertical's experience
+   contract (the UX end goal), its in-scope rules ranked by specificity, the touched code regions,
+   and the code-map-traced cross-layer path. That digest is the material each vertical slice is
+   decomposed and built against.
 3. Draft the **implementation unit list** — a first-pass decomposition into buildable child
    workstreams. Apply the decomposition criteria:
    - **One unit, one goal**: each unit has a single stated outcome in outcome-framed language.
@@ -62,6 +68,14 @@ plan doc, not the carrier.
      the `size` field — `size` is a single-agent-fit signal, so `L`/`XL` read as "probably
      split", not a raw effort estimate. Build emits `tokens_per_iu` per unit; a persistently
      high over-budget share is the signal that plan drew IUs too coarse.
+   - **Decompose by vertical slice (under the zone matrix)**: with a zone footprint, the unit of
+     work is a **vertical slice (a column)** — one experience across the horizontals it touches —
+     not a single cell. Each IU carries `zone: {vertical}` (a bare `{vertical, horizontal}` only for
+     a genuinely single-layer change); its `files` come from the column's resolved code region, and
+     the column's ranked rules + experience contract are its build-time context. **Split a too-large
+     column into thinner vertical slices, never into horizontal layers** — splitting horizontally
+     loses the end-to-end property and forfeits the governing per-vertical experience test. (No
+     footprint / no axes bound → ordinary decomposition; capability-gated.)
    - **Teach as you go**: state the sequencing rationale for each dependency relationship as
      you add it, not after the fact.
 

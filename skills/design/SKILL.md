@@ -128,6 +128,11 @@ Produce the **design doc** to a harness surface:
   *section*, and the *relationship* (amend / add / supersede / reference). This table is what
   `specify` turns into the canonical amendment; produce it here so `specify` does not reconstruct
   it. (Touchpoints are inlined in the doc for now.)
+- **Zone footprint (when the harness uses the zone matrix).** Name the **vertical(s)** — the customer
+  experiences the change touches — and, where it is genuinely single-layer, the specific **cell(s)**.
+  This is the experience-axis sibling of the Spec touchpoints table: `plan` reads it to resolve each
+  vertical's **column** via `explore`'s `zone` mode and decompose by vertical slice. **Capability-gated
+  — omit entirely when no axes are bound.** (Shape and resolution rules: `axis-entry-schema`.)
 - Fold in the actioned lens findings and any product-lens findings so the doc reflects the vetted
   design, not the first draft.
 

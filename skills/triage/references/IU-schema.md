@@ -3,7 +3,7 @@ kind: reference
 id: IU-schema
 title: Implementation-Unit schema — the plan↔build field contract (two shapes)
 description: The field contract for an implementation unit (IU) — a strict oneOf of two shapes. A CHILD IU (channel sprint, has parent) is the work item a plan decomposes a carrier into and build consumes; it is not a carrier. A STANDALONE IU (channel incremental, no parent) is a carrier-lite — it carries its own minimal lifecycle, a single recorded gate, an improves target, and the vertical-slice/testing contract.
-status: v0.5.0 — 2026-06-04
+status: v0.6.0 — 2026-06-05
 ---
 
 # Implementation-Unit schema
@@ -46,6 +46,7 @@ its best-work context budget (see Invariants). That is the decomposition target 
 | `size` | yes | **Single-agent fit signal** — `XS \| S \| M \| L \| XL`. Estimates whether one fresh agent can build the unit within its best-work context budget (see Invariants). `L`/`XL` read as "probably too big — consider splitting." Calibrated against the measured `tokens_per_iu`. Not a commitment; updated at build if the estimate was wrong. |
 | `channel` | yes | `sprint` (child) \| `incremental` (standalone). The discriminator together with `parent`. Drives which dashboard channel renders the unit. |
 | `status` | yes | Build-tracking state — `planned \| building \| done \| blocked`. **Lightweight build progress, not carrier lifecycle** (no gates). On a standalone IU this **coexists** with `lifecycle_state` on a different axis (see the standalone fields). |
+| `zone` | no | **Zone-matrix coordinate (optional, capability-gated)** — `{ vertical, horizontal? }`, present only when the harness uses the zone-matrix lens (`axis-entry-schema`). `horizontal` **absent ⇒ the whole column** (a vertical slice — the default unit of work, ship, and test); **present ⇒ a single cell** (the single-layer exception). `plan` writes it from the design's zone footprint; `build` reads it to load the column's resolved rules. Bound to axis entries under the `axis-root` binding. A non-matrix sprint omits it entirely and nothing changes. |
 
 ## Child IU — additional contract (`channel: sprint`, has `parent`)
 
@@ -122,6 +123,14 @@ fields below over the common set:
   `acceptance_check` and attaches the **raw output** (stdout, exit code) as the unit-complete
   evidence — shown, not asserted. Weak or absent criteria are a plan quality gap, flagged at
   review.
+- **`zone` is the matrix coordinate — optional, capability-gated, and neither required nor forbidden
+  by either shape.** When the harness uses the zone-matrix lens, `zone: {vertical, horizontal?}` is the
+  dispatch coordinate: **`horizontal` absent ⇒ the whole column** (a vertical slice — the default unit
+  of work, ship, and test, per `axis-entry-schema`); **present ⇒ a single cell** (the single-layer
+  exception). A **child** IU carries it as its dispatch cell/column; a **standalone** (incremental) IU
+  is **column-shaped** so it carries `zone: {vertical}` — the improvement spans the cells in that one
+  vertical, never a lone cell. `plan` writes it, `build` reads it to load the column's resolved rules
+  and reasons across the layers it touches (UX as the end goal). A non-matrix sprint omits it.
 
 ### Standalone-only invariants (the carrier-lite contract)
 

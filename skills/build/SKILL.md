@@ -45,7 +45,10 @@ Before the autonomous span begins, run the kick-off collaboratively with the ope
 2. **Flag horizontal IUs.** When an IU's `files` span a single layer (only model, only view) and its
    `acceptance` carries no integration check, suggest expanding it to a thin end-to-end slice — one
    interface path through the affected layers — before the span begins. A horizontal layer that defers
-   integration to a later IU is the "outrunning your headlights" failure mode.
+   integration to a later IU is the "outrunning your headlights" failure mode. **Under the zone matrix
+   this is the column discipline made explicit:** the unit is a **vertical slice** (`zone: {vertical}`)
+   — one experience across the layers it touches, graded by the vertical's experience test — and a
+   bare-cell IU (`zone: {vertical, horizontal}`) is the single-layer exception, not the norm.
 3. **Fill context gaps.** Invoke **`explore`** scoped to the IU's target area (`repo` / `learnings` /
    `framework-docs` / `best-practices`) if codebase context is needed. Pass a tight scope: the IU's
    `files` set and the question its `goal` raises. Consume the digest; do not re-explore ground the plan
@@ -64,7 +67,10 @@ one fresh agent context**, not main-thread serial. Pick the dispatch at kick-off
 
 - **serial-subagent** — **3+ dependent IUs.** Dispatch each IU to its own fresh-context subagent in
   dependency order; each receives the IU's full context bundle (carrier context, the IU record, the
-  imported `IU-schema`, and any explore digest for its scope) and returns a unit-complete summary.
+  imported `IU-schema`, and any explore digest for its scope — including, when the IU carries a `zone`
+  coordinate, the **column zone digest** from `explore`'s `zone` mode: the experience contract + the
+  column's ranked rules + the cross-layer path, so the agent holds the whole column and reasons over
+  its cells with the UX as the end goal) and returns a unit-complete summary.
 - **parallel-subagent** — **independent IUs** (no shared `files`, no dependency edges). The
   worktree-isolated path below. Run a Parallel Safety Check first.
 - **inline (main thread)** — the **exception**, not the rule. Reserve for a single tiny (XS/S) unit, or

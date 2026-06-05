@@ -3,7 +3,7 @@ kind: reference
 id: bindings-contract
 title: Bindings contract — the keys a harness supplies, and the surface template
 description: The factory contract the plugin ships so a consuming workspace can instantiate a harness — the complete set of binding keys the vendored graph may require, the bindings.yaml file format, the org-root CLAUDE.md ambient-surface template, and the dashboard + improvements surface-structure templates harness-init scaffolds. The plugin carries this contract; the harness supplies the values. No product data.
-status: v0.3.0 — 2026-06-04
+status: v0.4.0 — 2026-06-05
 ---
 
 # Bindings contract
@@ -55,6 +55,9 @@ target does not resolve.
 | `improvements-root` | the standalone-IU surface dir | **sibling of `surface-root`** (not under it); holds `<id>.md` + the manifest — the incremental loop's own surface, off the work-ledger (§3) |
 | `improvements-manifest` | the standalone-IU manifest | committed derived index: `[{id, file, improves, slice_type, lifecycle_state}]` |
 | `triage-source` | where improvements are raised from | **optional** — the handbook-curator drift queue / a `learn` store / an operator note. **Input-gated (Fork D):** bind it now; the auto-feed turns on only once those queues carry findings. `triage` still applies the route rule and the operator confirms before a standalone IU is created |
+| `axis-root` | the zone-matrix axis-entry dir | **optional** — holds the product's verticals + horizontals (`kind: reference`, each tagged `axis:`, per `axis-entry-schema`); `explore`'s `zone` mode reads it via an `external: true` reference the overlay binds. Present only when the harness uses the zone matrix (D63) |
+| `code-map` | the extracted code-map location under `.stack-graph/` | **optional**, **path-only**, degradable — the deterministic repo-map + ast-grep extraction `explore`'s `repo` and `zone` modes read **inline** (not a reference edge — D38). No committed schema, no labels; a fresh clone without it degrades to Glob/Grep |
+| `zone-test-root` | the two-tier zone/experience test surface | **optional**, **forward-referenced** — the testing layer is **input-gated** and realised in a harness, not the factory (D63); bind it when that layer is built |
 
 ## 3. The dashboard surface-structure template
 
