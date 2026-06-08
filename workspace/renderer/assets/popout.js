@@ -14,11 +14,19 @@
   var elBody = aside.querySelector(".popout-body");
   var lastFocus = null;
 
+  // own-property lookup: a hash of #__proto__ / #constructor would otherwise read a
+  // truthy Object.prototype member and open an empty drawer. Guard every items[] access.
+  function has(id) { return Object.prototype.hasOwnProperty.call(items, id); }
+
   function open(id) {
+    if (!has(id)) return;
     var it = items[id];
     if (!it) return;
     if (elCode) elCode.textContent = it.code || "";
     if (elBody) elBody.innerHTML = it.html || "";
+    // data-kind drives the drawer width (work-item drawers are wider — they carry the
+    // throughline + gates + timeline + child IUs). Canvas sidecar items carry no kind.
+    aside.setAttribute("data-kind", it.kind || "");
     aside.setAttribute("data-open", "true");
     aside.setAttribute("aria-hidden", "false");
     if (decodeURIComponent((location.hash || "").slice(1)) !== id) {
@@ -48,16 +56,27 @@
     }
   });
 
-  // Hash → drawer. If the hash IS a sidecar id, open it directly. Otherwise the hash
-  // is a deep-link to an element inside a drill target (e.g. a canvas /#H-CP-03 entry
-  // anchor that lives in a block cell) — find it, climb to the enclosing [data-popout],
-  // and open THAT drawer. The browser still scrolls to the anchor for the no-JS case.
+  // Hash → drawer / accordion. Resolution order (D65):
+  //   1. a canvas cv-anchor (the cross-surface "open in canvas" target) → climb to the
+  //      enclosing block cell and open ITS drawer. This wins over (2): in production each
+  //      page has its OWN #popout-data, so a bet id is only a sidecar key on the dashboard
+  //      and only an anchor on the canvas — no collision — but resolving the anchor first
+  //      is the robust order (a page carrying both would still land on the canvas block).
+  //   2. a sidecar id → open that drawer directly (work-item / IU / bet).
+  //   3. a <details> → open + scroll (the objective-accordion deep-link, the ~4-line shim).
+  //   4. else climb to the enclosing [data-popout] and open it.
   function openForHash() {
     var h = decodeURIComponent((location.hash || "").slice(1));
     if (!h) return;
-    if (items[h]) { open(h); return; }
     var el = document.getElementById(h);
-    var host = el && el.closest ? el.closest("[data-popout]") : null;
+    if (el && el.classList && el.classList.contains("cv-anchor")) {
+      var hostCv = el.closest ? el.closest("[data-popout]") : null;
+      if (hostCv) { open(hostCv.getAttribute("data-popout")); return; }
+    }
+    if (has(h)) { open(h); return; }
+    if (!el) return;
+    if (el.tagName === "DETAILS") { el.open = true; el.scrollIntoView({ block: "center" }); return; }
+    var host = el.closest ? el.closest("[data-popout]") : null;
     if (host) open(host.getAttribute("data-popout"));
   }
   openForHash();
