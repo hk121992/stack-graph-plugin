@@ -1,0 +1,62 @@
+/* stack-graph brand — the per-instance identity layer (TOKENS ONLY).
+ *
+ * Loaded AFTER the vendored bc-renderer-core style.css, so token re-declarations
+ * win. This is the swappable seam: a consuming product ships its own
+ * brand-overrides.css to re-skin without touching the renderer.
+ *
+ * Brand-overrides carries ONLY brand tokens (fonts, palette, accent). Structural
+ * layout + shared components (header alignment, the pop-out drawer, the spacing
+ * scale) live in the shared workspace.css, so they never drift between the factory
+ * and a harness. See DESIGN.md.
+ *
+ * stack-graph identity: neutral operator-instrument — Geist + near-monochrome
+ * + one teal accent (harmonised with the logo mark).
+ */
+
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/geist-sans.woff2") format("woff2");
+  font-weight: 100 900; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/geist-mono.woff2") format("woff2");
+  font-weight: 100 900; font-style: normal; font-display: swap;
+}
+
+:root {
+  /* Type */
+  --display: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --body: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Accent → teal. --brand-gold is the vendored accent token (hovers, active,
+     underlines); repointing it re-skins those without editing the core CSS. */
+  --brand-gold: #1b7f93;
+  --accent: #1b7f93;
+  --accent-hover: #13606f;
+
+  /* Cool neutrals (light) */
+  --brand-white: #ffffff;
+  --brand-cream: #f8f9fa;
+  --brand-cream-soft: #d4d6da;
+  --brand-ink: #1b1d1f;
+  --brand-ink-body: #3a3d42;
+  --brand-mute-light: #6b7177;
+  --brand-hairline-light: #e6e8eb;
+}
+
+html.dark {
+  --brand-gold: #46b0c4;
+  --accent: #46b0c4;
+  --accent-hover: #5cbdcf;
+  --brand-black: #0c0d0e;
+  --brand-cream: #f2f3f4;
+  --brand-cream-soft: #c5c8cc;
+  --brand-mute-dark: #8b9097;
+  --brand-hairline-dark: #26282b;
+}
+
+/* Body links carry the teal accent (a brand choice — DESIGN.md). */
+.content a { color: var(--accent); text-decoration: none; }
+.content a:hover { color: var(--accent-hover); text-decoration: underline; text-underline-offset: 2px; }

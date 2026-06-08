@@ -3,8 +3,9 @@ kind: reference
 id: okr-schema
 title: OKR / outcome-layer schema
 description: The outcome layer the product-dashboard is organised around — vision → objectives (OKRs) → north-star → KPIs. The targets a work item's outcome_link points at, and the yardstick the Progress panel measures against.
-status: v0.2.0 — 2026-06-05
+status: v0.3.0 — 2026-06-06
 changelog:
+  - v0.3.0 (2026-06-06): affirm vision-statement single-source ownership (the apex here, once; dashboard composes it with the strategy.md kernel); add optional `strategy_link` field on an objective (pinned to a canvas entry id, symmetric with value_prop_link)
   - v0.2.0 (2026-06-05): add explicit `vision` field/holder — the apex the objectives ladder to; feeds the dashboard vision panel; input-gated on operator stating a vision, not on user data
 ---
 
@@ -34,6 +35,8 @@ The **vision** is an explicit top-level field in the outcome layer — not impli
 
 **Consumer:** the product-dashboard's **vision & strategy** panel reads `statement` (and optionally `horizon`) directly — a content read, not a projected state. No signal or user data is required; the input gate is solely the **operator stating a vision**.
 
+**Single source.** The vision statement lives **here, once** — the apex of this outcome layer. `strategy.md` carries the rest of the Rumelt kernel (guiding policy, JTBD, open questions, decided) and the dashboard renderer *composes* the two. `strategy.md` must **not** restate the vision; a harness that restates the vision in `strategy.md` introduces a duplication that the renderer cannot resolve cleanly.
+
 **Ladder terminus:** every `outcome_link` chain — work item → objective → vision — terminates here. The dashboard's contribution view rolls up to this apex. An objective with no `vision_link` note is incomplete (the link is implicit via the layer structure; a curator note makes it explicit when the objective's relationship to the vision is non-obvious).
 
 ## An objective
@@ -44,6 +47,7 @@ The **vision** is an explicit top-level field in the outcome layer — not impli
 | `key_results[]` | the metrics that confirm the objective is met — `{metric, target, current}` |
 | `north_star_link` | how this objective relates to the north-star metric |
 | `maturity_note` | what evidence is available at the product's maturity (pre-launch: intent / proxy; first-users: real signal; scale: measured) |
+| `strategy_link` | **optional** — the canvas entry id of the bet/block this objective exists to test or advance (e.g. the BMC/VPC block it de-risks). Resolvable: the renderer resolves it to the canvas entry and links the objective to the bet. Symmetric with `value_prop_link` on a work item. Absent ⇒ the renderer omits that one link; nothing else depends on it. Pin to a **canvas entry id**, not a block code. |
 
 ## Invariants
 
@@ -52,6 +56,14 @@ The **vision** is an explicit top-level field in the outcome layer — not impli
 - **Vision is the apex, not implied.** The `vision` holder is a first-class field, not a label on the
   layer diagram. The outcome ladder — work item → objective → vision — only terminates meaningfully
   when a vision `statement` is present. Input gate: the operator states a vision; no user data required.
+- **Vision lives here, once.** The vision statement is the single source of truth — the `vision` apex
+  in this schema. The dashboard composes it with the `strategy.md` kernel (guiding policy, JTBD, open
+  questions, decided); `strategy.md` carries the kernel only and does **not** restate the vision.
+- **`strategy_link` closes the objective→bet seam.** An objective's `strategy_link` names the canvas
+  entry id of the bet it advances or tests — the methodology's core claim (objectives exist to advance
+  validated bets). Authored, optional. When present, the renderer links the objective to the bet and
+  surfaces the bet's evidence posture alongside the objective; when absent, the objective renders
+  without that link. A killed bet surfacing upward via `strategy_link` is the pivot signal.
 - **Work items ladder up.** Every work item's `outcome_link` points to an objective; the
   product-dashboard's *contribution* view rolls work items up to objectives → the vision apex. The link
   is **authored** (D38/D39), not inferred.

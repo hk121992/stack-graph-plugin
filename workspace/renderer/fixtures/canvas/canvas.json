@@ -1,0 +1,236 @@
+{
+  "title": "stack-graph — business model",
+  "note": "Sample seed, modelled on bmc-schema / vpc-schema. The strategy-curator skill is the eventual write path; this is the read surface.",
+  "bmc": {
+    "key_partnerships": [
+      {
+        "text": "Anthropic — Claude models + Claude Code primitives",
+        "evidence": "confirmed",
+        "detail": "The whole system rides Claude's native primitives (skills, agents, plugins, references). Structural: stack-graph has no value without the model + harness it instruments.",
+        "strength": "strong"
+      },
+      {
+        "text": "Cloudflare — Workers + Access hosting",
+        "evidence": "tested",
+        "detail": "The portal deploys as static assets behind Cloudflare Access (Zero-Trust, fail-closed). Proven for be-civic's workspace; the same pattern carries here.",
+        "strength": "moderate"
+      }
+    ],
+    "key_activities": [
+      {
+        "text": "Author + maintain the graph of .claude primitives",
+        "evidence": "confirmed",
+        "detail": "Keep the node/edge graph accurate, validated, and indexed as the operating environment evolves.",
+        "strength": "strong"
+      },
+      {
+        "text": "Vendor the plugin + portal renderer",
+        "evidence": "tested",
+        "detail": "build/vendor.ts projects the graph into an installable plugin; the renderer projects it into the comprehension portal.",
+        "strength": "moderate"
+      }
+    ],
+    "key_resources": [
+      {
+        "text": "The canonical graph + handbook",
+        "evidence": "confirmed",
+        "detail": "The single source of truth. Everything (plugin, portal, analytics) is a projection of it.",
+        "strength": "strong"
+      },
+      {
+        "text": "The vendored renderer engine",
+        "evidence": "tested",
+        "detail": "Install-free TS renderer (forked from be-civic's bc-renderer-core) that turns the graph + ledger into the deployed surfaces.",
+        "strength": "moderate"
+      }
+    ],
+    "value_propositions": [
+      {
+        "text": "Model an agent operating environment as a reviewable graph, improved via a PR-gated loop",
+        "evidence": "tested",
+        "detail": "The core bet: making the environment legible and reviewable beats ad-hoc .claude setups. Demonstrated on stack-graph itself; not yet proven with an external product.",
+        "refs": [
+          "H-VP-01",
+          "F-0003"
+        ],
+        "strength": "moderate"
+      },
+      {
+        "text": "Instantiate a product harness in hours, not weeks",
+        "evidence": "assumed",
+        "detail": "The harness-init + bindings-contract path is meant to stand up a new product workspace fast. Unvalidated — the be-civic Phase-C exercise is the first real test.",
+        "refs": [
+          "H-VP-02"
+        ],
+        "strength": "weak"
+      }
+    ],
+    "customer_relationships": [
+      {
+        "text": "Self-serve via the plugin + handbook",
+        "evidence": "assumed",
+        "detail": "Hypothesis: an operator can adopt stack-graph from the plugin + handbook alone. No external operator has done this yet.",
+        "strength": "weak"
+      },
+      {
+        "text": "Operator-in-the-loop review gates",
+        "evidence": "tested",
+        "detail": "The loop is PR-gated — the operator approves at gates. Proven as the working mode for building stack-graph itself.",
+        "strength": "moderate"
+      }
+    ],
+    "channels": [
+      {
+        "text": "Claude Code plugin marketplace",
+        "evidence": "assumed",
+        "detail": "Intended distribution channel. Not yet published / measured.",
+        "strength": "weak"
+      },
+      {
+        "text": "The workspace portal (this site)",
+        "evidence": "tested",
+        "detail": "The comprehension + adoption surface; it exists and renders, pending the live deploy.",
+        "strength": "moderate"
+      }
+    ],
+    "customer_segments": [
+      {
+        "text": "Operators building agent operating environments",
+        "evidence": "tested",
+        "detail": "The primary segment — people who run a non-trivial .claude environment and feel the drift/legibility pain. stack-graph dogfoods this user.",
+        "refs": [
+          "H-CS-01"
+        ],
+        "strength": "moderate"
+      },
+      {
+        "text": "Product teams running on Claude Code",
+        "evidence": "assumed",
+        "detail": "A broader segment if the harness model generalises. Unvalidated beyond be-civic.",
+        "strength": "weak"
+      }
+    ],
+    "cost_structure": [
+      {
+        "text": "Model inference (review / build loops)",
+        "evidence": "tested",
+        "detail": "The dominant variable cost — multi-pass review + build runs. Scales with how much work flows through the loop.",
+        "strength": "moderate"
+      },
+      {
+        "text": "Hosting (CF Workers / Access)",
+        "evidence": "confirmed",
+        "detail": "Small fixed cost; static assets behind Access. Negligible relative to inference.",
+        "strength": "strong"
+      }
+    ],
+    "revenue_streams": [
+      {
+        "text": "Pre-revenue — viability deferred until a product proves demand",
+        "evidence": "assumed",
+        "detail": "No revenue model committed. Viability is the explicit open risk; the factory is built first.",
+        "strength": "weak"
+      }
+    ]
+  },
+  "vpc": {
+    "segment": "Operators building an agent operating environment",
+    "customer_jobs": [
+      {
+        "text": "Stand up a reliable, reviewable agent environment",
+        "importance": "high",
+        "evidence": "tested",
+        "detail": "The functional job: go from ad-hoc primitives to a system you can trust and reason about.",
+        "strength": "moderate"
+      },
+      {
+        "text": "Know which primitives still earn their place",
+        "importance": "medium",
+        "evidence": "assumed",
+        "detail": "An ongoing job — prune what no longer pays its way. Depends on analytics that are input-gated until the loop runs.",
+        "strength": "weak"
+      }
+    ],
+    "pains": [
+      {
+        "text": "Ad-hoc .claude setups drift and break silently",
+        "importance": "high",
+        "evidence": "tested",
+        "detail": "Primitives accrete, conventions diverge, and nothing flags the drift until something breaks.",
+        "strength": "moderate"
+      },
+      {
+        "text": "No way to see the whole system at once",
+        "importance": "high",
+        "evidence": "confirmed",
+        "detail": "Before the graph browser, there was no single view of nodes + edges + health. It's why the graph surface exists.",
+        "strength": "strong"
+      }
+    ],
+    "gains": [
+      {
+        "text": "One comprehension surface over the whole environment",
+        "importance": "expected",
+        "evidence": "tested",
+        "detail": "The portal unifies handbook + dashboard + graph + canvas + analytics into one navigable space.",
+        "strength": "moderate"
+      },
+      {
+        "text": "A PR-gated improvement loop",
+        "importance": "desired",
+        "evidence": "assumed",
+        "detail": "The desired gain: insight turns into reviewed change. The loop exists; its end-to-end value is unproven at scale.",
+        "strength": "weak"
+      }
+    ],
+    "products_services": [
+      {
+        "text": "The graph + handbook + portal + plugin",
+        "evidence": "confirmed",
+        "detail": "What the operator engages with: the canonical graph, the rendered portal, and the installable plugin.",
+        "strength": "strong"
+      }
+    ],
+    "pain_relievers": [
+      {
+        "text": "The graph browser makes the whole system legible",
+        "evidence": "tested",
+        "detail": "The full graph with type-coloured nodes, typed edges, and health.",
+        "addresses": [
+          "No way to see the whole system at once"
+        ],
+        "strength": "moderate"
+      },
+      {
+        "text": "Conformance analytics catch drift",
+        "evidence": "assumed",
+        "detail": "Flags where traversals diverge from the authored graph. Input-gated until events exist.",
+        "addresses": [
+          "Ad-hoc .claude setups drift and break silently"
+        ],
+        "strength": "weak"
+      }
+    ],
+    "gain_creators": [
+      {
+        "text": "The dev-sprint loop turns insight into PRs",
+        "evidence": "assumed",
+        "detail": "The backbone is built; the full loop value is not yet evidenced.",
+        "addresses": [
+          "A PR-gated improvement loop"
+        ],
+        "strength": "weak"
+      }
+    ]
+  },
+  "fit": {
+    "problem_solution": {
+      "claim": "The pain relievers (legibility, drift-catching) address the most important pains (no overview, silent drift).",
+      "evidence": "tested"
+    },
+    "product_market": {
+      "claim": "Fit confirmed by evidence of demand from a paying/committed product. Not yet established — no commercial product.",
+      "evidence": "assumed"
+    }
+  }
+}

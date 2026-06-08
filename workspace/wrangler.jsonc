@@ -1,0 +1,16 @@
+{
+  // Workspace portal — Cloudflare Worker (Workers Static Assets, no worker code).
+  // Mirrors be-civic's bc-workspace pattern. The assembled site is workspace/dist/.
+  //
+  // FAIL-CLOSED ACCESS IS MANDATORY (design §1): this Worker must sit behind
+  // Cloudflare Access (Zero Trust), scoped to the single operator identity,
+  // BEFORE it is reachable. It serves no anonymous traffic. See
+  // docs/workspace-portal-deploy.md. The projection snapshot store (if KV/R2)
+  // must likewise not be publicly readable.
+  "name": "stack-graph-workspace",
+  "compatibility_date": "2026-05-24",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}

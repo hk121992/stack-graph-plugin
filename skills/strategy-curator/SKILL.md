@@ -124,14 +124,27 @@ before branching.
    queue **label**, and report the URL. The PR description *is* the proposal — write no separate
    proposal file.
 
-### `refresh-canvas` — regenerate the readable view (idempotent, inline)
+### `refresh-canvas` — regenerate the readable view (idempotent)
 
-Read the canvas sources (the value-proposition canvas, the business-model canvas, and the strategy
-items, each with its evidence state) and **regenerate the canvas/dashboard view inline** — you read
-the sources and rewrite the view yourself; do **not** invoke a build script. The canvas is **one
-surface** (VPC + BMC + strategy together); its sub-structure is the schema references' concern, not
-separate views. If the regenerated view is unchanged, say so and stop; if changed, report the delta
-(or, when called from `assess`, surface only the count — the diff is in the PR).
+Regenerate the canvas view from its **source of truth**, never by hand-editing the view. The canvas
+is **one surface** (VPC + BMC + strategy together, each item with its evidence state); its
+sub-structure is the schema references' concern, not separate views. Two forms, by what the harness
+binds:
+
+- **Inline view** (a hand-maintained markdown view — the common small case): read the canvas sources
+  and **rewrite the view yourself**; no build script.
+- **Bound canvas-render artefact** (a structured `canvas.json` the workspace renderer consumes,
+  regenerated from a larger source corpus): **drive the harness's bound regeneration adapter** — the
+  harness-local script that maps its own corpus (its block codes, evidence rungs, and any blocks with
+  no canvas home) into the `canvas.json` shape (`bmc` / `vpc` / `supporting` / `fit`, per
+  `bmc-schema` / `vpc-schema`). The transform lives in the harness (it carries the product's literals,
+  not you); you invoke it and report the result. The source corpus is authoritative — regenerate from
+  it, never edit `canvas.json` by hand.
+
+Either way the mode is **idempotent**: if the regenerated view is unchanged, say so and stop; if
+changed, report the delta (or, when called from `assess`, surface only the count — the diff is in the
+PR). Honesty of evidence state survives the regeneration: `assumed` / `killed` / `superseded` are
+preserved as the source records them, never upgraded by the transform.
 
 ## Hard constraints
 

@@ -3,7 +3,9 @@ kind: reference
 id: bindings-contract
 title: Bindings contract — the keys a harness supplies, and the surface template
 description: The factory contract the plugin ships so a consuming workspace can instantiate a harness — the complete set of binding keys the vendored graph may require, the bindings.yaml file format, the org-root CLAUDE.md ambient-surface template, and the dashboard + improvements surface-structure templates harness-init scaffolds. The plugin carries this contract; the harness supplies the values. No product data.
-status: v0.4.0 — 2026-06-05
+status: v0.4.1 — 2026-06-06
+changelog:
+  - v0.4.1 (2026-06-06): clarify strategy-doc binds the authored vision narrative (not a canvas/bmd inventory); augment renderer.canvas-root notes with dashboard bets-rollup use and graceful-degradation contract
 ---
 
 # Bindings contract
@@ -39,14 +41,14 @@ target does not resolve.
 | `manifest-path` | the work-items manifest | committed derived index (`items/manifest.json`) |
 | `sprint-records-root` | the sprint-records dir | `sprints/`; assembled views |
 | `learnings-archive` | the prior-proposals archive **file** (`learnings/archive.md`) | `capture-learnings`' surviving-but-unenacted proposals — the gate writes it, `capture-learnings` reads it next sprint (D60); committed (generative/non-replayable), **not** `.stack-graph/`; scaffold creates the file empty |
-| `strategy-doc` | the vision & strategy doc | `strategy.md` (vision · guiding policy · JTBD) |
+| `strategy-doc` | the **authored Product Strategy thesis** (vision narrative) | `strategy.md` — Rumelt kernel: diagnosis → guiding policy → coherent action; plus who & JTBD, open questions, decided/not-doing. This is the authored thesis, **not** a canvas/bmd inventory. A harness must not bind `strategy-doc` to a regenerated canvas or hypothesis corpus — that is redundant with the canvas surface. The vision statement itself lives in `objectives.md` (the `okr-schema` apex); `strategy.md` carries the kernel only and must not restate the vision. |
 | `objectives-doc` | the objectives / OKR doc | `objectives.md` per `okr-schema` |
 | `okr-binding` | how `outcome_link` resolves to an objective id | resolution rule, not a path |
 | `handbook-index` | the product canon index | the handbook `index.json` (the `handbook` external ref binds here) |
 | `personas` | the product's user profiles | PM-owned surface; consumed by the experience thread (optional pre-launch) |
 | `experience-contract` | the session-shape invariants doc | authored by `design`; per `experience-contract-schema` |
 | `event-log` | the carrier-tagged event stream | path + shape under `.stack-graph/` (gitignored, local) |
-| `renderer` | the workspace render | entrypoint + output/portal dir (the workspace portal) |
+| `renderer` | the vendored workspace render (0.5.0+) | the bound surface roots it is pointed at (`handbook-root` / `dashboard-root` / `canvas-root` / `brand-root` / `graph-root`, plus optional `graph-local` — the harness's local graph-overlay manifest, composed onto the vendored graph so the surface shows the **whole** graph by owner) + the output/portal dir + degraded-policy. The renderer ships in the plugin; this overlays it onto the harness's surfaces (optional). **`canvas-root` (a sub-key of `renderer`, optional):** when bound, the dashboard bets rollup reads `canvas.json` from this root and renders the two-axis posture (lifecycle state + evidence-strength rung) and four-risks coverage on the Direction and Vision & strategy pages. When absent, the dashboard **must degrade gracefully** — rendering the narrative and OKR cascade without the bets rollup, never crashing or silently vanishing. No new first-class required binding is introduced; `canvas-root` is and remains a sub-key of the optional `renderer` block. |
 | `deploy-config` | the deploy target | e.g. the portal's `wrangler.jsonc` (optional) |
 | `plan-policy` | in-body vs linked plan threshold + link shape | scalar policy (see `IU-schema`) |
 | `terminal-recorder` | who freezes the timeline at a terminal state | the recorder binding (`work-item-schema` §frozen) |
@@ -66,7 +68,7 @@ content is added later via `product-dashboard-curator`). Matches `artefacts-desi
 
 ```
 <surface-root>/
-  strategy.md            # vision · guiding policy · JTBD · open questions  (template)
+  strategy.md            # Product Strategy thesis: guiding policy · JTBD · open questions · decided/not-doing (template; vision lives in objectives.md apex — not restated here)
   objectives.md          # objectives / OKRs / north-star                  (per okr-schema, template)
   items/
     manifest.json        # committed derived index: [{id,file,title,lifecycle_state,tier,outcome_link}]

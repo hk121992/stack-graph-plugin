@@ -3,7 +3,9 @@ kind: reference
 id: work-item-schema
 title: Work-item schema — the carrier on the product-dashboard
 description: The structured state of a work item (a carrier, D44) on the product-dashboard's work ledger. Keeps three kinds of state strictly separate — authored facts (committed), projected facts (derived), and the terminal snapshot (frozen at close).
-status: v0.3.0 — 2026-06-05
+status: v0.3.1 — 2026-06-06
+changelog:
+  - v0.3.1 (2026-06-06): clarify that `value_prop_link` may resolve to a canvas entry id (the work-item→bet expression; no new field)
 ---
 
 # Work-item schema
@@ -24,7 +26,10 @@ modelling risk):
 | `children[]` | planned child work-item ids (decomposition); each materialises as its own work item at `build`; the parent aggregates | **curator** (from the plan) |
 
 Plus the **curator-maintained content** (PR-gated): the problem/opportunity (the *why*), `outcome_link`
-(the OKR it serves → vision; an **authored** link, D38), `value_prop_link` (VPC job/pain/gain), `vertical_link`
+(the OKR it serves → vision; an **authored** link, D38), `value_prop_link` (VPC job/pain/gain — **may
+resolve to a canvas entry id**, e.g. a BMC/VPC hypothesis block; this is how "work-item → bet" is
+expressed without a new field; the dashboard renders a navigable link to the canvas entry when the id
+resolves), `vertical_link`
 (**optional, forward-referenced** — the zone-matrix **vertical** this work serves; the column-level join key the
 future coverage view reads, authored only when the harness uses the zone matrix, else omitted), `risk_state`
 (the four-risks evidence state, strength × maturity bar), `tier` (T1/T2/T3, D45), the solution (once

@@ -1,0 +1,14 @@
+{
+  "name": "stack-graph-workspace-renderer",
+  "private": true,
+  "type": "module",
+  "description": "The workspace portal renderer. Reuses a vendored bc-renderer-core (under vendor/) to render stack-graph's handbook + dashboard + graph-browser surfaces into a deployable static site. Install-free: all runtime deps (marked, marked-gfm-heading-id, js-yaml, github-slugger) are vendored from local trusted sources under vendor/ — no node_modules, matching the repo's dependency-free tooling philosophy.",
+  "scripts": {
+    "smoke": "bun run smoke.ts",
+    "build:handbook": "bun run build-handbook.ts",
+    "build:graph": "bun run build-graph.ts",
+    "build:dashboard": "bun run build-dashboard.ts",
+    "publish:projection": "bun run publish-projection.ts",
+    "test:publish": "bun run publish-projection.test.ts"
+  }
+}

@@ -1,0 +1,118 @@
+/* Tag wrappers — round-7.4 unified surface (W3.3).
+ *
+ * Skill canonicals carry MDX tags in children-form (<VV>, <Ref>, <Risk>,
+ * <Path>, <Skill>, <Observations>). The renderer emits the SAME composed
+ * content to humans (HTML) and agents (markdown). Browsers don't know
+ * these custom elements; default behaviour is to render them as inline.
+ * This stylesheet gives each tag a subtle visual treatment so humans
+ * can see the system's semantic structure without it becoming noisy.
+ *
+ * Operator chose subtle (taste decision T3, plan default) over bold —
+ * the goal is "sophistication visible," not "loud styling." Tag wrappers
+ * are CSS-selectable as the lowercased element names (HTML normalises
+ * <Ref> → <ref> in the DOM).
+ */
+
+/* <VV> — volatile values inline. Dotted underline signals "value moves
+   over time and may be stale." Cursor stays default (not clickable). */
+vv {
+  border-bottom: 1px dotted var(--brand-mute-light);
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+}
+vv[uid=""] {
+  color: var(--brand-red);
+  font-style: italic;
+  border-bottom-color: var(--brand-red);
+}
+
+/* <Ref> — citations inline. Renders as a numeric superscript footnote
+   marker that links to the References block at the page bottom. The
+   <Ref> element itself is invisible — all visual weight lives on the
+   nested <sup class="cite-num"><a>. Tooltip is the native title attr
+   on the anchor (no JS). */
+ref { color: inherit; }
+sup.cite-num { font-size: 0.75em; line-height: 0; vertical-align: super; margin: 0 0.05em; }
+sup.cite-num a {
+  color: var(--brand-red);
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+}
+sup.cite-num a:hover { text-decoration: underline; }
+sup.cite-num a:focus-visible {
+  outline: 2px solid var(--brand-gold);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+/* Unresolved refs (sentinel state): no superscript was emitted, but the
+   <ref uid=""> element still wraps a [unresolved] label from preprocess.
+   Style it as a muted strikethrough so the gap is visible without screaming. */
+ref[uid=""] {
+  color: var(--brand-mute-light);
+  font-style: italic;
+  text-decoration: line-through;
+  text-decoration-style: dotted;
+}
+
+/* <Risk> — caution callout for irreversible/expensive routing decisions.
+   Block-level with brand-gold tint and left border. The wrapped step is
+   typically a [Process] step 1 eligibility-assessment. */
+risk {
+  display: block;
+  margin: 1.25em 0;
+  padding: 0.85em 1em;
+  background: rgba(250, 224, 66, 0.12);
+  border-left: 3px solid var(--brand-gold);
+  border-radius: 0 4px 4px 0;
+}
+risk::before {
+  content: "⚠ ";
+  font-weight: 700;
+  color: #b58b00;
+  margin-right: 0.25em;
+}
+
+/* <Path>, <Skill> — inline references to other catalogue entries.
+   Italic muted text. <Skill> wraps a clickable anchor at render time
+   (W3.14, 2026-05-15) so humans can navigate to the peer skill page.
+   The harness still reads the <Skill id="…"> tag for peer-invocation. */
+path, skill {
+  font-style: italic;
+  color: var(--brand-mute-light);
+}
+skill a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+skill a:hover { color: var(--brand-red); text-decoration-style: solid; }
+
+/* <Observations> — community observations wrapper. Block-level, indented
+   with a hairline border. The inner content is a markdown list (or empty
+   when no observations are recorded yet). */
+observations {
+  display: block;
+  margin: 1.5em 0;
+  padding: 0.5em 0 0.5em 1em;
+  border-left: 3px solid var(--brand-cream-soft);
+}
+observations:empty::before {
+  content: "No community observations recorded yet.";
+  color: var(--brand-mute-light);
+  font-style: italic;
+}
+
+/* Dark mode adjustments for tag wrappers. */
+html.dark vv {
+  border-bottom-color: var(--brand-mute-dark);
+}
+html.dark risk {
+  background: rgba(250, 224, 66, 0.08);
+}
+html.dark risk::before {
+  color: var(--brand-gold);
+}
+html.dark observations {
+  border-left-color: var(--brand-hairline-dark);
+}

@@ -1,0 +1,28 @@
+{
+  "provenance": {
+    "commit": "f5ad62c5944a23f4d3eec44d5eb3802da9843fdf",
+    "generated_at": "2026-06-02T08:00:00Z",
+    "generator_version": "0.1.0"
+  },
+  "carriers": {
+    "wi-001": {
+      "current_stage": "build",
+      "transition_summary": [
+        { "stage": "plan",  "at": "2026-05-31T10:00:00Z" },
+        { "stage": "build", "at": "2026-06-01T09:00:00Z" }
+      ]
+    }
+  },
+  "nodes": {
+    "plan":       { "last_used": "2026-06-01T09:00:00Z", "traversals_30d": 4 },
+    "build":      { "last_used": "2026-06-01T09:00:00Z", "traversals_30d": 3 },
+    "reconcile":  { "last_used": "2026-06-01T12:00:00Z", "traversals_30d": 2 },
+    "land":       { "last_used": "2026-06-01T14:00:00Z", "traversals_30d": 2 },
+    "debrief":    { "last_used": "2026-06-01T16:00:00Z", "traversals_30d": 2 }
+  },
+  "ax": {
+    "plan":    {},
+    "build":   {},
+    "debrief": {}
+  }
+}

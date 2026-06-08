@@ -59,7 +59,9 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    live), `handbook-index` (an existing handbook `index.json`), `personas` (an existing profiles
    doc, optional pre-launch), `event-log` (the `.stack-graph/` stream — generated/local),
    `learnings-archive` (the committed prior-proposals surface, D60), `renderer` + `deploy-config`
-   (the workspace portal, optional), and the scalar dials (`maturity`, `plan-policy`, `okr-binding`,
+   (the vendored workspace render overlaid onto the bound surface roots — `handbook-root` /
+   `dashboard-root` / `canvas-root` / `brand-root` / `graph-root` + output + deploy target; optional),
+   and the scalar dials (`maturity`, `plan-policy`, `okr-binding`,
    `stale-projection-policy`, `terminal-recorder`). Mark optional keys that don't apply yet rather
    than inventing targets.
 3. **Write `bindings.yaml`** — flat keys per the contract, values relative to the org root. Do not

@@ -1,0 +1,56 @@
+{
+  "provenance": { "commit": "sample", "generated_at": "2026-06-03T00:00:00Z", "generator_version": "sample" },
+  "carriers": {
+    "wi-001": {
+      "current_stage": "build",
+      "transition_summary": [
+        { "stage": "align-context", "at": "2026-05-28T09:10:00Z" },
+        { "stage": "design", "at": "2026-05-29T11:00:00Z" },
+        { "stage": "specify", "at": "2026-05-30T10:00:00Z" },
+        { "stage": "plan", "at": "2026-05-31T09:30:00Z" },
+        { "stage": "build", "at": "2026-06-01T14:00:00Z" }
+      ]
+    }
+  },
+  "nodes": {
+    "align-context": { "last_used": "2026-06-02T08:00:00Z", "traversals_30d": 24 },
+    "design":        { "last_used": "2026-06-01T16:00:00Z", "traversals_30d": 18 },
+    "specify":       { "last_used": "2026-05-31T12:00:00Z", "traversals_30d": 15 },
+    "plan":          { "last_used": "2026-06-02T10:00:00Z", "traversals_30d": 22 },
+    "build":         { "last_used": "2026-06-02T15:00:00Z", "traversals_30d": 31 },
+    "review":        { "last_used": "2026-06-02T15:30:00Z", "traversals_30d": 28 },
+    "reconcile":     { "last_used": "2026-05-30T17:00:00Z", "traversals_30d": 12 },
+    "land":          { "last_used": "2026-05-29T18:00:00Z", "traversals_30d": 9 },
+    "debrief":       { "last_used": "2026-05-27T19:00:00Z", "traversals_30d": 7 }
+  },
+  "ax": {
+    "plan":   { "tokens_to_outcome": 42000, "duration_ms": 180000, "steps_to_outcome": 14, "tool_calls": 31, "backtracks": 2 },
+    "build":  { "tokens_to_outcome": 88000, "duration_ms": 420000, "steps_to_outcome": 36, "tool_calls": 72, "backtracks": 5 },
+    "review": { "tokens_to_outcome": 25000, "duration_ms": 95000,  "steps_to_outcome": 9,  "tool_calls": 18, "backtracks": 1 },
+    "design": { "tokens_to_outcome": 31000, "duration_ms": 140000, "steps_to_outcome": 11, "tool_calls": 22, "backtracks": 3 },
+    "align-context": { "tokens_to_outcome": 12000, "duration_ms": 60000, "steps_to_outcome": 5, "tool_calls": 8, "backtracks": 0 },
+    "reconcile": { "tokens_to_outcome": 18000, "duration_ms": 80000, "steps_to_outcome": 7, "tool_calls": 14, "backtracks": 1 },
+    "simulate-users": { "tokens_to_outcome": 21000, "duration_ms": 110000, "steps_to_outcome": 8, "tool_calls": 16, "backtracks": 2, "tool_path_breadth": 6 }
+  },
+  "trends": {
+    "benchmark.perf": [
+      { "at": "2026-05-28T10:00:00Z", "value": 2100 },
+      { "at": "2026-05-30T10:00:00Z", "value": 2240 },
+      { "at": "2026-06-01T10:00:00Z", "value": 2310 }
+    ],
+    "health.quality": [
+      { "at": "2026-05-28T10:00:00Z", "value": 8.1 },
+      { "at": "2026-05-30T10:00:00Z", "value": 8.4 },
+      { "at": "2026-06-01T10:00:00Z", "value": 8.6 }
+    ]
+  },
+  "conformance": {
+    "experience_contract": { "pass": 7, "fail": 1 }
+  },
+  "path_conformance": {
+    "traced_carriers": 1,
+    "on_path": 22,
+    "diverged": 2,
+    "note": "Sample: 24 stage transitions traced; 2 diverged from the authored precedes path (a can-follow loop back to design)."
+  }
+}

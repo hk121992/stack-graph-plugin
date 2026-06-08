@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-06-02T00:00:00Z",
+  "items": [
+    {
+      "id": "wi-001",
+      "file": "items/wi-001.md",
+      "title": "Graph node authoring workflow",
+      "lifecycle_state": "in-delivery",
+      "tier": "T1",
+      "outcome_link": "obj-activate-factory"
+    },
+    {
+      "id": "wi-002",
+      "file": "items/wi-002.md",
+      "title": "Handbook surface (portal)",
+      "lifecycle_state": "shipped",
+      "tier": "T1",
+      "outcome_link": "obj-activate-factory"
+    },
+    {
+      "id": "wi-003",
+      "file": "items/wi-003.md",
+      "title": "Dev-sprint backbone (plan/build/reconcile/land/debrief)",
+      "lifecycle_state": "shipped",
+      "tier": "T1",
+      "outcome_link": "obj-activate-factory"
+    },
+    {
+      "id": "wi-004",
+      "file": "items/wi-004.md",
+      "title": "Plugin build pipeline (vendor nodes → skills/)",
+      "lifecycle_state": "defined",
+      "tier": "T2",
+      "outcome_link": "obj-harness-ready"
+    },
+    {
+      "id": "wi-005",
+      "file": "items/wi-005.md",
+      "title": "Experience-thread design (user journey modelling)",
+      "lifecycle_state": "discovery",
+      "tier": "T2",
+      "outcome_link": "obj-harness-ready"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{ "ts": "2026-05-25T09:00:00Z", "session": "sess-001", "kind": "enter", "node": "align-context", "carrier": "WI-001" }
+{ "ts": "2026-05-25T09:10:00Z", "session": "sess-001", "kind": "exit", "node": "align-context", "carrier": "WI-001", "outcome": "context-aligned", "gates": [], "body": "SENTINEL_SECRET_DO_NOT_EMIT" }
+{ "ts": "2026-05-25T09:12:00Z", "session": "sess-001", "kind": "enter", "node": "design", "carrier": "WI-001" }
+{ "ts": "2026-05-25T09:45:00Z", "session": "sess-001", "kind": "exit", "node": "design", "carrier": "WI-001", "outcome": "design-doc-produced", "gates": ["design-approved:pass"] }
+{ "ts": "2026-05-25T09:50:00Z", "session": "sess-001", "kind": "enter", "node": "specify", "carrier": "WI-001" }
+{ "ts": "2026-05-25T10:30:00Z", "session": "sess-001", "kind": "exit", "node": "specify", "carrier": "WI-001", "outcome": "spec-written", "gates": [] }
+{ "ts": "2026-05-30T14:00:00Z", "session": "sess-002", "kind": "enter", "node": "explore", "carrier": "WI-002" }
+{ "ts": "2026-05-30T14:30:00Z", "session": "sess-002", "kind": "exit", "node": "explore", "carrier": "WI-002", "outcome": "opportunity-mapped", "gates": [], "ax": { "tokens_total": 4200, "steps": 12 } }
+{ "ts": "2026-05-30T14:35:00Z", "session": "sess-002", "kind": "enter", "node": "align-context", "carrier": "WI-002" }
+{ "ts": "2026-05-30T15:00:00Z", "session": "sess-002", "kind": "exit", "node": "align-context", "carrier": "WI-002", "outcome": "context-aligned", "gates": [] }
+{ "ts": "2026-05-20T08:00:00Z", "session": "sess-000", "kind": "enter", "node": "explore", "carrier": null }
+{ "ts": "2026-05-20T08:45:00Z", "session": "sess-000", "kind": "exit", "node": "explore", "carrier": null, "outcome": "opportunity-mapped", "gates": [] }
+{ "ts": "2026-05-26T09:00:00Z", "session": "sess-003", "kind": "enter", "node": "benchmark", "carrier": null }
+{ "ts": "2026-05-26T09:05:00Z", "session": "sess-003", "kind": "exit", "node": "benchmark", "carrier": null, "outcome": "regression-verdict", "gates": [], "metrics": { "benchmark.perf": 2100, "secret.series": 999 } }
+{ "ts": "2026-05-28T09:00:00Z", "session": "sess-004", "kind": "enter", "node": "benchmark", "carrier": null }
+{ "ts": "2026-05-28T09:05:00Z", "session": "sess-004", "kind": "exit", "node": "benchmark", "carrier": null, "outcome": "regression-verdict", "gates": [], "metrics": { "benchmark.perf": 2310 } }
+{ "ts": "2026-05-26T10:00:00Z", "session": "sess-003", "kind": "enter", "node": "health", "carrier": null }
+{ "ts": "2026-05-26T10:08:00Z", "session": "sess-003", "kind": "exit", "node": "health", "carrier": null, "outcome": "quality-scored", "gates": [], "metrics": { "health.quality": 8.1, "body": "NOT_A_NUMBER" } }
+{ "ts": "2026-05-28T10:00:00Z", "session": "sess-004", "kind": "enter", "node": "health", "carrier": null }
+{ "ts": "2026-05-28T10:08:00Z", "session": "sess-004", "kind": "exit", "node": "health", "carrier": null, "outcome": "quality-scored", "gates": [], "metrics": { "health.quality": 8.6 } }
+{ "ts": "2026-05-29T11:00:00Z", "session": "sess-005", "kind": "enter", "node": "simulate-users", "carrier": "WI-001" }
+{ "ts": "2026-05-29T11:20:00Z", "session": "sess-005", "kind": "exit", "node": "simulate-users", "carrier": "WI-001", "outcome": "experience-graded", "gates": ["experience-contract:pass"], "ax": { "tokens_to_outcome": 21000, "duration_ms": 110000, "steps_to_outcome": 8, "tool_calls": 16, "backtracks": 2, "tool_path_breadth": 6, "leak_field": "DROP_ME" } }
+{ "ts": "2026-05-30T11:00:00Z", "session": "sess-006", "kind": "enter", "node": "simulate-users", "carrier": "WI-002" }
+{ "ts": "2026-05-30T11:20:00Z", "session": "sess-006", "kind": "exit", "node": "simulate-users", "carrier": "WI-002", "outcome": "experience-graded", "gates": ["experience-contract:fail", "design-approved:pass"] }
+{ "ts": "Fri Jun 05 2026 00:00:00 GMT+0000 (TS_SECRET_LEAK)", "session": "sess-007", "kind": "enter", "node": "benchmark", "carrier": "WI-003" }
+{ "ts": "04 DecSecret 1995", "session": "sess-007", "kind": "exit", "node": "benchmark", "carrier": "WI-003", "outcome": "regression-verdict", "gates": [], "metrics": { "benchmark.perf": 4242 } }
+{ "ts": "2026-05-30T12:00:00Z", "session": "sess-008", "kind": "enter", "node": ["privateToken"], "carrier": null }
+{ "ts": "2026-05-30T12:05:00Z", "session": "sess-008", "kind": "enter", "node": "benchmark", "carrier": 90909 }

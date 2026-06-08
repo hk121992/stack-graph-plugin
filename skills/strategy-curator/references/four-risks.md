@@ -3,7 +3,9 @@ kind: reference
 id: four-risks
 title: The four product risks — discovery lens
 description: The four risks every product idea must clear before it is worth building (value, usability, feasibility, viability), as a discovery checklist.
-status: v0.2.0 — 2026-06-01
+status: v0.2.1 — 2026-06-06
+changelog:
+  - v0.2.1 (2026-06-06): tie two-axis rule to the canvas.json contract (strength + importance_rank fields); name the two axes the dashboard rollup must honour
 ---
 
 # The four product risks
@@ -43,3 +45,32 @@ Apply it honestly:
   axes — a low maturity bar must never silently upgrade weak evidence into a cleared risk ("how strong
   must it be?" is not "how strong is it?"). An open value or viability risk routes back to discovery;
   an open usability or feasibility risk routes into design.
+
+## The two-axis rule in the dashboard rollup
+
+The dashboard bets rollup (Direction overview + Vision & strategy page) honours the same two-axis
+discipline:
+
+- **Lifecycle state axis** — `assumed | tested | confirmed | killed | superseded` (the
+  hypothesis-lifecycle the canvas carries). This is the *evidence state* of the bet.
+- **Evidence-strength rung** — `weak | moderate | strong` (synthetic / said-yes / did-yes, above).
+  **Separate axis. Never conflated.** A bet that is `confirmed` on `weak` evidence must never render
+  the same as one confirmed on `strong` (observed behaviour) — surfacing both together is what prevents
+  the silent upgrade.
+
+**These are the two axes the rollup must honour** (the lifecycle state axis is not a proxy for
+strength, and the strength rung is not a lifecycle stage).
+
+### `canvas.json` contract fields the adapter carries
+
+The canvas adapter (`refresh-canvas.ts`) must carry two fields per entry into `canvas.json` so the
+dashboard rollup can honour both axes:
+
+| field | type | meaning |
+|---|---|---|
+| `strength` | `"weak" \| "moderate" \| "strong"` (optional) | the evidence-strength rung above; absent ⇒ rollup degrades to state-axis only, no strength split |
+| `importance_rank` | `"critical" \| "high" \| "medium" \| "low"` (optional) | a generic importance/criticality rank for riskiest-first ordering; absent ⇒ rollup shows open bets by state and does not assert a riskiness order it cannot compute |
+
+When both are absent the bets rollup degrades gracefully — state-axis only, no ranking. When present,
+the rollup shows the full two-axis stacked evidence bar and can apply riskiest-first ordering
+(important-and-unevidenced first, per Strategyzer). Coordinate the field names with the canvas chip.
