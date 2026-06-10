@@ -1,9 +1,9 @@
 {
-  "generated": "2026-06-10T12:30:00Z",
-  "node_count": 44,
-  "reference_count": 25,
+  "generated": "2026-06-10T14:56:57Z",
+  "node_count": 46,
+  "reference_count": 26,
   "handbook_reference_count": 0,
-  "edge_count": 221,
+  "edge_count": 224,
   "nodes": {
     "align-context": {
       "primitive": "skill",
@@ -480,7 +480,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Handbook curator",
-      "status": "v0.1.0 — 2026-05-31",
+      "status": "v0.2.0 — 2026-06-10",
       "edges": {
         "invokes": [
           {
@@ -491,6 +491,12 @@
           },
           {
             "id": "queue-checker"
+          },
+          {
+            "id": "consistency-checker"
+          },
+          {
+            "id": "link-validator"
           }
         ],
         "references": [
@@ -509,6 +515,10 @@
           },
           {
             "id": "bundling-rules",
+            "load": "on-demand"
+          },
+          {
+            "id": "integrator-checklist",
             "load": "on-demand"
           }
         ]
@@ -1404,6 +1414,20 @@
           }
         ]
       }
+    },
+    "consistency-checker": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "title": "Consistency checker",
+      "status": "v0.1.0 — 2026-06-10",
+      "edges": {}
+    },
+    "link-validator": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "title": "Link validator",
+      "status": "v0.1.0 — 2026-06-10",
+      "edges": {}
     }
   },
   "references": {
@@ -1673,6 +1697,14 @@
         "product-dashboard-curator",
         "specify-slice",
         "triage"
+      ]
+    },
+    "integrator-checklist": {
+      "kind": "reference",
+      "title": "Integrator checklist",
+      "status": "v0.1.0 — 2026-06-10",
+      "consumed_by": [
+        "handbook-curator"
       ]
     }
   },
@@ -2129,6 +2161,22 @@
     {
       "from": "handbook-curator",
       "to": "bundling-rules",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "handbook-curator",
+      "to": "consistency-checker",
+      "type": "invokes"
+    },
+    {
+      "from": "handbook-curator",
+      "to": "link-validator",
+      "type": "invokes"
+    },
+    {
+      "from": "handbook-curator",
+      "to": "integrator-checklist",
       "type": "references",
       "load": "on-demand"
     },

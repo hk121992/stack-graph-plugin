@@ -3,7 +3,7 @@
 id: handbook-curator
 primitive: skill
 title: Handbook curator
-description: Maintains the curated-canon home (handbook + decisions). Modes — sweep (scan for drift), raise (author a labelled PR for an amendment, with duplicate detection), queue (list open canon PRs + collisions), refresh-index (regenerate the page index). The vendored, general curator; a harness points it at its own canon via overlay.
+description: Maintains the curated-canon home (handbook + decisions). Modes — sweep (scan for drift), raise (author a labelled PR for an amendment, with duplicate detection), queue (list open canon PRs + collisions), integrate (gated batch-merge of the queue with cross-PR consistency + link checks), refresh-index (regenerate the page index). The vendored, general curator; a harness points it at its own canon via overlay.
 when-to-use: A session surfaced canon drift, a broken cross-reference, stale terminology, or a missing canonical page; or a node proposed a durable finding that belongs in curated canon; or the operator wants to inspect/integrate the open-PR queue. NOT for context-loading — readers navigate the canon directly via its page index.
 # classification — graph lens
 mode: collaborative
@@ -14,11 +14,14 @@ edges:
     - { id: drift-detector }
     - { id: pr-author }
     - { id: queue-checker }
+    - { id: consistency-checker }
+    - { id: link-validator }
   references:
     - { id: handbook, load: on-demand, external: true }
     - { id: what-belongs, load: on-demand }
     - { id: pr-description-shape, load: on-demand }
     - { id: bundling-rules, load: on-demand }
+    - { id: integrator-checklist, load: on-demand }
 # analytics — the loop
 goals:
   - outcome: Curated canon stays free of drift and contradiction — stale or conflicting content does not survive to a session that reads it and acts on it.
@@ -30,7 +33,7 @@ goals:
   - outcome: Duplicate and over-bundled canon PRs are prevented at authoring time.
     metric: duplicate PRs opened over the same pages (target ~0); PRs bundling a structural change with content edits (target 0).
     earns-keep: both stay near zero; the duplicate-check and bundling gate are doing their job.
-status: v0.1.0 — 2026-05-31
+status: v0.2.0 — 2026-06-10
 ---
 
 # Handbook curator
@@ -60,7 +63,10 @@ curated-canon home.
 ## Preflight (before any mutating mode)
 
 Confirm the handbook root is reachable; confirm PR tooling is authenticated (abort and surface
-the auth error otherwise); for `raise`, confirm the working tree is clean before branching.
+the auth error otherwise); for `raise`, confirm the working tree is clean before branching; for
+`integrate`, confirm the working tree is clean AND no stale preview worktree or preview branches
+survive a prior aborted run (loose per-PR refs make the next preview fetch fail) — remove
+leftovers before starting.
 
 ## Modes
 
@@ -97,14 +103,38 @@ Invoke **queue-checker** in `list` mode. Report queue size; one row per PR (numb
 age, files, URL); and a **collisions** block naming any page touched by more than one open PR
 (a thing to resolve before merging either). No mutations.
 
-### `integrate` — batch-merge cadence *(contract recorded; implementation deferred)*
+### `integrate` — gated batch-merge of the queue
 
-The gated batch-merge that closes the loop `raise` opens — operator-cadence, in a **separate
-session**. Until its fleet exists, announce "integrate: contract recorded, implementation
-deferred" and stop. The recorded contract: list the queue (**queue-checker**); run cross-PR
-**consistency** and **link** checks (the `consistency-checker` / `link-validator` agents, to be
-authored); surface every operator decision **synchronously in the PR description** (never a
-mid-mode prompt); walk the **batch merges**; **refresh the index** after.
+The gate that closes the loop `raise` opens — operator-cadence, in a **separate session** from
+any per-change `raise`.
+
+1. **List the queue** (**queue-checker**, `list`). Empty queue → report and stop.
+2. **Build a merged preview**: a scratch worktree off the canon's main line, merging each PR
+   head oldest-first. A conflict *only in the generated index* is not real — take either side
+   and continue. A PR conflicting in authored content is excluded and pre-flagged deferred,
+   recording which earlier merge it conflicted against (it rejoins if that blocker is later
+   held). Record the base SHA and each PR-head SHA — the walk pins to both. The preview is
+   validation-only; never pushed.
+3. **Cross-PR checks, in parallel**: **consistency-checker** over the *post-preview candidate
+   set* (not the raw queue — an excluded PR's collisions won't land and must not hold a
+   mergeable one); **link-validator** over the preview worktree + the queue (for
+   `introduced_by` attribution).
+4. **Triage view** to the operator: depth, conflicting-in-preview PRs, findings by severity,
+   broken links, decision items quoted from PR descriptions. Decisions live **in the PR
+   description**, never a structured mid-mode prompt — surface each contested item and wait
+   for the operator's resolution in the session before walking any merge; record each
+   resolution as a comment on the PR it touches. Operator declines → exit with a pending
+   report; merge nothing.
+5. **Re-validate if the merge set — or its order — changed**: rebuild the preview from the
+   confirmed set in the confirmed order and re-dispatch both checkers; discard findings naming
+   PRs no longer in the set. A broken link holds the PR `introduced_by` names — except
+   index-freshness drift (`index_missing` / `index_orphan`), which the post-walk refresh
+   resolves; `unindexable` (frontmatter the index generator would skip) always holds.
+6. **Walk the merges** per the `integrator-checklist` reference — its held / resolution /
+   base-drift / mergeable gates, head-pinned squash merges, and skip-and-defer rules.
+7. **Refresh the index** in the primary checkout; if changed, commit it directly to the main
+   line — the generated-artifact exception below. **Clean up** the preview worktree and
+   branches; report per the checklist's shape.
 
 ### `refresh-index` — regenerate the page index (idempotent)
 
@@ -114,8 +144,10 @@ diff is in the PR).
 
 ## Hard constraints
 
-- Canon changes land via a **labelled PR**, never a direct push. Every `raise` PR carries the
-  queue label — without it the PR drops out of the operator's triage.
+- Canon changes land via a **labelled PR**, never a direct push — with one exception: the
+  regenerated page index `integrate` commits to the main line after a batch (a generated
+  artifact, not authored canon). Every `raise` PR carries the queue label — without it the PR
+  drops out of the operator's triage.
 - The **PR description is the proposal**. Write no separate proposal file and no audit file — PRs
   and history are the durable record.
 - **Never bundle a structural/index change with content edits** (`bundling-rules`).
