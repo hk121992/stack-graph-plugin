@@ -41,6 +41,10 @@ internals. Confirming the change-cost is allowed; mutating is not.
 
 ## What to hunt
 
+The depth / seam / module / interface / adapter / leverage / locality vocabulary the hunt-list
+below uses is grounded in **`architecture-doctrine`** (the deletion test, the dependency
+categories, replace-don't-layer); read it on-demand. The hunt-list is its review-time application.
+
 Read the target and ask, of each structure, "what will the next change cost because of
 this, and can I name that cost?" Hunt for:
 
@@ -162,3 +166,10 @@ contract expects `file` / `line`.
 
 Self-suppress per the anchors: drop 0/25 silently; surface 50 only as a P0/P1 or via
 soft-bucket routing; and drop anything for which you cannot name a concrete change-cost.
+
+## On-demand references
+
+Read these at the step of need (single-sourced into this primitive's bundle):
+
+- `../references/lens-maintainability/architecture-doctrine.md` — `architecture-doctrine`
+

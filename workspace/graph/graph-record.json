@@ -1,9 +1,9 @@
 {
-  "generated": "2026-06-05T16:22:52Z",
-  "node_count": 42,
-  "reference_count": 24,
+  "generated": "2026-06-10T07:39:39Z",
+  "node_count": 43,
+  "reference_count": 25,
   "handbook_reference_count": 0,
-  "edge_count": 204,
+  "edge_count": 212,
   "nodes": {
     "align-context": {
       "primitive": "skill",
@@ -41,6 +41,42 @@
         "can-follow": [
           {
             "id": "debrief"
+          }
+        ]
+      }
+    },
+    "architecture-review": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "title": "Architecture review",
+      "status": "v0.1.0 — 2026-06-10",
+      "edges": {
+        "invokes": [
+          {
+            "id": "explore"
+          },
+          {
+            "id": "log-decision"
+          }
+        ],
+        "references": [
+          {
+            "id": "architecture-doctrine",
+            "load": "on-demand"
+          },
+          {
+            "id": "instrumentation-preamble",
+            "load": "import"
+          },
+          {
+            "id": "domain-glossary",
+            "load": "on-demand",
+            "external": true
+          }
+        ],
+        "escalates": [
+          {
+            "id": "triage"
           }
         ]
       }
@@ -618,6 +654,12 @@
           {
             "id": "dev-sprint",
             "stage": "plan"
+          }
+        ],
+        "references": [
+          {
+            "id": "architecture-doctrine",
+            "load": "on-demand"
           }
         ]
       }
@@ -1332,6 +1374,16 @@
         "triage"
       ]
     },
+    "architecture-doctrine": {
+      "kind": "reference",
+      "title": "Architecture doctrine — deep modules, seams, dependency categories",
+      "status": "v0.1.0 — 2026-06-10",
+      "consumed_by": [
+        "architecture-review",
+        "lens-maintainability",
+        "test-discipline"
+      ]
+    },
     "axis-entry-schema": {
       "kind": "reference",
       "title": "Axis entry — schema (the zone-matrix lens)",
@@ -1344,7 +1396,7 @@
     "bindings-contract": {
       "kind": "reference",
       "title": "Bindings contract — the keys a harness supplies, and the surface template",
-      "status": "v0.4.0 — 2026-06-05",
+      "status": "v0.5.0 — 2026-06-10",
       "consumed_by": [
         "harness-init",
         "triage"
@@ -1432,7 +1484,7 @@
     "four-risks": {
       "kind": "reference",
       "title": "The four product risks — discovery lens",
-      "status": "v0.2.0 — 2026-06-01",
+      "status": "v0.2.1 — 2026-06-06",
       "consumed_by": [
         "product-lens",
         "strategy-curator"
@@ -1444,6 +1496,7 @@
       "status": "v0.3.0 — 2026-06-05",
       "consumed_by": [
         "align-context",
+        "architecture-review",
         "benchmark",
         "build",
         "canary",
@@ -1491,7 +1544,7 @@
     "okr-schema": {
       "kind": "reference",
       "title": "OKR / outcome-layer schema",
-      "status": "v0.2.0 — 2026-06-05",
+      "status": "v0.3.0 — 2026-06-06",
       "consumed_by": [
         "harness-init",
         "product-dashboard-curator",
@@ -1528,7 +1581,7 @@
     "test-discipline": {
       "kind": "reference",
       "title": "Test discipline — the test-quality standard",
-      "status": "v0.1.0 — 2026-06-05",
+      "status": "v0.1.1 — 2026-06-10",
       "consumed_by": [
         "build",
         "lens-tests"
@@ -1565,7 +1618,7 @@
     "work-item-schema": {
       "kind": "reference",
       "title": "Work-item schema — the carrier on the product-dashboard",
-      "status": "v0.3.0 — 2026-06-05",
+      "status": "v0.3.1 — 2026-06-06",
       "consumed_by": [
         "harness-init",
         "product-dashboard-curator",
@@ -1609,6 +1662,40 @@
       "from": "align-context",
       "to": "debrief",
       "type": "can-follow"
+    },
+    {
+      "from": "architecture-review",
+      "to": "explore",
+      "type": "invokes"
+    },
+    {
+      "from": "architecture-review",
+      "to": "log-decision",
+      "type": "invokes"
+    },
+    {
+      "from": "architecture-review",
+      "to": "architecture-doctrine",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "architecture-review",
+      "to": "instrumentation-preamble",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "architecture-review",
+      "to": "domain-glossary",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "architecture-review",
+      "to": "triage",
+      "type": "escalates"
     },
     {
       "from": "benchmark",
@@ -1682,11 +1769,6 @@
     {
       "from": "build",
       "to": "review",
-      "type": "precedes"
-    },
-    {
-      "from": "build",
-      "to": "review",
       "type": "can-follow"
     },
     {
@@ -1694,6 +1776,11 @@
       "to": "reconcile",
       "type": "can-follow",
       "arc": "dev-sprint"
+    },
+    {
+      "from": "build",
+      "to": "review",
+      "type": "precedes"
     },
     {
       "from": "canary",
@@ -1855,12 +1942,6 @@
     },
     {
       "from": "design-implement",
-      "to": "dev-sprint",
-      "type": "composes-into",
-      "stage": "build"
-    },
-    {
-      "from": "design-implement",
       "to": "instrumentation-preamble",
       "type": "references",
       "load": "import"
@@ -1870,6 +1951,12 @@
       "to": "ux-principles",
       "type": "references",
       "load": "on-demand"
+    },
+    {
+      "from": "design-implement",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "build"
     },
     {
       "from": "design-implement",
@@ -1896,12 +1983,6 @@
     },
     {
       "from": "design-shotgun",
-      "to": "dev-sprint",
-      "type": "composes-into",
-      "stage": "design"
-    },
-    {
-      "from": "design-shotgun",
       "to": "instrumentation-preamble",
       "type": "references",
       "load": "import"
@@ -1911,6 +1992,12 @@
       "to": "ux-principles",
       "type": "references",
       "load": "on-demand"
+    },
+    {
+      "from": "design-shotgun",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "design"
     },
     {
       "from": "design-shotgun",
@@ -2115,6 +2202,12 @@
       "stage": "plan"
     },
     {
+      "from": "lens-maintainability",
+      "to": "architecture-doctrine",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
       "from": "lens-security",
       "to": "dev-sprint",
       "type": "composes-into",
@@ -2228,12 +2321,12 @@
     {
       "from": "plan",
       "to": "build",
-      "type": "precedes"
+      "type": "can-follow"
     },
     {
       "from": "plan",
       "to": "build",
-      "type": "can-follow"
+      "type": "precedes"
     },
     {
       "from": "pr-author",
@@ -2386,12 +2479,12 @@
     {
       "from": "reconcile",
       "to": "land",
-      "type": "precedes"
+      "type": "can-follow"
     },
     {
       "from": "reconcile",
       "to": "land",
-      "type": "can-follow"
+      "type": "precedes"
     },
     {
       "from": "review",
@@ -2610,13 +2703,13 @@
     },
     {
       "from": "specify-slice",
-      "to": "build",
-      "type": "precedes"
+      "to": "triage",
+      "type": "can-follow"
     },
     {
       "from": "specify-slice",
-      "to": "triage",
-      "type": "can-follow"
+      "to": "build",
+      "type": "precedes"
     },
     {
       "from": "specify-slice",
@@ -2757,6 +2850,12 @@
       "from": "verify",
       "to": "review",
       "type": "can-follow"
+    },
+    {
+      "from": "test-discipline",
+      "to": "architecture-doctrine",
+      "type": "references",
+      "load": "on-demand"
     }
   ]
 }

@@ -1,6 +1,6 @@
 ---
 name: "verify"
-description: ">- Use when: The review span is complete and the built change must be proven against its running behaviour, visuals, and experience before it advances to reconcile."
+description: "Orchestrates the verification panel over the running built thing before it lands — dispatches qa (browser behaviour), design-review (visual), and simulate-users (AI-agent experience), consolidates their verdicts into one ranked finding set, surfaces a single verification gate, and owns the corrective loop back to review. Use when: The review span is complete and the built change must be proven against its running behaviour, visuals, and experience before it advances to reconcile."
 ---
 
 

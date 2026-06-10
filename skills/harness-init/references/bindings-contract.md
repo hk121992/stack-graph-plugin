@@ -3,8 +3,9 @@ kind: reference
 id: bindings-contract
 title: Bindings contract — the keys a harness supplies, and the surface template
 description: The factory contract the plugin ships so a consuming workspace can instantiate a harness — the complete set of binding keys the vendored graph may require, the bindings.yaml file format, the org-root CLAUDE.md ambient-surface template, and the dashboard + improvements surface-structure templates harness-init scaffolds. The plugin carries this contract; the harness supplies the values. No product data.
-status: v0.4.1 — 2026-06-06
+status: v0.5.0 — 2026-06-10
 changelog:
+  - v0.5.0 (2026-06-10): add optional `architecture-reviews-root` — the committed home of architecture-review's report pair (the axis-root pattern: bound only when the harness runs the capability)
   - v0.4.1 (2026-06-06): clarify strategy-doc binds the authored vision narrative (not a canvas/bmd inventory); augment renderer.canvas-root notes with dashboard bets-rollup use and graceful-degradation contract
 ---
 
@@ -60,6 +61,7 @@ target does not resolve.
 | `axis-root` | the zone-matrix axis-entry dir | **optional** — holds the product's verticals + horizontals (`kind: reference`, each tagged `axis:`, per `axis-entry-schema`); `explore`'s `zone` mode reads it via an `external: true` reference the overlay binds. Present only when the harness uses the zone matrix (D63) |
 | `code-map` | the extracted code-map location under `.stack-graph/` | **optional**, **path-only**, degradable — the deterministic repo-map + ast-grep extraction `explore`'s `repo` and `zone` modes read **inline** (not a reference edge — D38). No committed schema, no labels; a fresh clone without it degrades to Glob/Grep |
 | `zone-test-root` | the two-tier zone/experience test surface | **optional**, **forward-referenced** — the testing layer is **input-gated** and realised in a harness, not the factory (D63); bind it when that layer is built |
+| `architecture-reviews-root` | the committed architecture-review reports dir | **optional** — bound only when the harness runs `architecture-review` (the `axis-root` pattern). Holds the per-run report pair `<yyyy-mm-dd>-<slug>.html` (immutable diagnosis) + `<yyyy-mm-dd>-<slug>.md` (living disposition record); **committed** (generative/non-replayable, the D60 test), never `.stack-graph/`. Sits under `surface-root` (e.g. `<surface-root>/architecture-reviews/`); `harness-init validate` resolves it when bound; the node creates the dir on first run if absent. No manifest at v0 |
 
 ## 3. The dashboard surface-structure template
 

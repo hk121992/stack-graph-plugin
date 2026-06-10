@@ -7,7 +7,10 @@ description: >-
   interfaces not implementation, integration over unit, mock only at system boundaries never internal
   collaborators, interfaces shaped for testability. Use when writing or reviewing tests. The
   RED→GREEN→REFACTOR loop lives in build, not here.
-status: v0.1.0 — 2026-06-05
+edges:
+  references:
+    - { id: architecture-doctrine, load: on-demand }
+status: v0.1.1 — 2026-06-10
 ---
 
 # Test discipline
@@ -83,9 +86,9 @@ Behaviour is testable through a public interface only if the interface is shaped
 - **Small surface area** — fewer methods and fewer parameters mean fewer tests and simpler setup. The
   underlying principle is the *deep module* (small interface over substantial implementation).
 
-> The fuller deep-modules / interface-design / refactoring doctrine belongs to the planned
-> `improve-codebase-architecture` import. This reference takes only the **testability slice**; when
-> that reference exists, `test-discipline` should `reference` it rather than carry architecture content.
+> The fuller deep-modules / interface-design doctrine lives in **`architecture-doctrine`**
+> (referenced on-demand — see this ref's frontmatter). This reference keeps only the
+> **testability slice**; for what shape a module and its seam should take, read the doctrine.
 
 ## The gates
 

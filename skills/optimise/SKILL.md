@@ -1,6 +1,6 @@
 ---
 name: "optimise"
-description: ">- Use when: A built span has a measurable objective worth improving (runtime perf, or agent-traversal cost) and the baseline is correct — generate variants and pick the best that still passes its gate. Invoked from within build."
+description: "Generates N implementation variants of a span in parallel isolated worktrees, measures each, and selects the one that best improves the objective while still passing its gate. Two modes: perf (benchmark; keep the fastest that passes correctness) and AX-optimise (simulate-users; keep the cheapest in tokens/latency whose UX still passes the contract). Use when: A built span has a measurable objective worth improving (runtime perf, or agent-traversal cost) and the baseline is correct — generate variants and pick the best that still passes its gate. Invoked from within build."
 ---
 
 

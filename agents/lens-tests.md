@@ -169,5 +169,6 @@ soft-bucket routing.
 
 Read these at the step of need (single-sourced into this primitive's bundle):
 
+- `../references/lens-tests/architecture-doctrine.md` — `architecture-doctrine` (via `test-discipline`)
 - `../references/lens-tests/test-discipline.md` — `test-discipline`
 

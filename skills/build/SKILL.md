@@ -1,6 +1,6 @@
 ---
 name: "build"
-description: ">- Use when: A plan is settled and its implementation units are ready to execute — the commit-to-build gate has passed and the work is moving from defined to in-delivery."
+description: "Execute a settled plan's implementation units to spec across an autonomous span — one IU per fresh agent context, each proven by running its acceptance_check and showing the raw evidence. Use when the commit-to-build gate has passed and work moves from defined to in-delivery. Use when: A plan is settled and its implementation units are ready to execute — the commit-to-build gate has passed and the work is moving from defined to in-delivery."
 ---
 
 
@@ -268,6 +268,7 @@ The following references are single-sourced into this primitive's bundle and spl
 
 Read these at the step of need (single-sourced into this primitive's bundle):
 
+- `references/architecture-doctrine.md` — `architecture-doctrine` (via `test-discipline`)
 - `references/carrier-interface.md` — `carrier-interface`
 - `references/test-discipline.md` — `test-discipline`
 

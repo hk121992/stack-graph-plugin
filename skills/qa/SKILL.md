@@ -1,6 +1,6 @@
 ---
 name: "qa"
-description: ">- Use when: A built change has interactive behaviour (flows, forms, controls, state) that must be exercised against a running app and fixed before it advances — dispatched by the verify stage."
+description: "Systematically QA-tests a running web app like a real user, then fixes what breaks — navigate, interact, verify every state, find bugs, fix them atomically, and re-verify with before/after evidence. The browser-behaviour modality of the verify stage. Use when: A built change has interactive behaviour (flows, forms, controls, state) that must be exercised against a running app and fixed before it advances — dispatched by the verify stage."
 ---
 
 

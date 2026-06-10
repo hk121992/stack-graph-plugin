@@ -14,6 +14,8 @@ edges:
     - { id: dev-sprint, stage: review }
     - { id: dev-sprint, stage: design }
     - { id: dev-sprint, stage: plan }
+  references:
+    - { id: architecture-doctrine, load: on-demand }
 # analytics — the loop
 goals:
   - outcome: Maintainability traps (duplication, leaky abstraction, oversized unit, dead code, tight coupling) are caught and consolidated before they ossify into load-bearing debt.
@@ -64,6 +66,10 @@ abstraction really has only one consumer, trace whether a module imports another
 internals. Confirming the change-cost is allowed; mutating is not.
 
 ## What to hunt
+
+The depth / seam / module / interface / adapter / leverage / locality vocabulary the hunt-list
+below uses is grounded in **`architecture-doctrine`** (the deletion test, the dependency
+categories, replace-don't-layer); read it on-demand. The hunt-list is its review-time application.
 
 Read the target and ask, of each structure, "what will the next change cost because of
 this, and can I name that cost?" Hunt for:
