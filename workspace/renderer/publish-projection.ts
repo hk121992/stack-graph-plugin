@@ -11,17 +11,32 @@
  * leave a few optional ones implicit):
  *
  *   Every event is a JSON object on a single line (JSONL). Mandatory fields:
- *     ts       — ISO-8601 UTC timestamp  (e.g. "2026-06-02T10:00:00Z")
- *     session  — session identifier string
- *     kind     — "enter" | "exit" | "gate" | "traverse"
- *     node     — node id string  (present on enter/exit/gate; omit on traverse)
- *     carrier  — carrier id string, or null if no carrier is active
+ *     ts            — ISO-8601 UTC timestamp  (e.g. "2026-06-02T10:00:00Z")
+ *     session       — session identifier string
+ *     kind          — "enter" | "exit" | "gate" | "traverse" | "dispatch-complete"
+ *     node          — node id string  (present on enter/exit/gate; omit on traverse)
+ *     carrier       — carrier id string, or null if no carrier is active
+ *     carrier_kind  — "work-item" | "standalone-iu" | null  (instrumentation-preamble v0.2.0+)
+ *     arc           — arc id string (e.g. "dev-sprint" | "incremental") | null  (preamble v0.2.0+)
+ *
+ *   THE PROJECTION TRIPLE-KEY: a carrier's current_stage keys by the FULL triple
+ *     (carrier_id, carrier_kind, arc) — NOT carrier id alone. build/review/land are shared
+ *     across the dev-sprint and incremental arcs, so keying by carrier id alone would let one
+ *     arc's stage bleed into another's at a shared node (carrier-interface.md "The projection
+ *     key"; 06-analytics). Legacy enter events missing carrier_kind or arc are EXCLUDED from
+ *     the stage projection (degrade, never guess — matching the publisher's strictness posture).
  *
  *   Additional fields on "exit" events (from instrumentation-preamble.md):
  *     outcome  — short outcome label string (e.g. "intent-settled")
  *     gates    — array of gate strings (e.g. ["commit-to-build:pass"])
  *     metrics  — optional object of named trend measurements (e.g. {"benchmark.perf": 1234});
  *                only present on measurement-bearing exit events
+ *
+ *   "dispatch-complete" events (06-analytics; loop-runner-design §4 Phase 1.4):
+ *     A hook-captured subagent-completion event — the same class as unit-complete — emitted
+ *     by an arc-level dispatcher per dispatched IU session. Carrier-keyed (carrier + kind +
+ *     arc), carries `outcome` and a `metrics` object bearing tokens_per_session. It is a
+ *     MEASURE event: the projection NEVER reads it for current_stage (it is not a stage event).
  *
  *   Additional fields on "traverse" events (from 06-analytics README):
  *     from, to — node ids (the edge traversed)
@@ -36,9 +51,10 @@
  *   that carrier") and instrumentation-preamble.md ("carrier tagging" section).
  *
  *   SANITIZATION CONTRACT: this script reads from each event only ts, kind, node, carrier,
- *   the ax aggregate object, the metrics measurement object, and — for conformance only — a
- *   COUNT of the closed-allowlist experience-contract gate token (never the gate string
- *   itself). It never reads, copies, or echoes:
+ *   carrier_kind, arc (the last two validated against closed value allowlists), the ax aggregate
+ *   object, the metrics measurement object (TREND_SERIES + SESSION_COST_KEYS allowlists), and —
+ *   for conformance only — a COUNT of the closed-allowlist experience-contract gate token (never
+ *   the gate string itself). It never reads, copies, or echoes:
  *     - outcome strings (may reflect private content)
  *     - free-text gate names (only the closed `experience-contract:<pass|fail>` token is
  *       inspected, and only its pass/fail tally is surfaced — never the gate string verbatim)
@@ -65,7 +81,9 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { execSync } from "node:child_process";
 
-const GENERATOR_VERSION = "0.1.0";
+// 0.2.0 — carrier projection keyed by the (carrier_id, carrier_kind, arc) triple; admits the
+// dispatch-complete measure event + tokens_per_session (session_costs). See loop-runner-design §7.3.
+const GENERATOR_VERSION = "0.2.0";
 
 // Sanitization — the locality boundary. Ids are emitted as JSON keys AND values, so they
 // must be bounded, metachar-free tokens, never a free-text/secret channel. Non-matching
@@ -99,14 +117,49 @@ const TREND_SERIES = [
   "benchmark.perf", "health.quality",
 ] as const;
 
+// Per-session cost measures (06-analytics "Per-session cost"; loop-runner-design §4 Phase 1.4).
+// A `dispatch-complete` event carries a `metrics` object bearing `tokens_per_session` — the
+// dispatched session's whole cost. Read by a CLOSED numeric allowlist under the SAME discipline
+// as TREND_SERIES (typeof number + Number.isFinite + non-negative): a non-numeric, NaN-string,
+// negative, or non-finite (Infinity / absurd-magnitude overflow) value is dropped. dispatch-complete
+// is a MEASURE event — it never advances current_stage.
+const SESSION_COST_KEYS = [
+  "tokens_per_session",
+] as const;
+
 // UX-conformance: the ONLY gate token the publisher inspects. It is a closed-allowlist token,
 // matched exactly; the publisher surfaces only the pass/fail TALLY, never the gate string. All
 // other (free-text) gate names are ignored — they may carry private decision names.
 const EXPERIENCE_CONTRACT_GATE = "experience-contract";
 
+// Closed value allowlists for the carrier-triple discriminators. Both are emitted into the
+// snapshot (as CarrierProjection / SessionCostPoint values), so they are a locality boundary —
+// validated against a closed set, never echoed free-form. carrier_kind / arc per the
+// instrumentation-preamble (v0.2.0) + carrier-interface.md "The projection key".
+const CARRIER_KINDS = new Set(["work-item", "standalone-iu"]);
+const ARCS = new Set(["dev-sprint", "incremental"]);
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * Resolve an event's full carrier triple (carrier_id, carrier_kind, arc) for the projection
+ * key. Returns null when any element is missing or non-conforming — a LEGACY event (preamble
+ * < v0.2.0, no carrier_kind / arc) or a hostile event is EXCLUDED from the stage projection
+ * (degrade, never guess), matching the publisher's strictness posture (id-grammar, closed
+ * value allowlists). carrier_id must match ID_RE; carrier_kind / arc must be in their closed
+ * allowlists (also defends against non-string coercion and free-text leak via the value channel).
+ */
+function resolveTriple(ev: RawEvent): { carrier_id: string; carrier_kind: string; arc: string } | null {
+  const cid = ev.carrier;
+  const kind = ev.carrier_kind;
+  const arc = ev.arc;
+  if (typeof cid !== "string" || cid === "null" || !ID_RE.test(cid)) return null;
+  if (typeof kind !== "string" || !CARRIER_KINDS.has(kind)) return null;
+  if (typeof arc !== "string" || !ARCS.has(arc)) return null;
+  return { carrier_id: cid, carrier_kind: kind, arc };
+}
 
 function repoRoot(): string {
   // Walk up from __dirname until we find a .git directory.
@@ -157,10 +210,15 @@ interface RawEvent {
   kind: string;
   node?: string;
   carrier?: string | null;
+  // carrier-shape discriminator + traversal arc (instrumentation-preamble v0.2.0+).
+  // Part of the projection triple-key (carrier, carrier_kind, arc). Legacy events omit them —
+  // the stage projection EXCLUDES such events (degrade, never guess).
+  carrier_kind?: string | null;
   // exit-specific
   outcome?: string;
   gates?: string[];
-  // trend measurements (optional) — sanitised to the TREND_SERIES allowlist on read, never copied verbatim
+  // trend measurements (optional) — sanitised to the TREND_SERIES / SESSION_COST_KEYS allowlists
+  // on read, never copied verbatim
   metrics?: Record<string, unknown>;
   // traverse-specific
   from?: string;
@@ -182,6 +240,12 @@ interface TransitionEntry {
 }
 
 interface CarrierProjection {
+  // The triple-key components (carrier-interface.md "The projection key"). current_stage and
+  // transition_summary are computed from ONLY the events matching this full triple, so a carrier
+  // traversing a shared node (build/review/land) on one arc never bleeds stage into another arc.
+  carrier_id: string;
+  carrier_kind: string;
+  arc: string;
   current_stage: string | null;
   transition_summary: TransitionEntry[];
 }
@@ -201,6 +265,16 @@ interface ConformanceProjection {
   experience_contract: { pass: number; fail: number };
 }
 
+interface SessionCostPoint {
+  at: string;
+  // the carrier triple this measure belongs to (dispatch-complete is carrier-keyed).
+  carrier_id: string;
+  carrier_kind: string;
+  arc: string;
+  // closed numeric allowlist (SESSION_COST_KEYS) — finite, non-negative.
+  tokens_per_session: number;
+}
+
 interface PortalProjection {
   provenance: {
     commit: string;
@@ -215,6 +289,11 @@ interface PortalProjection {
   trends: Record<string, TrendPoint[]>;
   // UX-conformance tallies derived from the closed-allowlist gate tokens.
   conformance: ConformanceProjection;
+  // Per-session dispatch cost — one point per admitted dispatch-complete event carrying a
+  // finite, non-negative tokens_per_session (SESSION_COST_KEYS). The dispatch-efficiency
+  // measure (06-analytics "Per-session cost"). dispatch-complete is a MEASURE event: it never
+  // contributes to any carrier's current_stage. Empty list when no dispatch-complete events exist.
+  session_costs: SessionCostPoint[];
 }
 
 // ---------------------------------------------------------------------------
@@ -229,6 +308,7 @@ function buildEmptySnapshot(commit: string, generatedAt: string): PortalProjecti
     ax: {},
     trends: {},
     conformance: { experience_contract: { pass: 0, fail: 0 } },
+    session_costs: [],
   };
 }
 
@@ -273,13 +353,21 @@ function deriveProjection(
   const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
   const now = new Date(generatedAt).getTime();
 
-  // Per-carrier: ordered stage transitions (from enter events only).
-  // NOTE (incremental loop, input-gated): when a node is shared across arcs, current_stage must
-  // key by the (carrier id, carrier_kind, arc) triple — events now carry carrier_kind + arc — so a
-  // carrier with events on two arcs cannot bleed. Implementing the triple key here and threading it
-  // through the snapshot output + dashboard consumer is pending the first incremental-arc carrier
-  // events (none exist yet); see carrier-interface.md + 06-analytics. Keyed by carrier id for now.
-  const carrierTransitions = new Map<string, TransitionEntry[]>();
+  // Per-carrier-TRIPLE: ordered stage transitions (from enter events only).
+  // current_stage keys by the FULL (carrier_id, carrier_kind, arc) triple, not carrier id alone:
+  // build/review/land are shared across the dev-sprint and incremental arcs, so carrier-id-only
+  // keying would let one arc's stage bleed into another's at a shared node (carrier-interface.md
+  // "The projection key"; 06-analytics). The map key is the composite triple; each value retains
+  // its triple components so the output entry carries them. A legacy enter event missing
+  // carrier_kind or arc is EXCLUDED from the stage projection (degrade, never guess — same
+  // strictness posture as the id-grammar / ISO-ts / future-ts rejections).
+  interface TripleTransitions { carrier_id: string; carrier_kind: string; arc: string; entries: TransitionEntry[]; }
+  const carrierTransitions = new Map<string, TripleTransitions>();
+
+  // Per dispatch-complete event: a session-cost point (carrier-keyed, finite non-negative
+  // tokens_per_session). dispatch-complete is a MEASURE event — it is read ONLY here, never for
+  // current_stage (it is excluded from the enter-driven stage projection above).
+  const sessionCosts: SessionCostPoint[] = [];
 
   // Per-node: last_used ts (as ms for comparison) and traversal timestamps within 30d
   const nodeLastUsedMs = new Map<string, number>();
@@ -296,11 +384,56 @@ function deriveProjection(
   const conformanceTally = { pass: 0, fail: 0 };
 
   for (const ev of events) {
-    // Only process enter and exit events (gate/traverse are not used for projection)
-    if (ev.kind !== "enter" && ev.kind !== "exit") continue;
+    // Process enter/exit (stage + measure projection) and dispatch-complete (measure-only).
+    // gate/traverse are not used for projection.
+    if (ev.kind !== "enter" && ev.kind !== "exit" && ev.kind !== "dispatch-complete") continue;
+
+    const ts = ev.ts;
+
+    // dispatch-complete is carrier-keyed but NOT node-bound (a subagent-completion measure event,
+    // like unit-complete) — it has no `node` and is handled separately below. It is a MEASURE
+    // event: it NEVER advances current_stage, so it is excluded from the enter-driven stage
+    // projection by construction (its branch never touches carrierTransitions).
+    if (ev.kind === "dispatch-complete") {
+      // Validate ts under the SAME strict UTC ISO-8601 + future-ts discipline as stage events.
+      if (typeof ts !== "string" || !ISO_UTC_RE.test(ts)) {
+        console.warn(`  [WARN] dispatch-complete with non-ISO-8601 timestamp rejected — skipped.`);
+        continue;
+      }
+      const dcMs = new Date(ts).getTime();
+      if (isNaN(dcMs)) { console.warn(`  [WARN] dispatch-complete with unparseable timestamp rejected — skipped.`); continue; }
+      if (dcMs > now) { console.warn(`  [WARN] dispatch-complete with future timestamp rejected — skipped.`); continue; }
+      const dcIso = new Date(dcMs).toISOString();
+
+      // Resolve the carrier triple. dispatch-complete must carry the full (carrier, kind, arc)
+      // triple; any element missing or non-conforming drops the measure (degrade, never guess).
+      const triple = resolveTriple(ev);
+      if (!triple) {
+        console.warn(`  [WARN] dispatch-complete missing/non-conforming carrier triple — measure dropped.`);
+        continue;
+      }
+      // Read tokens_per_session by the closed SESSION_COST_KEYS allowlist with a finite +
+      // non-negative guard — a non-numeric (NaN-string), negative, or non-finite (Infinity /
+      // absurd-magnitude overflow) value is dropped; the `metrics` object is NEVER spread verbatim.
+      if (ev.metrics && typeof ev.metrics === "object" && !Array.isArray(ev.metrics)) {
+        const src = ev.metrics as Record<string, unknown>;
+        for (const key of SESSION_COST_KEYS) {
+          const v = src[key];
+          if (typeof v === "number" && Number.isFinite(v) && v >= 0) {
+            sessionCosts.push({
+              at: dcIso,
+              carrier_id: triple.carrier_id,
+              carrier_kind: triple.carrier_kind,
+              arc: triple.arc,
+              tokens_per_session: v,
+            });
+          }
+        }
+      }
+      continue;
+    }
 
     const nodeId = ev.node;
-    const ts = ev.ts;
 
     if (!nodeId || !ts) {
       console.warn("  [WARN] Event missing node or ts — skipped.");
@@ -350,11 +483,24 @@ function deriveProjection(
         nodeTraversals30d.set(nodeId, (nodeTraversals30d.get(nodeId) ?? 0) + 1);
       }
 
-      // Carrier stage transition — a carrier's "stage" is the node it entered
+      // Carrier stage transition — a carrier's "stage" is the node it entered. Keyed by the
+      // FULL (carrier_id, carrier_kind, arc) triple so a shared node (build/review/land) on one
+      // arc never bleeds stage into another arc. A legacy enter event that has a (conforming)
+      // carrier id but is missing/non-conforming carrier_kind or arc resolves to null here and is
+      // EXCLUDED from the stage projection (degrade, never guess) — it still counted toward node
+      // usage above. (carrierId is validated separately above for the warn; resolveTriple re-checks.)
       if (carrierId) {
-        const list = carrierTransitions.get(carrierId) ?? [];
-        list.push({ stage: nodeId, at: tsIso });
-        carrierTransitions.set(carrierId, list);
+        const triple = resolveTriple(ev);
+        if (triple) {
+          const key = `${triple.carrier_id} ${triple.carrier_kind} ${triple.arc}`;
+          const tt = carrierTransitions.get(key) ?? {
+            carrier_id: triple.carrier_id, carrier_kind: triple.carrier_kind, arc: triple.arc, entries: [],
+          };
+          tt.entries.push({ stage: nodeId, at: tsIso });
+          carrierTransitions.set(key, tt);
+        } else {
+          console.warn(`  [WARN] enter event with carrier but missing/non-conforming carrier_kind/arc — excluded from stage projection.`);
+        }
       }
     }
 
@@ -399,20 +545,30 @@ function deriveProjection(
     }
   }
 
-  // Build carriers output
+  // Build carriers output. The output map is keyed by carrier_id for the dashboard consumer
+  // (build-dashboard.ts looks up carriers[item.id]); current_stage / transition_summary are
+  // computed per the FULL triple so no cross-arc bleed. The common case — a carrier id with a
+  // single (kind, arc) — keys cleanly by carrier_id. If the SAME carrier id legitimately appears
+  // under more than one triple (a carrier traversing two arcs), the first stays under the bare
+  // carrier_id and the rest are suffixed `<id>::<arc>` so neither is silently dropped or collapsed.
   const carriers: Record<string, CarrierProjection> = {};
-  for (const [carrierId, transitions] of carrierTransitions) {
-    // current_stage: honor stage_override if present; otherwise latest enter
-    let current_stage: string | null = transitions.length > 0
-      ? transitions[transitions.length - 1].stage
+  for (const [, tt] of carrierTransitions) {
+    // current_stage: honor stage_override (keyed by carrier_id) if present; otherwise latest enter
+    let current_stage: string | null = tt.entries.length > 0
+      ? tt.entries[tt.entries.length - 1].stage
       : null;
-    if (stageOverrides[carrierId]) {
-      current_stage = stageOverrides[carrierId];
+    if (stageOverrides[tt.carrier_id]) {
+      current_stage = stageOverrides[tt.carrier_id];
     }
-    carriers[carrierId] = {
+    const entry: CarrierProjection = {
+      carrier_id: tt.carrier_id,
+      carrier_kind: tt.carrier_kind,
+      arc: tt.arc,
       current_stage,
-      transition_summary: transitions,
+      transition_summary: tt.entries,
     };
+    const outKey = carriers[tt.carrier_id] === undefined ? tt.carrier_id : `${tt.carrier_id}::${tt.arc}`;
+    carriers[outKey] = entry;
   }
 
   // Build nodes output
@@ -441,6 +597,9 @@ function deriveProjection(
     trends[series] = points.slice().sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
   }
 
+  // Session costs — ordered by time so the dispatch-efficiency read is a clean slope.
+  const session_costs = sessionCosts.slice().sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+
   return {
     provenance: {
       commit,
@@ -452,6 +611,7 @@ function deriveProjection(
     ax,
     trends,
     conformance: { experience_contract: { pass: conformanceTally.pass, fail: conformanceTally.fail } },
+    session_costs,
   };
 }
 
@@ -499,6 +659,7 @@ async function main() {
       console.log("  [INFO] Nodes found      :", Object.keys(snapshot.nodes).length);
       console.log("  [INFO] AX nodes found   :", Object.keys(snapshot.ax).length);
       console.log("  [INFO] Trend series     :", Object.keys(snapshot.trends).length);
+      console.log("  [INFO] Session costs    :", snapshot.session_costs.length);
       console.log("  [INFO] Conformance      :", `${snapshot.conformance.experience_contract.pass} pass / ${snapshot.conformance.experience_contract.fail} fail`);
     }
   }

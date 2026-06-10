@@ -3,7 +3,7 @@ kind: reference
 id: IU-schema
 title: Implementation-Unit schema — the plan↔build field contract (two shapes)
 description: The field contract for an implementation unit (IU) — a strict oneOf of two shapes. A CHILD IU (channel sprint, has parent) is the work item a plan decomposes a carrier into and build consumes; it is not a carrier. A STANDALONE IU (channel incremental, no parent) is a carrier-lite — it carries its own minimal lifecycle, a single recorded gate, an improves target, and the vertical-slice/testing contract.
-status: v0.6.0 — 2026-06-05
+status: v0.7.0 — 2026-06-10
 ---
 
 # Implementation-Unit schema
@@ -91,13 +91,16 @@ fields below over the common set:
     `hitl_point` fails validate (the loop would not know which stage to run attended). `hitl_point` is
     part of the carrier interface reused nodes read (see `carrier-interface`).
   - **Staged completeness — the `proposed` stub is valid (R-build).** A standalone IU is scaffolded
-    by `triage` at `lifecycle_state: proposed` carrying only **identity** (`id`, `title`), `channel:
-    incremental`, `improves`, `lifecycle_state: proposed`, `status: planned`, and an empty
-    `gate_decisions[]`. Its **content fields** — `goal`, `files`, `dependencies`, `acceptance`, `acceptance_check`, `size`,
-    `slice_type`, `verification` (+ `hitl_point` when HITL) — are authored by `specify-slice` and are
-    **required from `in-delivery` onward**. Validate enforces the full standalone shape once
-    `lifecycle_state` is past `proposed`; a `proposed` stub validates against this reduced scaffold.
-    (The `improvements-manifest` `slice_type` is therefore null until `specify-slice` tags it.)
+    by `triage` at `lifecycle_state: proposed` carrying **identity** (`id`, `title`), `channel:
+    incremental`, `improves`, `lifecycle_state: proposed`, `status: planned`, an empty
+    `gate_decisions[]`, **and the definition body** (`## Context` + `## Decisions`, written at raise —
+    see the loop-eligibility invariant below). Its **content fields** — `goal`, `files`,
+    `dependencies`, `acceptance`, `acceptance_check`, `size`, `slice_type`, `verification`
+    (+ `hitl_point` when HITL) — are **formalised by `specify-slice` from that captured definition**
+    (typically unattended, in the dispatched session) and are **required from `in-delivery` onward**.
+    Validate enforces the full standalone shape once `lifecycle_state` is past `proposed`; a `proposed`
+    stub validates against this reduced scaffold. (The `improvements-manifest` `slice_type` is therefore
+    null until `specify-slice` formalises it from the recorded decision.)
 - **Child IUs are not carriers (scoped — R1).** A **child** IU does **not** hold carrier
   `lifecycle_state` or `gate_decisions` — those stay the parent carrier's; its `status` is
   build-tracking only. *(This invariant is scoped to the child shape. The standalone shape **is** a
@@ -148,6 +151,21 @@ fields below over the common set:
   **only other standalone IUs** (a small chain), never child-IU ids. If the work decomposes into
   multiple slices that must be sequenced and planned together, it is a **work-item, not a
   standalone IU** — promote it (the light loop never silently grows into a sprint).
+- **Loop-eligibility (cold-handoff) — decision-completeness gate.** A `proposed` standalone IU is
+  **dispatchable by the incremental loop iff it is decision-complete**: its carrier body carries a
+  `## Context` section (**verbatim evidence** — observed vs expected, repro, error output, pointers —
+  never "see this conversation") and a `## Decisions` section (**every call settled, including the
+  AFK/HITL call**), and **no unresolved decision remains in prose**. The test is the **cold-handoff
+  test** — *a fresh agent with only this carrier file and repo access could implement and prove the
+  slice* (field-proven by a chip-spawned cold session). `triage` writes this definition body at raise
+  time (capture, not interview); a fork it cannot settle is escalated or the IU is not raised — it is
+  never handed off open. The **staged-completeness `proposed` stub** (the R-build invariant above)
+  remains a **valid intra-conversation state** but is **not loop-eligible** until decision-complete.
+  Under-definition has **two catch-points with different remedies**: caught at **intake** (the
+  loop-runner gate, operator present) → **defined-now attended** (triage's capture flow re-run) or
+  parked, never dispatched; surfaced **mid-dispatch** (specify-slice, unattended, hits a gap) →
+  `blocked: insufficiently-defined`, back to raise-capture — **never** defined-now, no operator is
+  present in the loop. (Consumed by `loop-runner`'s Phase 0 decision-completeness gate.)
 - **Three-writers, reduced (R2/R6).** Reuses `work-item-schema`'s discipline at reduced scope:
   - **Lifecycle writers, per state (split explicitly):**
     - `proposed` — **authored** by `triage` at scaffold (workflow state, not gated).
@@ -159,7 +177,8 @@ fields below over the common set:
     state** — `lifecycle_state` is the carrier's coarse position, `status` is the fine-grained
     build tracker inside it.
   - **Author** writes content (`goal`, `files`, `acceptance`, `acceptance_check`, `improves`,
-    `slice_type`, `verification`) via `specify-slice`.
+    `slice_type`, `verification`) via `specify-slice`, **formalising it from the captured definition
+    body** (`triage`'s `## Context` + `## Decisions`) — typically unattended in a dispatched session.
   - **`current_stage` is projected** from the event log, **never written** to the file (carrier
     interface; `carrier-interface.md`).
   - **Gate** writes terminal `lifecycle_state` + the `gate_decisions` entry.

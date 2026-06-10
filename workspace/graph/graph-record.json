@@ -1,9 +1,9 @@
 {
-  "generated": "2026-06-10T07:39:39Z",
-  "node_count": 43,
+  "generated": "2026-06-10T12:30:00Z",
+  "node_count": 44,
   "reference_count": 25,
   "handbook_reference_count": 0,
-  "edge_count": 212,
+  "edge_count": 221,
   "nodes": {
     "align-context": {
       "primitive": "skill",
@@ -728,6 +728,50 @@
         ]
       }
     },
+    "loop-runner": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "title": "Loop runner",
+      "status": "v0.2.0 — 2026-06-10",
+      "edges": {
+        "invokes": [
+          {
+            "id": "triage"
+          },
+          {
+            "id": "specify-slice"
+          },
+          {
+            "id": "build"
+          },
+          {
+            "id": "land"
+          }
+        ],
+        "references": [
+          {
+            "id": "IU-schema",
+            "load": "import"
+          },
+          {
+            "id": "carrier-interface",
+            "load": "on-demand"
+          },
+          {
+            "id": "instrumentation-preamble",
+            "load": "import"
+          },
+          {
+            "id": "bindings-contract",
+            "load": "on-demand"
+          },
+          {
+            "id": "deploy-config",
+            "load": "on-demand"
+          }
+        ]
+      }
+    },
     "measure-outcomes": {
       "primitive": "agent",
       "mode": "autonomous",
@@ -1176,7 +1220,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Specify slice",
-      "status": "v0.1.0 — 2026-06-04",
+      "status": "v0.2.0 — 2026-06-10",
       "edges": {
         "invokes": [
           {
@@ -1278,7 +1322,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Triage",
-      "status": "v0.1.0 — 2026-06-04",
+      "status": "v0.2.0 — 2026-06-10",
       "edges": {
         "composes-into": [
           {
@@ -1366,9 +1410,10 @@
     "IU-schema": {
       "kind": "reference",
       "title": "Implementation-Unit schema — the plan↔build field contract (two shapes)",
-      "status": "v0.6.0 — 2026-06-05",
+      "status": "v0.7.0 — 2026-06-10",
       "consumed_by": [
         "build",
+        "loop-runner",
         "plan",
         "specify-slice",
         "triage"
@@ -1399,6 +1444,7 @@
       "status": "v0.5.0 — 2026-06-10",
       "consumed_by": [
         "harness-init",
+        "loop-runner",
         "triage"
       ]
     },
@@ -1427,6 +1473,7 @@
       "consumed_by": [
         "build",
         "land",
+        "loop-runner",
         "review",
         "ship",
         "specify-slice"
@@ -1457,7 +1504,8 @@
       "title": "Deploy-config — the field set deploy validates in preflight, supplied by the harness",
       "status": "v0.1.0 — 2026-06-04",
       "consumed_by": [
-        "deploy"
+        "deploy",
+        "loop-runner"
       ]
     },
     "experience-contract-schema": {
@@ -1510,6 +1558,7 @@
         "health",
         "investigate-probe",
         "land",
+        "loop-runner",
         "optimise",
         "plan",
         "qa",
@@ -2164,6 +2213,56 @@
       "to": "debrief",
       "type": "precedes",
       "arc": "dev-sprint"
+    },
+    {
+      "from": "loop-runner",
+      "to": "triage",
+      "type": "invokes"
+    },
+    {
+      "from": "loop-runner",
+      "to": "specify-slice",
+      "type": "invokes"
+    },
+    {
+      "from": "loop-runner",
+      "to": "build",
+      "type": "invokes"
+    },
+    {
+      "from": "loop-runner",
+      "to": "land",
+      "type": "invokes"
+    },
+    {
+      "from": "loop-runner",
+      "to": "IU-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "loop-runner",
+      "to": "carrier-interface",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "loop-runner",
+      "to": "instrumentation-preamble",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "loop-runner",
+      "to": "bindings-contract",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "loop-runner",
+      "to": "deploy-config",
+      "type": "references",
+      "load": "on-demand"
     },
     {
       "from": "lens-correctness",

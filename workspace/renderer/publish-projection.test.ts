@@ -62,6 +62,37 @@ const EVENTS = [
   // hostile: numeric carrier — ID_RE.test would coerce 90909 via toString; typeof guard must drop
   // the carrier so 90909 never becomes a carrier key.
   { ts: "2026-01-07T08:05:00Z", session: "s8", kind: "enter", node: "benchmark", carrier: 90909 as unknown as string },
+
+  // ── Triple-key (loop-runner-design §7.3) — interleaved carriers/arcs project SEPARATE stage ──
+  // Two carriers traversing the SHARED node `build` on TWO arcs, interleaved in time. Keying by
+  // carrier id alone would let one bleed into the other's current_stage; the triple keeps them
+  // separate. ci-wi (work-item on dev-sprint) ends at `review`; ci-iu (standalone-iu on
+  // incremental) ends at `build`.
+  { ts: "2026-02-01T09:00:00Z", session: "d1", kind: "enter", node: "build",  carrier: "ci-wi", carrier_kind: "work-item",    arc: "dev-sprint"  },
+  { ts: "2026-02-01T09:01:00Z", session: "d2", kind: "enter", node: "build",  carrier: "ci-iu", carrier_kind: "standalone-iu", arc: "incremental" },
+  { ts: "2026-02-01T09:05:00Z", session: "d1", kind: "enter", node: "review", carrier: "ci-wi", carrier_kind: "work-item",    arc: "dev-sprint"  },
+  // ci-iu's last stage event stays `build` — must NOT pick up ci-wi's later `review`.
+
+  // ── dispatch-complete NEVER advances current_stage (measure event) ──
+  // ci-iu emits a dispatch-complete naming node `land` as a hostile attempt to advance its stage.
+  // The projection must ignore it for current_stage (ci-iu stays at `build`) and admit only the
+  // tokens_per_session measure.
+  { ts: "2026-02-01T09:10:00Z", session: "d2", kind: "dispatch-complete", node: "land", carrier: "ci-iu", carrier_kind: "standalone-iu", arc: "incremental", outcome: "built", metrics: { "tokens_per_session": 52000 } },
+
+  // ── tokens_per_session admitted; hostile values rejected ──
+  // good (admitted), negative (rejected), NaN-string (rejected), absurd-magnitude overflow→Infinity
+  // (rejected by the finite guard). Each rides a valid triple so only the VALUE discipline is under test.
+  { ts: "2026-02-02T09:00:00Z", session: "d3", kind: "dispatch-complete", carrier: "ci-good", carrier_kind: "standalone-iu", arc: "incremental", outcome: "built",          metrics: { "tokens_per_session": 38000 } },
+  { ts: "2026-02-02T09:01:00Z", session: "d4", kind: "dispatch-complete", carrier: "ci-neg",  carrier_kind: "standalone-iu", arc: "incremental", outcome: "built",          metrics: { "tokens_per_session": -5 } },
+  { ts: "2026-02-02T09:02:00Z", session: "d5", kind: "dispatch-complete", carrier: "ci-nan",  carrier_kind: "standalone-iu", arc: "incremental", outcome: "built",          metrics: { "tokens_per_session": "9e9SECRET" as unknown as number } },
+  { ts: "2026-02-02T09:03:00Z", session: "d6", kind: "dispatch-complete", carrier: "ci-huge", carrier_kind: "standalone-iu", arc: "incremental", outcome: "built",          metrics: { "tokens_per_session": 1e400 } }, // → Infinity, non-finite, dropped
+
+  // ── legacy events (no carrier_kind / arc) excluded from stage projection ──
+  // ci-legacy has a conforming carrier id but NO kind/arc (preamble < v0.2.0). Its enter events
+  // must NOT produce a carrier entry (excluded — degrade, never guess). `legacynode` still counts
+  // as a used node (node tracking is independent of the stage projection).
+  { ts: "2026-02-03T09:00:00Z", session: "d7", kind: "enter", node: "legacynode", carrier: "ci-legacy" },
+  { ts: "2026-02-03T09:05:00Z", session: "d7", kind: "enter", node: "build",      carrier: "ci-legacy" },
 ];
 
 const dir = mkdtempSync(path.join(tmpdir(), "sg-pub-test-"));
@@ -79,11 +110,12 @@ try {
 }
 
 const snap = JSON.parse(raw) as {
-  carriers: Record<string, { current_stage: string | null; transition_summary: Array<{ stage: string; at: string }> }>;
+  carriers: Record<string, { carrier_id: string; carrier_kind: string; arc: string; current_stage: string | null; transition_summary: Array<{ stage: string; at: string }> }>;
   nodes: Record<string, unknown>;
   ax: Record<string, Record<string, unknown>>;
   trends: Record<string, Array<{ at: string; value: number }>>;
   conformance: { experience_contract: { pass: number; fail: number } };
+  session_costs: Array<{ at: string; carrier_id: string; carrier_kind: string; arc: string; tokens_per_session: number }>;
 };
 
 // The whole serialized snapshot must not carry any private/free-text field that should have
@@ -94,7 +126,9 @@ const FORBIDDEN = ["secret.series", "leak_field", "DROP_ME", "design-approved", 
   // timestamp-leak vectors (Fix 1): neither the raw hostile ts nor its embedded comment may appear.
   "TS_SECRET_LEAK", TS_TRAILING_COMMENT, TS_NON_ISO, "DecSecret",
   // non-string id-coercion vectors (Fix 2): neither the array element nor the numeric carrier may appear.
-  "privateToken", "90909"];
+  "privateToken", "90909",
+  // tokens_per_session hostile-value vector: the NaN-string measure must be dropped, never echoed.
+  "9e9SECRET"];
 
 const bp = snap.trends["benchmark.perf"] ?? [];
 const hq = snap.trends["health.quality"] ?? [];
@@ -133,6 +167,41 @@ const checks: Array<[string, boolean]> = [
   ["no forbidden token leaks into snapshot", !FORBIDDEN.some((t) => raw.includes(t))],
 ];
 
+// ── Triple-key: interleaved carriers/arcs project SEPARATE current_stage per triple ──
+const ciWi = snap.carriers["ci-wi"];
+const ciIu = snap.carriers["ci-iu"];
+checks.push(
+  ["triple: ci-wi (work-item/dev-sprint) present", !!ciWi && ciWi.carrier_kind === "work-item" && ciWi.arc === "dev-sprint"],
+  ["triple: ci-iu (standalone-iu/incremental) present", !!ciIu && ciIu.carrier_kind === "standalone-iu" && ciIu.arc === "incremental"],
+  ["triple: ci-wi current_stage = review (its own arc)", ciWi?.current_stage === "review"],
+  ["triple: ci-iu current_stage = build (NOT bled to review)", ciIu?.current_stage === "build"],
+);
+
+// ── dispatch-complete never advances current_stage (it named `land` but ci-iu stays at build) ──
+checks.push(
+  ["dispatch-complete did NOT advance ci-iu stage to land", ciIu?.current_stage === "build"],
+  ["dispatch-complete did NOT add a `land` transition to ci-iu", !(ciIu?.transition_summary ?? []).some((t) => t.stage === "land")],
+);
+
+// ── tokens_per_session admitted; hostile values (negative, NaN-string, Infinity) rejected ──
+const sc = snap.session_costs ?? [];
+const scById = (id: string) => sc.filter((p) => p.carrier_id === id);
+checks.push(
+  ["tokens_per_session: ci-iu admitted (52000)", scById("ci-iu").length === 1 && scById("ci-iu")[0].tokens_per_session === 52000],
+  ["tokens_per_session: ci-good admitted (38000)", scById("ci-good").length === 1 && scById("ci-good")[0].tokens_per_session === 38000],
+  ["tokens_per_session: negative dropped (ci-neg absent)", scById("ci-neg").length === 0],
+  ["tokens_per_session: NaN-string dropped (ci-nan absent)", scById("ci-nan").length === 0],
+  ["tokens_per_session: Infinity/absurd-magnitude dropped (ci-huge absent)", scById("ci-huge").length === 0],
+  ["session_costs carry the carrier triple", sc.every((p) => typeof p.carrier_id === "string" && typeof p.carrier_kind === "string" && typeof p.arc === "string")],
+  ["session_costs time-sorted ascending", sc.every((p, i) => i === 0 || new Date(sc[i - 1].at).getTime() <= new Date(p.at).getTime())],
+);
+
+// ── legacy events (no carrier_kind/arc) excluded from stage projection ──
+checks.push(
+  ["legacy carrier (no kind/arc) excluded from stage projection", !("ci-legacy" in snap.carriers) && !Object.values(snap.carriers).some((c) => c.carrier_id === "ci-legacy")],
+  ["legacy node still counted as a used node", "legacynode" in snap.nodes],
+);
+
 let ok = true;
 for (const [name, pass] of checks) {
   console.log(`${pass ? "✓" : "✗"} ${name}`);
@@ -148,9 +217,10 @@ try {
   const empty = JSON.parse(readFileSync(emptyOut, "utf8")) as typeof snap;
   const emptyOk =
     JSON.stringify(empty.trends) === "{}" &&
+    JSON.stringify(empty.session_costs) === "[]" &&
     empty.conformance.experience_contract.pass === 0 &&
     empty.conformance.experience_contract.fail === 0;
-  console.log(`${emptyOk ? "✓" : "✗"} empty snapshot has trends:{} + zero conformance tally`);
+  console.log(`${emptyOk ? "✓" : "✗"} empty snapshot has trends:{} + session_costs:[] + zero conformance tally`);
   if (!emptyOk) ok = false;
 } catch (e) {
   console.log("✗ empty-snapshot run failed:", e);
