@@ -218,7 +218,6 @@ The following references are single-sourced into this primitive's bundle and spl
 
 @references/confidence-anchors.md
 @references/findings-schema.md
-@references/instrumentation-preamble.md
 @references/severity-scale.md
 
 ## On-demand references

@@ -312,12 +312,6 @@ The following process edges are wired in the frontmatter (backbone wiring pass, 
   its carrier, so it serves both the work-item (dev-sprint) and standalone-IU (incremental)
   kinds without assuming work-item-only fields. Wired.
 
-## Imported references
-
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
-
-@references/instrumentation-preamble.md
-
 ## On-demand references
 
 Read these at the step of need (single-sourced into this primitive's bundle):

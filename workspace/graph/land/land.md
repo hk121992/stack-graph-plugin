@@ -18,7 +18,6 @@ edges:
     - { id: dev-sprint,  stage: land }
     - { id: incremental, stage: land }
   references:
-    - { id: instrumentation-preamble, load: import }
     - { id: carrier-interface,        load: on-demand }
   precedes:
     - { id: debrief, arc: dev-sprint }

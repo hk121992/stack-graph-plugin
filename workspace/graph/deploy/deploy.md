@@ -20,7 +20,6 @@ edges:
   loads:         []
   references:
     - { id: deploy-config,            load: on-demand }
-    - { id: instrumentation-preamble, load: import }
   composes-into: []
   can-follow:    []
   precedes:      []

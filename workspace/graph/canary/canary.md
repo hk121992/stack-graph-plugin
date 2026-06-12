@@ -17,7 +17,6 @@ determinism: generative
 # simulate-users' experience-contract; the factory ships only the pointer and validate/build skip it.
 edges:
   references:
-    - { id: instrumentation-preamble, load: import }
     - { id: canary-manifest,          load: on-demand, external: true }
 # analytics — the loop
 goals:

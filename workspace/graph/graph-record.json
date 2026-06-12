@@ -1,9 +1,9 @@
 {
-  "generated": "2026-06-10T14:56:57Z",
-  "node_count": 46,
-  "reference_count": 26,
+  "generated": "2026-06-12T18:15:46Z",
+  "node_count": 47,
+  "reference_count": 28,
   "handbook_reference_count": 0,
-  "edge_count": 224,
+  "edge_count": 205,
   "nodes": {
     "align-context": {
       "primitive": "skill",
@@ -27,10 +27,6 @@
             "id": "handbook",
             "load": "on-demand",
             "external": true
-          },
-          {
-            "id": "instrumentation-preamble",
-            "load": "import"
           }
         ],
         "precedes": [
@@ -65,10 +61,6 @@
             "load": "on-demand"
           },
           {
-            "id": "instrumentation-preamble",
-            "load": "import"
-          },
-          {
             "id": "domain-glossary",
             "load": "on-demand",
             "external": true
@@ -89,7 +81,7 @@
       "edges": {
         "references": [
           {
-            "id": "instrumentation-preamble",
+            "id": "analytics-vocabulary",
             "load": "import"
           },
           {
@@ -104,7 +96,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Build",
-      "status": "v0.4.0 — 2026-06-05",
+      "status": "v0.5.0 — 2026-06-10",
       "edges": {
         "invokes": [
           {
@@ -133,10 +125,6 @@
         "references": [
           {
             "id": "IU-schema",
-            "load": "import"
-          },
-          {
-            "id": "instrumentation-preamble",
             "load": "import"
           },
           {
@@ -172,10 +160,6 @@
       "edges": {
         "references": [
           {
-            "id": "instrumentation-preamble",
-            "load": "import"
-          },
-          {
             "id": "canary-manifest",
             "load": "on-demand",
             "external": true
@@ -201,6 +185,13 @@
           }
         ]
       }
+    },
+    "consistency-checker": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "title": "Consistency checker",
+      "status": "v0.1.0 — 2026-06-10",
+      "edges": {}
     },
     "debrief": {
       "primitive": "skill",
@@ -231,12 +222,7 @@
             "stage": "debrief"
           }
         ],
-        "references": [
-          {
-            "id": "instrumentation-preamble",
-            "load": "import"
-          }
-        ]
+        "references": []
       }
     },
     "debug": {
@@ -254,10 +240,6 @@
           {
             "id": "iron-law",
             "load": "import"
-          },
-          {
-            "id": "instrumentation-preamble",
-            "load": "import"
           }
         ]
       }
@@ -268,21 +250,12 @@
       "title": "Deploy",
       "status": "v0.2.0 — 2026-06-04",
       "edges": {
-        "invokes": [],
-        "loads": [],
         "references": [
           {
             "id": "deploy-config",
             "load": "on-demand"
-          },
-          {
-            "id": "instrumentation-preamble",
-            "load": "import"
           }
-        ],
-        "composes-into": [],
-        "can-follow": [],
-        "precedes": []
+        ]
       }
     },
     "design": {
@@ -332,10 +305,6 @@
             "id": "experience-contract",
             "load": "on-demand",
             "external": true
-          },
-          {
-            "id": "instrumentation-preamble",
-            "load": "import"
           }
         ],
         "precedes": [
@@ -352,10 +321,6 @@
       "status": "v0.1.0 — 2026-06-05",
       "edges": {
         "references": [
-          {
-            "id": "instrumentation-preamble",
-            "load": "import"
-          },
           {
             "id": "ux-principles",
             "load": "on-demand"
@@ -388,10 +353,6 @@
         ],
         "references": [
           {
-            "id": "instrumentation-preamble",
-            "load": "import"
-          },
-          {
             "id": "ux-principles",
             "load": "on-demand"
           }
@@ -405,10 +366,6 @@
       "status": "v0.1.0 — 2026-06-05",
       "edges": {
         "references": [
-          {
-            "id": "instrumentation-preamble",
-            "load": "import"
-          },
           {
             "id": "ux-principles",
             "load": "on-demand"
@@ -528,7 +485,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Harness init",
-      "status": "v0.3.0 — 2026-06-04",
+      "status": "v0.5.0 — 2026-06-12",
       "edges": {
         "references": [
           {
@@ -542,6 +499,24 @@
           {
             "id": "work-item-schema",
             "load": "on-demand"
+          },
+          {
+            "id": "handoff-prompt-convention",
+            "load": "on-demand"
+          }
+        ]
+      }
+    },
+    "harness-update": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "title": "Harness update",
+      "status": "v0.1.0 — 2026-06-12",
+      "edges": {
+        "references": [
+          {
+            "id": "bindings-contract",
+            "load": "import"
           }
         ]
       }
@@ -554,7 +529,7 @@
       "edges": {
         "references": [
           {
-            "id": "instrumentation-preamble",
+            "id": "analytics-vocabulary",
             "load": "import"
           },
           {
@@ -571,12 +546,7 @@
       "title": "Investigate probe",
       "status": "v0.1.0 — 2026-06-05",
       "edges": {
-        "references": [
-          {
-            "id": "instrumentation-preamble",
-            "load": "import"
-          }
-        ]
+        "references": []
       }
     },
     "land": {
@@ -607,10 +577,6 @@
           }
         ],
         "references": [
-          {
-            "id": "instrumentation-preamble",
-            "load": "import"
-          },
           {
             "id": "carrier-interface",
             "load": "on-demand"
@@ -724,6 +690,13 @@
         ]
       }
     },
+    "link-validator": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "title": "Link validator",
+      "status": "v0.1.0 — 2026-06-10",
+      "edges": {}
+    },
     "log-decision": {
       "primitive": "agent",
       "mode": "autonomous",
@@ -742,7 +715,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Loop runner",
-      "status": "v0.2.0 — 2026-06-10",
+      "status": "v0.3.0 — 2026-06-10",
       "edges": {
         "invokes": [
           {
@@ -768,7 +741,7 @@
             "load": "on-demand"
           },
           {
-            "id": "instrumentation-preamble",
+            "id": "handoff-prompt-convention",
             "load": "import"
           },
           {
@@ -786,7 +759,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Measure outcomes",
-      "status": "v0.1.0 — 2026-06-01",
+      "status": "v0.2.0 — 2026-06-10",
       "edges": {}
     },
     "optimise": {
@@ -803,12 +776,7 @@
             "id": "simulate-users"
           }
         ],
-        "references": [
-          {
-            "id": "instrumentation-preamble",
-            "load": "import"
-          }
-        ]
+        "references": []
       }
     },
     "plan": {
@@ -847,10 +815,6 @@
           },
           {
             "id": "confidence-anchors",
-            "load": "import"
-          },
-          {
-            "id": "instrumentation-preamble",
             "load": "import"
           }
         ],
@@ -976,10 +940,6 @@
         ],
         "references": [
           {
-            "id": "instrumentation-preamble",
-            "load": "import"
-          },
-          {
             "id": "findings-schema",
             "load": "import"
           }
@@ -1021,10 +981,6 @@
             "id": "handbook",
             "load": "on-demand",
             "external": true
-          },
-          {
-            "id": "instrumentation-preamble",
-            "load": "import"
           },
           {
             "id": "decisions-store",
@@ -1097,7 +1053,7 @@
             "load": "import"
           },
           {
-            "id": "instrumentation-preamble",
+            "id": "analytics-vocabulary",
             "load": "import"
           },
           {
@@ -1123,8 +1079,6 @@
       "title": "Ship",
       "status": "v0.3.0 — 2026-06-04",
       "edges": {
-        "invokes": [],
-        "loads": [],
         "references": [
           {
             "id": "pr-description-shape",
@@ -1134,10 +1088,7 @@
             "id": "carrier-interface",
             "load": "on-demand"
           }
-        ],
-        "composes-into": [],
-        "can-follow": [],
-        "precedes": []
+        ]
       }
     },
     "simulate-users": {
@@ -1168,7 +1119,7 @@
             "external": true
           },
           {
-            "id": "instrumentation-preamble",
+            "id": "analytics-vocabulary",
             "load": "import"
           }
         ]
@@ -1213,10 +1164,6 @@
             "id": "handbook",
             "load": "on-demand",
             "external": true
-          },
-          {
-            "id": "instrumentation-preamble",
-            "load": "import"
           }
         ],
         "precedes": [
@@ -1228,7 +1175,7 @@
     },
     "specify-slice": {
       "primitive": "skill",
-      "mode": "collaborative",
+      "mode": "collaborative          # hand-run character; the body also renders an `unattended` mode",
       "title": "Specify slice",
       "status": "v0.2.0 — 2026-06-10",
       "edges": {
@@ -1251,10 +1198,6 @@
           {
             "id": "carrier-interface",
             "load": "on-demand"
-          },
-          {
-            "id": "instrumentation-preamble",
-            "load": "import"
           },
           {
             "id": "lens-dispatch",
@@ -1350,10 +1293,6 @@
             "load": "on-demand"
           },
           {
-            "id": "instrumentation-preamble",
-            "load": "import"
-          },
-          {
             "id": "work-item-schema",
             "load": "on-demand"
           }
@@ -1395,10 +1334,6 @@
         ],
         "references": [
           {
-            "id": "instrumentation-preamble",
-            "load": "import"
-          },
-          {
             "id": "findings-schema",
             "load": "import"
           }
@@ -1414,20 +1349,6 @@
           }
         ]
       }
-    },
-    "consistency-checker": {
-      "primitive": "agent",
-      "mode": "autonomous",
-      "title": "Consistency checker",
-      "status": "v0.1.0 — 2026-06-10",
-      "edges": {}
-    },
-    "link-validator": {
-      "primitive": "agent",
-      "mode": "autonomous",
-      "title": "Link validator",
-      "status": "v0.1.0 — 2026-06-10",
-      "edges": {}
     }
   },
   "references": {
@@ -1441,6 +1362,17 @@
         "plan",
         "specify-slice",
         "triage"
+      ]
+    },
+    "analytics-vocabulary": {
+      "kind": "reference",
+      "title": "Analytics vocabulary — the model-authored verdict tokens the analyzer reads",
+      "status": "v0.1.0 — 2026-06-12",
+      "consumed_by": [
+        "benchmark",
+        "health",
+        "review",
+        "simulate-users"
       ]
     },
     "architecture-doctrine": {
@@ -1465,9 +1397,10 @@
     "bindings-contract": {
       "kind": "reference",
       "title": "Bindings contract — the keys a harness supplies, and the surface template",
-      "status": "v0.5.0 — 2026-06-10",
+      "status": "v0.7.0 — 2026-06-12",
       "consumed_by": [
         "harness-init",
+        "harness-update",
         "loop-runner",
         "triage"
       ]
@@ -1562,37 +1495,27 @@
         "strategy-curator"
       ]
     },
+    "handoff-prompt-convention": {
+      "kind": "reference",
+      "title": "Handoff-prompt convention — the delta-only field form for cold agent→agent handoffs",
+      "status": "v0.2.0 — 2026-06-12",
+      "consumed_by": [
+        "harness-init",
+        "loop-runner"
+      ]
+    },
     "instrumentation-preamble": {
       "kind": "reference",
-      "title": "Instrumentation preamble — node enter/exit emit contract",
-      "status": "v0.3.0 — 2026-06-05",
+      "title": "Instrumentation preamble — RETIRED (analyzer-derived; tombstone)",
+      "status": "v1.0.0 — 2026-06-12 — RETIRED (cluster A, #28, supersedes #21)",
+      "consumed_by": []
+    },
+    "integrator-checklist": {
+      "kind": "reference",
+      "title": "Integrator checklist",
+      "status": "v0.1.0 — 2026-06-10",
       "consumed_by": [
-        "align-context",
-        "architecture-review",
-        "benchmark",
-        "build",
-        "canary",
-        "debrief",
-        "debug",
-        "deploy",
-        "design",
-        "design-implement",
-        "design-review",
-        "design-shotgun",
-        "health",
-        "investigate-probe",
-        "land",
-        "loop-runner",
-        "optimise",
-        "plan",
-        "qa",
-        "reconcile",
-        "review",
-        "simulate-users",
-        "specify",
-        "specify-slice",
-        "triage",
-        "verify"
+        "handbook-curator"
       ]
     },
     "iron-law": {
@@ -1627,7 +1550,7 @@
     "pm-methodology-provenance": {
       "kind": "reference",
       "title": "PM pack — methodology provenance",
-      "status": "v0.1.0 — 2026-06-01",
+      "status": "v0.1.1 — 2026-06-10",
       "consumed_by": []
     },
     "pr-description-shape": {
@@ -1698,14 +1621,6 @@
         "specify-slice",
         "triage"
       ]
-    },
-    "integrator-checklist": {
-      "kind": "reference",
-      "title": "Integrator checklist",
-      "status": "v0.1.0 — 2026-06-10",
-      "consumed_by": [
-        "handbook-curator"
-      ]
     }
   },
   "handbook_references": {},
@@ -1727,12 +1642,6 @@
       "type": "references",
       "load": "on-demand",
       "external": true
-    },
-    {
-      "from": "align-context",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
     },
     {
       "from": "align-context",
@@ -1762,12 +1671,6 @@
     },
     {
       "from": "architecture-review",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
-    },
-    {
-      "from": "architecture-review",
       "to": "domain-glossary",
       "type": "references",
       "load": "on-demand",
@@ -1780,7 +1683,7 @@
     },
     {
       "from": "benchmark",
-      "to": "instrumentation-preamble",
+      "to": "analytics-vocabulary",
       "type": "references",
       "load": "import"
     },
@@ -1831,12 +1734,6 @@
     },
     {
       "from": "build",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
-    },
-    {
-      "from": "build",
       "to": "carrier-interface",
       "type": "references",
       "load": "on-demand"
@@ -1862,12 +1759,6 @@
       "from": "build",
       "to": "review",
       "type": "precedes"
-    },
-    {
-      "from": "canary",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
     },
     {
       "from": "canary",
@@ -1921,12 +1812,6 @@
       "stage": "debrief"
     },
     {
-      "from": "debrief",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
-    },
-    {
       "from": "debug",
       "to": "investigate-probe",
       "type": "invokes"
@@ -1938,22 +1823,10 @@
       "load": "import"
     },
     {
-      "from": "debug",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
-    },
-    {
       "from": "deploy",
       "to": "deploy-config",
       "type": "references",
       "load": "on-demand"
-    },
-    {
-      "from": "deploy",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
     },
     {
       "from": "design",
@@ -2012,20 +1885,8 @@
     },
     {
       "from": "design",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
-    },
-    {
-      "from": "design",
       "to": "specify",
       "type": "precedes"
-    },
-    {
-      "from": "design-implement",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
     },
     {
       "from": "design-implement",
@@ -2052,21 +1913,9 @@
     },
     {
       "from": "design-review",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
-    },
-    {
-      "from": "design-review",
       "to": "ux-principles",
       "type": "references",
       "load": "on-demand"
-    },
-    {
-      "from": "design-shotgun",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
     },
     {
       "from": "design-shotgun",
@@ -2141,6 +1990,16 @@
     },
     {
       "from": "handbook-curator",
+      "to": "consistency-checker",
+      "type": "invokes"
+    },
+    {
+      "from": "handbook-curator",
+      "to": "link-validator",
+      "type": "invokes"
+    },
+    {
+      "from": "handbook-curator",
       "to": "handbook",
       "type": "references",
       "load": "on-demand",
@@ -2163,16 +2022,6 @@
       "to": "bundling-rules",
       "type": "references",
       "load": "on-demand"
-    },
-    {
-      "from": "handbook-curator",
-      "to": "consistency-checker",
-      "type": "invokes"
-    },
-    {
-      "from": "handbook-curator",
-      "to": "link-validator",
-      "type": "invokes"
     },
     {
       "from": "handbook-curator",
@@ -2199,8 +2048,20 @@
       "load": "on-demand"
     },
     {
+      "from": "harness-init",
+      "to": "handoff-prompt-convention",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "harness-update",
+      "to": "bindings-contract",
+      "type": "references",
+      "load": "import"
+    },
+    {
       "from": "health",
-      "to": "instrumentation-preamble",
+      "to": "analytics-vocabulary",
       "type": "references",
       "load": "import"
     },
@@ -2210,12 +2071,6 @@
       "type": "references",
       "load": "on-demand",
       "external": true
-    },
-    {
-      "from": "investigate-probe",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
     },
     {
       "from": "land",
@@ -2246,12 +2101,6 @@
     },
     {
       "from": "land",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
-    },
-    {
-      "from": "land",
       "to": "carrier-interface",
       "type": "references",
       "load": "on-demand"
@@ -2261,56 +2110,6 @@
       "to": "debrief",
       "type": "precedes",
       "arc": "dev-sprint"
-    },
-    {
-      "from": "loop-runner",
-      "to": "triage",
-      "type": "invokes"
-    },
-    {
-      "from": "loop-runner",
-      "to": "specify-slice",
-      "type": "invokes"
-    },
-    {
-      "from": "loop-runner",
-      "to": "build",
-      "type": "invokes"
-    },
-    {
-      "from": "loop-runner",
-      "to": "land",
-      "type": "invokes"
-    },
-    {
-      "from": "loop-runner",
-      "to": "IU-schema",
-      "type": "references",
-      "load": "import"
-    },
-    {
-      "from": "loop-runner",
-      "to": "carrier-interface",
-      "type": "references",
-      "load": "on-demand"
-    },
-    {
-      "from": "loop-runner",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
-    },
-    {
-      "from": "loop-runner",
-      "to": "bindings-contract",
-      "type": "references",
-      "load": "on-demand"
-    },
-    {
-      "from": "loop-runner",
-      "to": "deploy-config",
-      "type": "references",
-      "load": "on-demand"
     },
     {
       "from": "lens-correctness",
@@ -2403,6 +2202,56 @@
       "load": "import"
     },
     {
+      "from": "loop-runner",
+      "to": "triage",
+      "type": "invokes"
+    },
+    {
+      "from": "loop-runner",
+      "to": "specify-slice",
+      "type": "invokes"
+    },
+    {
+      "from": "loop-runner",
+      "to": "build",
+      "type": "invokes"
+    },
+    {
+      "from": "loop-runner",
+      "to": "land",
+      "type": "invokes"
+    },
+    {
+      "from": "loop-runner",
+      "to": "IU-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "loop-runner",
+      "to": "carrier-interface",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "loop-runner",
+      "to": "handoff-prompt-convention",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "loop-runner",
+      "to": "bindings-contract",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "loop-runner",
+      "to": "deploy-config",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
       "from": "optimise",
       "to": "benchmark",
       "type": "invokes"
@@ -2411,12 +2260,6 @@
       "from": "optimise",
       "to": "simulate-users",
       "type": "invokes"
-    },
-    {
-      "from": "optimise",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
     },
     {
       "from": "plan",
@@ -2456,12 +2299,6 @@
     {
       "from": "plan",
       "to": "confidence-anchors",
-      "type": "references",
-      "load": "import"
-    },
-    {
-      "from": "plan",
-      "to": "instrumentation-preamble",
       "type": "references",
       "load": "import"
     },
@@ -2573,12 +2410,6 @@
     },
     {
       "from": "qa",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
-    },
-    {
-      "from": "qa",
       "to": "findings-schema",
       "type": "references",
       "load": "import"
@@ -2610,12 +2441,6 @@
       "type": "references",
       "load": "on-demand",
       "external": true
-    },
-    {
-      "from": "reconcile",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
     },
     {
       "from": "reconcile",
@@ -2701,7 +2526,7 @@
     },
     {
       "from": "review",
-      "to": "instrumentation-preamble",
+      "to": "analytics-vocabulary",
       "type": "references",
       "load": "import"
     },
@@ -2763,7 +2588,7 @@
     },
     {
       "from": "simulate-users",
-      "to": "instrumentation-preamble",
+      "to": "analytics-vocabulary",
       "type": "references",
       "load": "import"
     },
@@ -2798,12 +2623,6 @@
     },
     {
       "from": "specify",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
-    },
-    {
-      "from": "specify",
       "to": "plan",
       "type": "precedes"
     },
@@ -2829,12 +2648,6 @@
       "to": "carrier-interface",
       "type": "references",
       "load": "on-demand"
-    },
-    {
-      "from": "specify-slice",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
     },
     {
       "from": "specify-slice",
@@ -2935,12 +2748,6 @@
     },
     {
       "from": "triage",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
-    },
-    {
-      "from": "triage",
       "to": "work-item-schema",
       "type": "references",
       "load": "on-demand"
@@ -2975,12 +2782,6 @@
       "to": "dev-sprint",
       "type": "composes-into",
       "stage": "verify"
-    },
-    {
-      "from": "verify",
-      "to": "instrumentation-preamble",
-      "type": "references",
-      "load": "import"
     },
     {
       "from": "verify",

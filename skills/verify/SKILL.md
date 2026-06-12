@@ -152,5 +152,4 @@ and the same consolidation.
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
 @references/findings-schema.md
-@references/instrumentation-preamble.md
 

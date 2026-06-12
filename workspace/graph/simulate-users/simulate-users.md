@@ -23,7 +23,10 @@ determinism: generative
 # *against* — the schema/overlay pairing strategy-curator uses for vpc-schema/bmc-schema.
 # `instrumentation-preamble` (import) is the enter/exit emit contract: this node attaches the
 # product run's AX profile as the `ax` aggregate on its node-exit event so the analytics AX axis
-# projects it (the verify-sibling pattern qa/design-review follow).
+# projects it (the verify-sibling pattern qa/design-review follow). `analytics-vocabulary` (import)
+# carries the model-authored verdict tokens — the `<sg-signal>` block + the experience-contract gate
+# token — this node states in its final result for the transcript analyzer to read (the layer-2
+# verdict channel; the analyzer derives everything else from the transcript).
 edges:
   composes-into:
     - { id: dev-sprint, stage: verify }
@@ -31,7 +34,7 @@ edges:
     - { id: experience-contract,        load: on-demand, external: true }
     - { id: experience-contract-schema, load: on-demand }
     - { id: personas,                   load: on-demand, external: true }
-    - { id: instrumentation-preamble,   load: import }
+    - { id: analytics-vocabulary,       load: import }
 # analytics — the loop
 goals:
   - outcome: The product behaves as intended before real users see it — edge cases the instructions do not cover are caught against the experience contract, not by eyeballing (the UX dimension).
@@ -262,10 +265,20 @@ projection's substrate. Two signals ride the exit event:
   detail (the ranked friction narrative, the tool-path order) stays in your returned profile,
   not in `ax`. This `ax` block is the product-facing instance of the factory's own AX
   instrumentation — same exit-event shape, pointed at the *product's* run.
-- **The UX-conformance result, as a gate on the exit event.** Emit the run's verdict against the
-  experience contract as a conformance signal — `experience-contract:<pass|fail>` in the exit
-  event's `gates` array — `pass` only when every graded invariant holds and no failure mode
-  fired, `fail` otherwise.
+- **The UX-conformance result, as a `<sg-signal>` verdict in your final result.** The
+  experience-contract verdict is a **model judgment** the analyzer cannot derive from the transcript,
+  so state it as a fenced `<sg-signal>` block in your **final output/result message** (per
+  `analytics-vocabulary`), not on an event. Emit the run's verdict against the experience contract as
+  the `experience-contract:<pass|fail>` gate token in the block's `gates` array:
+
+  ```
+  <sg-signal>{"gates":["experience-contract:pass"]}</sg-signal>
+  ```
+
+  `pass` only when every graded invariant holds and no failure mode fired, `fail` otherwise. The
+  analyzer reads this block from your run's final message (the **subagent** transcript's final message
+  when you run dispatched, e.g. under `verify`); absent or malformed, it is simply **not recorded**
+  (honest under-capture, never invented).
 
 On a `tier-1` reconstruction the `ax` numbers are an estimate (one agent's own traversal); on a
 live `tier-2` run they are measured from the assistant-agent's transcript. Tag which in the

@@ -217,7 +217,6 @@ You write **no carrier lifecycle field** and **no gate decision**. The projectio
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
 @references/IU-schema.md
-@references/instrumentation-preamble.md
 
 ## On-demand references
 

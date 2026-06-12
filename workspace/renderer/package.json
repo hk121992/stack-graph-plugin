@@ -9,6 +9,9 @@
     "build:graph": "bun run build-graph.ts",
     "build:dashboard": "bun run build-dashboard.ts",
     "publish:projection": "bun run publish-projection.ts",
-    "test:publish": "bun run publish-projection.test.ts"
+    "token-usage": "bun run sg-token-usage.ts",
+    "test:publish": "bun run publish-projection.test.ts",
+    "test:transcript-usage": "bun run transcript-usage.test.ts",
+    "test:token-usage": "bun run sg-token-usage.test.ts"
   }
 }

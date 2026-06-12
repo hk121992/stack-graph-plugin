@@ -22,7 +22,6 @@ edges:
   composes-into:
     - { id: dev-sprint, stage: verify }
   references:
-    - { id: instrumentation-preamble, load: import }
     - { id: ux-principles,            load: on-demand }
 # analytics — the loop
 goals:

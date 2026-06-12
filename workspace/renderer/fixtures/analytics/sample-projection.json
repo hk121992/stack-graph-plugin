@@ -47,6 +47,18 @@
   "conformance": {
     "experience_contract": { "pass": 7, "fail": 1 }
   },
+  "session_costs": [
+    { "at": "2026-06-01T14:05:00Z", "kind": "unit-usage", "scope_id": "iu-001", "carrier_id": "wi-001", "carrier_kind": "work-item", "arc": "dev-sprint", "model": "claude-opus-4-8", "cumulative": false, "usage": { "input": 4200, "output": 1800, "cache_creation_5m": 9000, "cache_creation_1h": 0, "cache_read": 310000, "total": 325000 } },
+    { "at": "2026-06-01T15:10:00Z", "kind": "unit-usage", "scope_id": "iu-002", "carrier_id": "wi-001", "carrier_kind": "work-item", "arc": "dev-sprint", "model": "claude-opus-4-8", "cumulative": false, "usage": { "input": 5100, "output": 2300, "cache_creation_5m": 12000, "cache_creation_1h": 0, "cache_read": 402000, "total": 421400 } },
+    { "at": "2026-06-01T16:00:00Z", "kind": "session-usage", "scope_id": "sess-1", "carrier_id": null, "carrier_kind": null, "arc": null, "model": "claude-opus-4-8", "cumulative": true, "usage": { "input": 12000, "output": 5200, "cache_creation_5m": 28000, "cache_creation_1h": 4000, "cache_read": 980000, "total": 1029200 } }
+  ],
+  "reconciliation": {
+    "unit_usage": 2, "session_usage": 1, "dispatch_usage": 0,
+    "measured_iu_total": 746400, "session_total": 1029200,
+    "inequality_ok": true, "instrumentation_errors": 0,
+    "rejected_model_token_keys": 0, "version_incompatible_events": 0,
+    "notes": ["Sample: 2 IU measures under 1 session; Σ child ≤ session holds."]
+  },
   "path_conformance": {
     "traced_carriers": 1,
     "on_path": 22,

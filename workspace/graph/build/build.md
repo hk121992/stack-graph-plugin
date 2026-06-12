@@ -18,8 +18,10 @@ determinism: generative
 # + script fallback. Referenced inline in body prose only (Non-nodes, graph-map).
 # IN-SPAN REVIEWER (CF-2): a recommended fresh-context reviewer subagent, dispatched in prose —
 # NOT a graph node or edge; it does not replace the downstream `review` stage.
-# TOKENS_PER_IU (D57): emitted on each unit-complete event into the analytics product-outcomes
-# event log — a body emit, NOT an edge or a new 06-analytics dependency.
+# PER-IU COST (D69 amends D57): the body emits the STRUCTURAL unit-complete (IU id + acceptance
+# evidence) only — NO token numbers. Cost is HOOK-captured (PostToolUse native usage → unit-usage),
+# joined by scope id. A body cannot see cache reads, so a body-emitted token figure is fabrication
+# (the ~25x error); the preamble's do-NOT-emit list bars tokens_per_iu and the publisher rejects it.
 # INVOKED SUB-PATHS (wired, caller-side convention): build invokes debug (Iron-Law fix path for a
 # failing unit), design-implement (a UI unit), optimise (a perf-critical unit) — the inbound invoke
 # is authored here, on build's side; the target nodes declare no inbound edge.
@@ -38,7 +40,6 @@ edges:
     - { id: incremental, stage: build }
   references:
     - { id: IU-schema,                load: import }
-    - { id: instrumentation-preamble, load: import }
     - { id: carrier-interface,        load: on-demand }
     - { id: test-discipline,          load: on-demand }
   can-follow:
@@ -54,10 +55,10 @@ goals:
   - outcome: Rework is caught and fixed within the build span, not deferred to review.
     metric: fraction of IUs requiring a review→build re-entry vs units where build caught and resolved the issue in-span; average re-entry count per IU.
     earns-keep: re-entry rate trends down as the span matures; a span that never self-corrects despite clear acceptance criteria is a calibration signal for the autonomous depth setting.
-  - outcome: The per-IU build cost is measured, so the single-agent context budget is an empirical dial and decomposition quality is observable.
-    metric: tokens_per_iu emitted on each unit-complete event into the analytics product-outcomes stream; measure-outcomes derives the distribution and the over-budget share against the harness budget.
+  - outcome: The per-IU build cost is measured (hook-captured, not body-emitted), so the single-agent context budget is an empirical dial and decomposition quality is observable.
+    metric: per-IU cost captured by the plugin hook (unit-usage, a 6-component token_usage joined to the unit-complete by scope id); measure-outcomes derives the distribution and the context-pressure over-budget share (with a coverage denominator) against the harness budget.
     earns-keep: over-budget share trends toward zero as decomposition matures; a persistently high share is a plan decomposition-quality signal (IUs drawn too coarse), not a build capability gap.
-status: v0.4.0 — 2026-06-05
+status: v0.5.0 — 2026-06-10
 ---
 
 # Build
@@ -156,10 +157,12 @@ From kick-off to review handoff, you run the span unattended. The discipline:
   derived from the IU `goal`. Commit only passing state — if you cannot write a meaningful commit
   message, the unit is not done. No `WIP:` messages. In worktree-isolated parallel mode each subagent
   commits within its own branch; in a shared-directory fallback only the orchestrator commits.
-- **Emit unit-complete.** After the commit, emit the **unit-complete event** carrying the IU `id`, the
-  raw `acceptance_check` output, and **`tokens_per_iu`** — the per-IU build token cost — into the
-  analytics product-outcomes event log (per the imported `instrumentation-preamble`). This is the
-  projection's signal; it is not a write to the carrier.
+- **Emit unit-complete.** After the commit, emit the **structural unit-complete event** carrying the
+  IU `id` and the raw `acceptance_check` output — the **acceptance evidence only the body knows** — per
+  the imported `instrumentation-preamble`. **Emit NO token numbers**: the per-IU cost is captured by the
+  plugin hook (a `unit-usage` event joined to this one by scope id), because a body cannot see cache
+  reads and a body-emitted figure is fabrication (the preamble's do-NOT-emit list; the publisher
+  rejects `tokens_per_iu`). This event is the projection's structural signal; it is not a write to the carrier.
 - **Catch and repair in-span.** When a unit fails its acceptance check, diagnose and fix it within the
   span before emitting the complete event. Surface a passing unit to review, not one that "mostly works."
   In-span rework is cheaper than a review→build re-entry.
@@ -305,9 +308,9 @@ Still deferred (F7 — wired once the endpoint/ref lands):
 ## Output
 
 - **All modes:** the **IU set delivered** — each unit passing its acceptance criteria, evidenced by the
-  raw `acceptance_check` output. A **unit-complete event** per IU (carrying the IU `id`, the raw evidence,
-  and `tokens_per_iu`) and an **incremental commit** per IU. A **stage-complete event** when all units are
-  done. No carrier write.
+  raw `acceptance_check` output. A **structural unit-complete event** per IU (carrying the IU `id` and the
+  raw evidence — **no token numbers**; the hook captures cost as a joined `unit-usage`) and an **incremental
+  commit** per IU. A **stage-complete event** when all units are done. No carrier write.
 - **Parallel mode:** a **merged result** assembled from per-worktree worker outputs in dependency order,
   after the worktree-teardown sequence, before review handoff.
 - **Blocker report** (if triggered): the affected IU, the blocker, the options — surfaced to the operator

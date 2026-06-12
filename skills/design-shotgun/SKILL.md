@@ -104,12 +104,6 @@ direction — not a vague memory of the session — is the hand-off artefact.
 - The **node-enter / node-exit events** per the instrumentation preamble.
 - **No carrier write.**
 
-## Imported references
-
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
-
-@references/instrumentation-preamble.md
-
 ## On-demand references
 
 Read these at the step of need (single-sourced into this primitive's bundle):

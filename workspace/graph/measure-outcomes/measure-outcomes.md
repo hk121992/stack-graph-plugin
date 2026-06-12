@@ -16,12 +16,15 @@ edges: {}
 # analytics — the loop
 goals:
   - outcome: Every debrief closes with a structured metrics row for each earns-keep criterion of each node the sprint touched — plus a per-IU cost block when the sprint built IUs — numbers, not narrative.
-    metric: share of debrief runs that produce a complete metrics row per touched node and a per-IU cost block (tokens_per_iu distribution + over-budget share) when the sprint built IUs; missing-metric rate (nodes touched but not measured).
+    metric: share of debrief runs that produce a complete metrics row per touched node and a per-IU cost block (cost-per-IU distribution + context-pressure over-budget share with a coverage denominator) when the sprint built IUs; missing-metric rate (nodes touched but not measured).
     earns-keep: missing-metric rate trends toward zero; a debrief that omits measurement for a node, or omits the per-IU cost block when IUs were built, is a gap, not a valid outcome.
+  - outcome: The single-agent context budget is an empirical dial read on real context-pressure, not cumulative spend, with honest coverage — so a high over-budget share is a trustworthy decomposition-quality signal back to plan, never a survivorship-biased artefact.
+    metric: over_budget_share computed on max per-turn context-pressure (input+cache_read+cache_creation) against the harness context_budget, reported over `measured` of `total` IUs with `unmeasured` named; reuse proxies (reference/script-creation count, review-re-entry decline) tracked as the crystallization signal.
+    earns-keep: the share is always reported with its coverage denominator (never as whole-population); reuse proxies accumulate a second point so the crystallization trend becomes readable. The token-level generative fraction stays a named deferred seam — it is never fabricated.
   - outcome: Metrics compound across sprints — each run emits a trend point the next run can compare against, so the earns-keep signal matures over time.
     metric: trend-point coverage (share of earns-keep metrics that have ≥2 data points after N sprints); delta tracked vs prior run.
     earns-keep: trend-point coverage grows sprint-over-sprint; a metric that never accumulates a second point is not being read.
-status: v0.1.0 — 2026-06-01
+status: v0.2.0 — 2026-06-10
 ---
 
 # Measure outcomes
@@ -40,15 +43,16 @@ touched_nodes: [<node-id>, ...]          # nodes the sprint traversed
 timeline_source: <path>                   # path to the local event log for this sprint
 graph_record: <path>                      # path to graph-record.json
 baseline: <path> | null                   # path to prior debrief metrics output, or null
-context_budget: <int> | null              # harness-tunable per-IU context budget, in tokens
-                                          # (~100k documented default); READ-ONLY — passed in,
-                                          # never written out. Needed only for the over-budget
-                                          # share. Absent → over-budget share is n/a.
+context_budget: <int> | null              # harness-tunable per-IU CONTEXT-WINDOW budget, in tokens
+                                          # (~100k documented default); the best-work window size,
+                                          # READ-ONLY — passed in, never written out. Needed only for
+                                          # the over-budget share. Absent → over-budget share is n/a.
 ```
 
-`context_budget` is the harness's tunable dial value, not yours to set. It is model/version-dependent,
-so the harness owns it and passes it in; you only read it. If it is `null` or omitted, still compute the
-`tokens_per_iu` distribution from the stream, but report the over-budget share as `n/a` — degrade cleanly.
+`context_budget` is the harness's tunable dial value, not yours to set. It is the **context-window**
+best-work size (model/version-dependent), so the harness owns it and passes it in; you only read it. If
+it is `null` or omitted, still compute the cost-per-IU distribution from the stream, but report the
+over-budget share as `n/a` — degrade cleanly.
 
 ## Procedure
 
@@ -73,6 +77,13 @@ For each `node-id` in `touched_nodes`:
 
 ### 2. Read the instrumentation timeline
 
+The analytics substrate is **transcript-derived in batch**: a scheduled analyzer reads the raw
+session transcripts ~1–2×/day and rewrites the derived event log the timeline is read from. Because
+that batch may not have run since the sprint finished, the just-completed sprint's rows may not yet
+exist. So `debrief` **triggers an on-demand analyzer run over the current sprint's transcripts before
+spawning you** (analyze → rewrite the derived log), so the rows for the work you are measuring are
+present by the time you read them. You read the settled log; you never run the analyzer yourself.
+
 Open `timeline_source`. The timeline is an ordered sequence of `node-enter` / `node-exit` /
 gate events tagged with `node` id and timestamps. For each touched node:
 
@@ -88,12 +99,12 @@ the earns-keep metric can be derived from the work record alone (e.g. decision c
 `decisions-store`).
 
 If the timeline is present but **partial** — a `node-enter` with no matching `node-exit`,
-which happens when `debrief` fires before all hook events have flushed — raise a
-`timeline_incomplete` warning. Do **not** skip the affected node: still compute its metrics
-from the events present; the warning flags reduced confidence in any duration/closure metric
-over the incomplete span. This is distinct from the degraded-mode case where the carrier
-projection is *absent* (a fresh clone) — here the projection exists but is incomplete at the
-moment of measurement.
+which happens when a span genuinely did not close (a node still in flight, or a transcript
+that has not yet settled) — raise a `timeline_incomplete` warning. Do **not** skip the
+affected node: still compute its metrics from the events present; the warning flags reduced
+confidence in any duration/closure metric over the incomplete span. This is distinct from the
+degraded-mode case where the carrier projection is *absent* (a fresh clone) — here the
+projection exists but is incomplete at the moment of measurement.
 
 ### 3. Compute metrics
 
@@ -135,21 +146,65 @@ metric can read `ok` and `degrading` at once. Do not collapse them into one fiel
 
 ### 5. Derive the per-IU cost block
 
-If the sprint built IUs, derive a per-IU cost block from the product-outcomes event stream —
-the same stream the timeline carries `tokens_per_iu` measures on (one measure per IU built this
-sprint). Two derived values:
+If the sprint built IUs, derive a per-IU cost block from the **analyzer-derived** product-outcomes
+event stream — the `unit-usage` events (one per IU built this sprint, each carrying a 6-component
+`token_usage` block: `input`, `output`, `cache_creation_5m`, `cache_creation_1h`, `cache_read`,
+`total`). The model never authors token numbers; the analyzer derives them deterministically from
+the transcript and you read them off the derived rows.
 
-- **`tokens_per_iu` distribution** — compute the distribution across the sprint's IUs. Report the
-  `median` and `p90`.
-- **`over_budget_share`** — the fraction of the sprint's IUs whose `tokens_per_iu` exceeded
-  `context_budget`. Report `n/a` when `context_budget` is `null` or absent — do not invent a budget.
+Three derived values, each **read-and-arithmetic** — read the stream, compute, return; write nothing:
 
-These are read-and-arithmetic, exactly like every other metric here: read the stream, compute the
-distribution and the share. Compute and return them — do not write them anywhere.
+- **per-IU cost distribution** — the distribution of each IU's `token_usage.total` across the
+  sprint's IUs. Report `median` and `p90`. This is the **cost** read (volume), never shown as `$`.
+
+- **`over_budget_share` — computed on CONTEXT-PRESSURE, not total tokens.** The budget dial is about
+  the **working-context window** an agent reasons in, not cumulative spend. The two diverge by orders
+  of magnitude: an IU can read the same cache across many turns and run ~100M cumulative tokens while
+  its peak per-turn context stays ~95k — under budget. So:
+  - **context-pressure of an IU** = the **maximum single-turn `input + cache_read + cache_creation`**
+    (everything loaded into the window on its heaviest turn; output is excluded — it is produced, not
+    loaded). This per-turn peak lives in the **transcript**, not the aggregate `unit-usage` line — read
+    it from the IU's transcript via the deterministic summer / `sg-token-usage` where the transcript is
+    available. Where only the aggregate `unit-usage` is available, use its `input + cache_read +
+    cache_creation` (non-output) sum as a **documented upper-bound proxy** and flag the IU
+    `context_pressure_proxied` — never silently treat the aggregate as the per-turn peak.
+  - **`over_budget_share`** = the fraction of **measured** IUs whose context-pressure exceeded
+    `context_budget`. Report `n/a` when `context_budget` is `null`/absent — never invent a budget.
+
+- **coverage denominator (mandatory).** `over_budget_share` is a share **over the IUs that have a
+  usage measure**, not the whole population — report it as `measured` of `total` IUs with `unmeasured`
+  named, so the dial is never read as whole-population. An IU built this sprint with **no** `unit-usage`
+  event (a background dispatch whose transcript is missing or not yet settled) is `unmeasured`, counted in the
+  denominator note, never dropped silently. This kills the survivorship-bias hole: a share computed
+  only over the IUs that happened to be captured would understate pressure.
 
 The over-budget share is a **decomposition-quality** signal. A persistently high share means `plan`
 drew IUs too coarse — the same shape as "weak acceptance is a *plan* gap, not a *build* gap." You do
-not judge it; you surface the number and `debrief`/the operator reads it.
+not judge it; you surface the number, its coverage, and `debrief`/the operator reads it.
+
+### 5b. Reuse proxies — the crystallization signal (deterministic)
+
+The factory thesis is that a product-dependent node **crystallizes** as it runs: it writes reusable
+references and scripts, so its generative fraction declines and it grows cheaper
+([`06-analytics`](../../handbook/content/06-analytics/README.md) — Crystallization). The token-level
+**generative fraction** (what share of an IU's output was generative reasoning vs replayed reference)
+needs **semantic judgment** to classify — which you are forbidden to do — so it is a **named, deferred
+seam**: it lands when a deterministic mechanism (e.g. a provenance tag the body emits per artefact)
+exists, not by you reading meaning into tokens. Do **not** fabricate a generative-fraction number.
+
+Measure the **cheap deterministic reuse proxies now** — these are counts and rates, exactly your kind
+of metric, and they are the factory-thesis signal:
+
+- **reference/script-creation count** — the number of harness-local references and scripts created or
+  grown this sprint (from `reconcile`/`integrate` events that gate a new reference or script, or the
+  artefact records the sprint added). A node that never creates a reusable artefact is not crystallizing.
+- **review-re-entry decline** — the `review→build` (and `reconcile→build`) re-entry count per IU this
+  sprint vs the `baseline` run's. A falling re-entry rate is the node compounding (the build span
+  self-correcting more, leaning on accumulated references); a flat rate over the window is an earns-keep
+  signal. This reuses the timeline's loop-re-entry events you already count in step 2.
+
+Both are deltas against `baseline` when present (`first_point` otherwise), emitted with the same
+`severity` / `trend_direction` axes as every other metric.
 
 ### 6. Emit the report
 
@@ -170,10 +225,20 @@ rows:
         severity: ok | warn | breach | n/a                  # value-vs-baseline verdict (not P0–P3)
         trend_direction: improving | stable | degrading | first_point  # delta sign × earns-keep direction
 per_iu_cost:                              # present when the sprint built IUs; omit otherwise
-  tokens_per_iu:
+  cost_per_iu:                            # token_usage.total distribution (volume read; never $)
     median: <number>
     p90: <number>
-  over_budget_share: <rate | n/a>          # fraction of IUs over context_budget; n/a if budget absent
+  over_budget_share:                      # computed on CONTEXT-PRESSURE, with a coverage denominator
+    share: <rate | n/a>                   # fraction of MEASURED IUs over context_budget; n/a if no budget
+    measured: <int>                       # IUs with a usage measure (the share's denominator)
+    total: <int>                          # IUs built this sprint
+    unmeasured: <int>                     # built but no usage event — named, never dropped
+    context_pressure_proxied: <int>       # IUs whose pressure used the aggregate upper-bound proxy
+reuse_proxies:                            # the crystallization signal (deterministic); omit if no data
+  references_scripts_created: <int>
+  references_scripts_created_delta: <+N | -N | n/a>
+  review_reentry_per_iu: <rate>
+  review_reentry_per_iu_delta: <+N | -N | n/a>      # falling = node compounding
 skipped:
   - node_id: <string>
     reason: missing_earns_keep | timeline_unavailable | node_not_found
@@ -194,6 +259,12 @@ warnings: [<string>, ...]                   # e.g. timeline_incomplete (enter wi
   flag the gap, never substitute inference.
 - Do not interpret results. "Revenue rose" is an interpretation; "delta: +0.12 (warn)" is
   a measurement. The over-budget share is a number you surface, not a verdict you reach.
+- Do not compute `over_budget_share` from total/cumulative tokens — it is computed on **context-pressure**
+  (max per-turn input+cache_read+cache_creation), and always reported with its **coverage denominator**
+  (`measured` of `total`, `unmeasured` named). A share without its denominator is survivorship-biased.
+- Do not fabricate a token-level **generative fraction** — classifying generative-vs-replayed output
+  needs semantic judgment, which you do not do. It is a named deferred seam; measure the deterministic
+  reuse proxies instead.
 - Treat `context_budget` as read-only. Read it from the spawn bundle; never write it, and never
   invent a budget when it is absent — report the over-budget share as `n/a` instead.
 - Do not write to any file. The per-IU cost block, like every row, is computed and returned — never

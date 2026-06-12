@@ -14,9 +14,11 @@ determinism: generative
 # `composes-into`: the edge into a verify span is deferred until that span exists (F7). The
 # `health-manifest` is the harness-supplied crystallisation manifest — external, like
 # simulate-users' experience-contract; the factory ships only the pointer and validate/build skip it.
+# `analytics-vocabulary` (import) carries the `<sg-signal>` format + the `health.quality` series name
+# this node states in its final result for the transcript analyzer to read (the layer-2 channel).
 edges:
   references:
-    - { id: instrumentation-preamble, load: import }
+    - { id: analytics-vocabulary,     load: import }
     - { id: health-manifest,          load: on-demand, external: true }
 # analytics — the loop
 goals:
@@ -104,13 +106,21 @@ tool findings** (which errors/warnings/test failures appeared). Produce impact-r
 recommendations — rank by `weight × (10 − score)`, showing only categories below 10. On a first
 run with no history, say so and invite a re-run after changes to start the trend.
 
-## Emit the exit event — carry the health.quality measurement
+## Emit the `health.quality` measurement — a `<sg-signal>` verdict in your final result
 
-After the dashboard is produced, emit your `node-exit` event per the imported preamble (same
-`node` / `carrier` / `carrier_kind` / `arc`, plus an `outcome` and any `gates`). On the exit
-event, **carry a `health.quality` measurement** — the weighted composite from this run — so the
-analytics surface projects a **quality trend series** across runs. This measurement is the
-load-bearing analytics contract of this node: emit it on every run.
+The quality composite is a **model-authored number** the analyzer cannot derive from the transcript,
+so state it as a fenced `<sg-signal>` block in your **final output/result message** (per
+`analytics-vocabulary`), not on an event. **Carry the `health.quality` measurement** — the weighted
+composite 0-10 from this run, a finite number — under the block's `metrics`:
+
+```
+<sg-signal>{"metrics":{"health.quality":8.6}}</sg-signal>
+```
+
+so the analytics surface projects a **quality trend series** across runs. This measurement is the
+load-bearing analytics contract of this node: emit it on every run. The analyzer reads the block from
+your run's final message (the **subagent** transcript's final message when you run dispatched, e.g.
+under `review`); absent or malformed, the point is simply **not recorded** (honest under-capture).
 
 ## Output
 
@@ -120,8 +130,8 @@ Return one structured result to the caller's context:
    checks; the **weighted composite 0-10**.
 2. The **trend** vs prior runs, declared **regressions** with attribution, and impact-ranked
    **recommendations**.
-3. The exit-event **`health.quality` measurement** (carried on the node-exit event) for the
-   trend series.
+3. The **`health.quality` measurement** (carried as a `<sg-signal>` block in your final result,
+   per `analytics-vocabulary`) for the trend series.
 
 Make no mutation to product code (the hard read-only gate); your contribution outward is the
 dashboard, the recommendations, and the quality measurement, for the operator and the analytics

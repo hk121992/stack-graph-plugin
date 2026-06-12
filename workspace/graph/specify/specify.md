@@ -17,7 +17,6 @@ edges:
     - { id: dev-sprint, stage: specify }
   references:
     - { id: handbook,                 load: on-demand, external: true }
-    - { id: instrumentation-preamble, load: import }
   precedes:
     - { id: plan }
 # analytics — the loop

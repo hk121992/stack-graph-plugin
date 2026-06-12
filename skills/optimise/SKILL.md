@@ -123,10 +123,3 @@ gate, AX-cost is what you minimise. If no variant cuts cost while passing UX, se
 
 No product fix and no discovery: a failure found during measurement routes back to the caller (`build`),
 never repaired here.
-
-## Imported references
-
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
-
-@references/instrumentation-preamble.md
-

@@ -140,6 +140,5 @@ the report is returned, never before the work is complete.
 
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
-@references/instrumentation-preamble.md
 @references/iron-law.md
 

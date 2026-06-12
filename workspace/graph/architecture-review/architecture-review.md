@@ -33,7 +33,6 @@ edges:
     - { id: log-decision }
   references:
     - { id: architecture-doctrine,    load: on-demand }
-    - { id: instrumentation-preamble,  load: import }
     - { id: domain-glossary,           load: on-demand, external: true }
   escalates:
     - { id: triage }

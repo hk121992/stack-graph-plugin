@@ -20,7 +20,6 @@ determinism: generative
 # `precedes design-implement` resolves because design-implement is authored in this same wave (not F7).
 edges:
   references:
-    - { id: instrumentation-preamble, load: import }
     - { id: ux-principles,            load: on-demand }
   composes-into:
     - { id: dev-sprint, stage: design }

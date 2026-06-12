@@ -153,10 +153,3 @@ and edit that section in place. Raise the labelled PR the same way.
   work advanced; **no amendment PR**.
 - **All modes:** a **stage-complete signal** — the projection advances `current_stage`. You write
   no carrier field and record no gate decision; the item now sits at gate-2 for the PM/operator.
-
-## Imported references
-
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
-
-@references/instrumentation-preamble.md
-

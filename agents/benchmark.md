@@ -87,14 +87,22 @@ Produce a structured before/after report: per-metric `current` / `baseline` / `d
 size is the leading indicator — it is deterministic where load time varies with network, so
 weight it. You write **no product code** — read-only by contract; produce the report only.
 
-## Emit the exit event — carry the benchmark.perf measurement
+## Emit the `benchmark.perf` measurement — a `<sg-signal>` verdict in your final result
 
-After the report is produced, emit your `node-exit` event per the imported preamble (same
-`node` / `carrier` / `carrier_kind` / `arc`, plus an `outcome` and any `gates`). On the exit
-event, **carry a `benchmark.perf` measurement** — the per-metric values from this run — so the
-analytics surface projects a **perf trend series** across runs. This measurement is the
-load-bearing analytics contract of this node: without it on exit, no trend can be projected.
-Emit it on every `compare` and `baseline` run.
+The performance measurement is a **model-authored number** the analyzer cannot derive from the
+transcript, so state it as a fenced `<sg-signal>` block in your **final output/result message** (per
+`analytics-vocabulary`), not on an event. **Carry the `benchmark.perf` measurement** — the
+representative value from this run, a finite number — under the block's `metrics`:
+
+```
+<sg-signal>{"metrics":{"benchmark.perf":2100}}</sg-signal>
+```
+
+so the analytics surface projects a **perf trend series** across runs. This measurement is the
+load-bearing analytics contract of this node: without it in your final result, no trend can be
+projected. Emit it on every `compare` and `baseline` run. The analyzer reads the block from your run's
+final message (the **subagent** transcript's final message when you run dispatched, e.g. under
+`review`); absent or malformed, the point is simply **not recorded** (honest under-capture).
 
 ## Output
 
@@ -103,8 +111,8 @@ Return one structured result to the caller's context:
 1. The **regression verdict** — per-metric current / baseline / delta / status, the budget-check
    grade, and the one-line verdict.
 2. The **slowest-resources** list with first-party / third-party context.
-3. The exit-event **`benchmark.perf` measurement** (carried on the node-exit event) for the
-   trend series.
+3. The **`benchmark.perf` measurement** (carried as a `<sg-signal>` block in your final result,
+   per `analytics-vocabulary`) for the trend series.
 
 Make no mutation to product code; your contribution outward is the verdict and the trend
 measurement, for the caller and the analytics surface to act on.
@@ -113,5 +121,5 @@ measurement, for the caller and the analytics surface to act on.
 
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
-@../references/benchmark/instrumentation-preamble.md
+@../references/benchmark/analytics-vocabulary.md
 

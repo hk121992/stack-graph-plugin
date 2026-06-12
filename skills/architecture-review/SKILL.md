@@ -125,12 +125,6 @@ After the report (mode `review`) or the interface comparison (mode `interface-de
 No product fix and no direct routing: a pursued candidate goes to `triage`, a rejection to `log-decision`,
 and the hard read-only gate holds throughout.
 
-## Imported references
-
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
-
-@references/instrumentation-preamble.md
-
 ## On-demand references
 
 Read these at the step of need (single-sourced into this primitive's bundle):

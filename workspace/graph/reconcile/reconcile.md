@@ -28,7 +28,6 @@ edges:
     - { id: dev-sprint, stage: reconcile }
   references:
     - { id: handbook,                 load: on-demand, external: true }
-    - { id: instrumentation-preamble, load: import }
     - { id: decisions-store,          load: import }
   can-follow:
     - { id: land }

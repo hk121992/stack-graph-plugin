@@ -18,7 +18,6 @@ determinism: generative
 # shape as the `explore` read-only fan-out agent.
 edges:
   references:
-    - { id: instrumentation-preamble, load: import }
 # analytics — the loop
 goals:
   - outcome: Each probe returns an accurate confirm/rule-out for the one cause it tested, so debug picks the real root cause faster.

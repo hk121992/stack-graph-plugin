@@ -112,12 +112,6 @@ signal worth naming, not a loop to run forever.
 - **No carrier write.** Completing the unit is the signal the build span and its projection pick up;
   design-implement writes only the surface artefacts.
 
-## Imported references
-
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
-
-@references/instrumentation-preamble.md
-
 ## On-demand references
 
 Read these at the step of need (single-sourced into this primitive's bundle):

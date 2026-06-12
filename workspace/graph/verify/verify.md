@@ -26,7 +26,6 @@ edges:
   composes-into:
     - { id: dev-sprint, stage: verify }
   references:
-    - { id: instrumentation-preamble, load: import }
     - { id: findings-schema,          load: import }
   precedes:
     - { id: reconcile }

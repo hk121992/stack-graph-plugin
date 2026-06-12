@@ -31,7 +31,6 @@ edges:
   references:
     - { id: IU-schema,                 load: import }
     - { id: bindings-contract,         load: on-demand }
-    - { id: instrumentation-preamble,  load: import }
     - { id: work-item-schema,          load: on-demand }
   precedes:
     - { id: specify-slice }

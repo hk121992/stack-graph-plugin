@@ -119,18 +119,30 @@ Per scheduled IU:
    silent overwrite.
 2. **Dispatch one fresh agent session** with the **spawn bundle** — the contract is canonical, the
    mechanism is not (native subagent dispatch with `isolation: 'worktree'` is the default where the
-   runtime offers it; a headless `claude -p` session is the fallback). The bundle carries:
-   - the **carrier file path** (the decision-complete carrier is sufficient context, proven);
-   - **entry stage `specify-slice` in unattended mode** (entry `build` when the IU is **already
-     formalised**) — the session runs `specify-slice → build → review` per the arc's own node bodies:
-     specify-slice **formalises** the captured definition into the content fields (`goal / files /
-     acceptance / acceptance_check / size / slice_type / verification`) and **enforces** the
+   runtime offers it; a headless `claude -p` session is the fallback). **Write the dispatch prompt in
+   the `handoff-prompt-convention` field form** (imported) — the delta-only `GOAL / WHERE / DO /
+   DONE-WHEN / POL / EPH / META` envelope a cold session consumes — never free prose. The bundle
+   carries, as field-form fields:
+   - **`WHERE:`** — the **carrier file path** (the decision-complete carrier is sufficient context,
+     proven), the worktree path(s), and the `iu/<id>` branch (`<repo>@iu/<id> — <carrier path>`);
+   - **`DO:`** — **entry stage `specify-slice` in unattended mode** (entry `build` when the IU is
+     **already formalised**) — the session runs `specify-slice → build → review` per the arc's own node
+     bodies: specify-slice **formalises** the captured definition into the content fields (`goal /
+     files / acceptance / acceptance_check / size / slice_type / verification`) and **enforces** the
      vertical-slice / testing / single-slice invariants, **routing out on a gap, never asking**; build
      runs the tracer-bullet inner loop; review runs in `headless`/`autofix` mode for an AFK slice —
      honouring the arc's escalate and HITL semantics, and **stopping after the review verdict — it never
      runs `land`**;
-   - the **worktree path(s) and branch**;
-   - the **event-log binding**;
+   - **`POL:`** — the **event-log binding** path (policy by pointer, never copied);
+   - **`META:`** — the **machine-readable attribution line**, exactly:
+     `META: carrier=<id> kind=<work-item|standalone-iu> arc=<dev-sprint|incremental> iu=<id>`. Emit it
+     verbatim in this fixed `key=value` grammar, using **only** the allowlisted `kind` values
+     (`work-item` | `standalone-iu`) and `arc` values (`dev-sprint` | `incremental`) — for a
+     loop-runner-dispatched standalone IU that is `kind=standalone-iu arc=incremental`, with `carrier`
+     the IU's carrier id and `iu` its id. This is the **attribution source** the transcript analyzer
+     reads off the dispatched-session transcript to key the IU's derived analytics to the right
+     `(carrier, kind, arc, iu)` deterministically; a malformed token degrades to a null attribution at
+     the publisher, never a wrong one (see `handoff-prompt-convention`);
    - the **return-envelope contract** (below).
 
    **Write discipline inside the session:** the session writes its worktree(s) and **its own carrier
@@ -167,14 +179,15 @@ Per scheduled IU:
    Route-outs **write no lifecycle**: the IU stays open and re-lists in a future batch. Only the
    operator parks it durably (the land gate's `parked` decision), or the coordinator's enacted promotion
    drops it.
-4. **Emit the carrier-keyed `dispatch-complete` event** — the same hook-captured subagent-completion
-   event class as build's `unit-complete` (the D57 mechanism) — carrying the triple `(carrier_id,
-   carrier_kind, arc)`, the outcome, and **`tokens_per_session`**: the whole-session cost of that IU's
-   traversal (the specify, build, and review spans + session overhead). `tokens_per_session` is a defined
-   **superset of** build's `tokens_per_iu`, which stays canonical for the IU-sizing dial — do **not**
-   re-emit build's metric; this is the distinct **dispatch-efficiency** measure (the sequential-baseline
-   comparison this node exists to win). `dispatch-complete` is **not a stage event**: the projection
-   never reads it for `current_stage`.
+4. **Emit the carrier-keyed STRUCTURAL `dispatch-complete` event** — carrying the triple `(carrier_id,
+   carrier_kind, arc)` and the outcome. **Emit NO token numbers** (D69 amends D57): the whole-session
+   cost is captured by the plugin's `Stop` hook as a carrier-keyed **`dispatch-usage`** event (a
+   6-component `token_usage`), joined to this carrier by scope id — a body cannot see the session's
+   cache reads, so a body-emitted `tokens_per_session` is fabrication (the preamble's do-NOT-emit list;
+   the publisher rejects it). The `dispatch-usage` cost is the **dispatch-efficiency** measure (the
+   sequential-baseline comparison this node exists to win); it is a defined **superset of** build's
+   per-IU `unit-usage`. `dispatch-complete` is **not a stage event**: the projection never reads it for
+   `current_stage`.
 
 ## Phase 2 — Integration dry-run + land queue (collaborative)
 
@@ -206,10 +219,13 @@ Per scheduled IU:
 
 - **Dispatcher enter/exit** (imported preamble) carry the batch id and are **non-carrier events** —
   routed to the **factory-conformance stream**, never the carrier projection.
-- **Per-IU `dispatch-complete`** (product-outcomes): the carrier triple + outcome +
-  `tokens_per_session` (Phase 1.4). A measure event, never a stage event.
-- **All stage-level events** (enter/exit, `unit-complete` with `tokens_per_iu`, gates) are emitted by
-  the stage nodes **inside** the dispatched sessions, unchanged. Concurrent sessions append to the same
+- **Per-IU structural `dispatch-complete`** (product-outcomes): the carrier triple + outcome
+  (Phase 1.4), **no token numbers**. The whole-session cost rides the plugin's `Stop` hook as a
+  carrier-keyed **`dispatch-usage`** event (6-component `token_usage`), joined by scope id. Both are
+  measure events, never stage events.
+- **All stage-level events** (enter/exit, the structural `unit-complete`, gates) are emitted by the
+  stage nodes **inside** the dispatched sessions; their per-IU cost rides the hook's `unit-usage`
+  events. Concurrent sessions append to the same
   `event-log` under the **append contract** above (one event = one whole line in a single `O_APPEND`
   write). The projection's `(carrier_id, carrier_kind, arc)` key separates interleaved carriers — with
   concurrent dispatch this key is mandatory, not cosmetic.
@@ -226,9 +242,9 @@ Per scheduled IU:
   merged tree; conflicts surfaced before land. No real merge performed here.
 - **Land-queue outcomes** — per `built` IU, the operator's land decision and, on go, `land` invoked
   (land fires its gate and owns the merge).
-- **Per-IU `dispatch-complete` events** carrying `tokens_per_session`, plus the dispatcher's own
-  non-carrier enter/exit on the factory-conformance stream. No shared committed surface or carrier
-  lifecycle written during the span.
+- **Per-IU structural `dispatch-complete` events** (carrier triple + outcome, **no token numbers** —
+  cost rides the hook's `dispatch-usage`), plus the dispatcher's own non-carrier enter/exit on the
+  factory-conformance stream. No shared committed surface or carrier lifecycle written during the span.
 
 If any IU's dependency, environment, or merge step fails, park it with the reason and surface the
 options — never re-dispatch in-batch, never merge an IU on your own.
@@ -238,7 +254,7 @@ options — never re-dispatch in-batch, never merge an IU on your own.
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
 @references/IU-schema.md
-@references/instrumentation-preamble.md
+@references/handoff-prompt-convention.md
 
 ## On-demand references
 

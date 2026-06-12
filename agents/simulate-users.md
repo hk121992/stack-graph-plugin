@@ -217,10 +217,20 @@ projection's substrate. Two signals ride the exit event:
   detail (the ranked friction narrative, the tool-path order) stays in your returned profile,
   not in `ax`. This `ax` block is the product-facing instance of the factory's own AX
   instrumentation — same exit-event shape, pointed at the *product's* run.
-- **The UX-conformance result, as a gate on the exit event.** Emit the run's verdict against the
-  experience contract as a conformance signal — `experience-contract:<pass|fail>` in the exit
-  event's `gates` array — `pass` only when every graded invariant holds and no failure mode
-  fired, `fail` otherwise.
+- **The UX-conformance result, as a `<sg-signal>` verdict in your final result.** The
+  experience-contract verdict is a **model judgment** the analyzer cannot derive from the transcript,
+  so state it as a fenced `<sg-signal>` block in your **final output/result message** (per
+  `analytics-vocabulary`), not on an event. Emit the run's verdict against the experience contract as
+  the `experience-contract:<pass|fail>` gate token in the block's `gates` array:
+
+  ```
+  <sg-signal>{"gates":["experience-contract:pass"]}</sg-signal>
+  ```
+
+  `pass` only when every graded invariant holds and no failure mode fired, `fail` otherwise. The
+  analyzer reads this block from your run's final message (the **subagent** transcript's final message
+  when you run dispatched, e.g. under `verify`); absent or malformed, it is simply **not recorded**
+  (honest under-capture, never invented).
 
 On a `tier-1` reconstruction the `ax` numbers are an estimate (one agent's own traversal); on a
 live `tier-2` run they are measured from the assistant-agent's transcript. Tag which in the
@@ -240,7 +250,7 @@ shared substrate — not a typed edge, not a curator write from this node — cl
 
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
-@../references/simulate-users/instrumentation-preamble.md
+@../references/simulate-users/analytics-vocabulary.md
 
 ## On-demand references
 

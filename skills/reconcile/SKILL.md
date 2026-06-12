@@ -247,5 +247,4 @@ declared on the appropriate node's frontmatter.
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
 @references/decisions-store.md
-@references/instrumentation-preamble.md
 

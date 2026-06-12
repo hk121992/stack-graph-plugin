@@ -26,7 +26,6 @@ edges:
     - { id: benchmark }
     - { id: simulate-users }
   references:
-    - { id: instrumentation-preamble, load: import }
 # analytics — the loop
 goals:
   - outcome: A measurably better implementation of the target span is selected — one that beats the baseline on the objective while still passing the correctness/quality gate.

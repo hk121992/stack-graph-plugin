@@ -17,7 +17,6 @@ edges:
   references:
     - { id: IU-schema,                 load: import }
     - { id: carrier-interface,         load: on-demand }
-    - { id: instrumentation-preamble,  load: import }
     - { id: lens-dispatch,             load: on-demand }
     - { id: work-item-schema,          load: on-demand }
   can-follow:

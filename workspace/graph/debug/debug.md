@@ -20,7 +20,6 @@ edges:
     - { id: investigate-probe }
   references:
     - { id: iron-law,                 load: import }
-    - { id: instrumentation-preamble, load: import }
 # analytics — the loop
 goals:
   - outcome: Every fix debug ships addresses a confirmed, reproduced root cause — not a symptom.

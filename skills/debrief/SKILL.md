@@ -235,10 +235,3 @@ the hypothesis it tested and the forward view it implied, without a direct edge.
 | `seed-next` | next-sprint candidate(s); the shipped-outcome → strategy-hypothesis **confirm/kill** evidence + the **reprioritise** signal (the PM loop close, D38) | candidate surfaced to operator; confirm/kill + reprioritise evidence written to the work-item record + `docs/decisions.md` + gbrain recall (the shared homes the curators sweep — no curator edge) |
 | **terminal transition** | `frozen_metrics` baseline (the next sprint's `measure-outcomes` `baseline:`) | closed work-item record (`items/<id>.md`); recorder freeze, once at close |
 | **all modes** | stage-complete signal | projection advances `current_stage`; no carrier field written by this node |
-
-## Imported references
-
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
-
-@references/instrumentation-preamble.md
-

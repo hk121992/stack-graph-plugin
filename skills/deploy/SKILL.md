@@ -224,12 +224,6 @@ node-exit event, projected on read, frozen at terminal — not a bespoke report 
 If any phase fails, deploy stops at that phase, surfaces the failure, and asks the
 operator for a path — it does not silently continue or auto-revert.
 
-## Imported references
-
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
-
-@references/instrumentation-preamble.md
-
 ## On-demand references
 
 Read these at the step of need (single-sourced into this primitive's bundle):

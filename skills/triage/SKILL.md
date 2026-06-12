@@ -186,7 +186,6 @@ This is a one-way cross-arc handoff, **not** ordinary next-stage flow:
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
 @references/IU-schema.md
-@references/instrumentation-preamble.md
 
 ## On-demand references
 

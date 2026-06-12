@@ -119,10 +119,3 @@ Return one structured result to the caller's context:
 Make no mutation to product code; your contribution outward is the live verdict and its
 evidence, for `land`'s gate and the operator to act on. If you were dormant (no live traffic, no
 baseline), say so plainly and emit nothing as if it were a real verdict.
-
-## Imported references
-
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
-
-@../references/canary/instrumentation-preamble.md
-

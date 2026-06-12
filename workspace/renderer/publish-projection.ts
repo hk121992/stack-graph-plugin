@@ -32,11 +32,16 @@
  *     metrics  — optional object of named trend measurements (e.g. {"benchmark.perf": 1234});
  *                only present on measurement-bearing exit events
  *
- *   "dispatch-complete" events (06-analytics; loop-runner-design §4 Phase 1.4):
- *     A hook-captured subagent-completion event — the same class as unit-complete — emitted
- *     by an arc-level dispatcher per dispatched IU session. Carrier-keyed (carrier + kind +
- *     arc), carries `outcome` and a `metrics` object bearing tokens_per_session. It is a
- *     MEASURE event: the projection NEVER reads it for current_stage (it is not a stage event).
+ *   "dispatch-complete" events (06-analytics; loop-runner): a STRUCTURAL subagent-completion
+ *     event (carrier + outcome). After D69 the body emits NO token numbers on it — cost rides the
+ *     hook usage events below — so the publisher only enforces the fabrication guard on its metrics.
+ *
+ *   HOOK usage events "unit-usage" / "session-usage" / "dispatch-usage" (D69 / #21):
+ *     The ONLY source of token cost. Each carries a 6-component `token_usage` block (input, output,
+ *     cache_creation_5m, cache_creation_1h, cache_read, total — the cache split preserved), a
+ *     dominant `model`, a per-event `v` (version-gated), `cumulative`, and a `scope_id`
+ *     (iu id / anonymised session / carrier id). Read by the closed USAGE_COMPONENT_KEYS allowlist;
+ *     latest-per (kind, scope) for cumulative kinds. NEVER advances current_stage.
  *
  *   Additional fields on "traverse" events (from 06-analytics README):
  *     from, to — node ids (the edge traversed)
@@ -52,9 +57,11 @@
  *
  *   SANITIZATION CONTRACT: this script reads from each event only ts, kind, node, carrier,
  *   carrier_kind, arc (the last two validated against closed value allowlists), the ax aggregate
- *   object, the metrics measurement object (TREND_SERIES + SESSION_COST_KEYS allowlists), and —
+ *   object, the metrics measurement object (TREND_SERIES allowlist), the hook usage block
+ *   (USAGE_COMPONENT_KEYS allowlist + a grammar-validated model + a version-gated `v`), and —
  *   for conformance only — a COUNT of the closed-allowlist experience-contract gate token (never
- *   the gate string itself). It never reads, copies, or echoes:
+ *   the gate string itself). A raw session id is NEVER echoed (session-usage scope is anonymised to
+ *   `sess-<n>`). It never reads, copies, or echoes:
  *     - outcome strings (may reflect private content)
  *     - free-text gate names (only the closed `experience-contract:<pass|fail>` token is
  *       inspected, and only its pass/fail tally is surfaced — never the gate string verbatim)
@@ -81,9 +88,26 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { execSync } from "node:child_process";
 
-// 0.2.0 — carrier projection keyed by the (carrier_id, carrier_kind, arc) triple; admits the
-// dispatch-complete measure event + tokens_per_session (session_costs). See loop-runner-design §7.3.
-const GENERATOR_VERSION = "0.2.0";
+// 0.3.0 (D69 / #21) — cost comes from HOOK-captured usage events (unit-usage / session-usage /
+// dispatch-usage), each carrying a 6-component token_usage block (cache split preserved). The old
+// model-authored tokens_per_session on dispatch-complete is REJECTED (fabrication guard, design §4).
+// Adds a per-event version gate, latest-per-scope cumulative handling, and an instrumentation-health
+// reconciliation block. 0.2.0 — carrier projection keyed by the (carrier_id, carrier_kind, arc) triple.
+const GENERATOR_VERSION = "0.3.0";
+
+// The event-schema version this publisher is built for, kept SEPARATE from the generator version
+// (design §9). Usage events carry a per-event `v`; an event whose major band differs is dropped and
+// flagged so the renderer's version banner can prescribe the re-vendor fix. The compatible band is
+// "0.x" (major 0) — every D-series event so far. Legacy v-less enter/exit are accepted (degraded).
+const EVENT_SCHEMA_VERSION = "0.4.0";
+const COMPATIBLE_EVENT_RANGE = "0.x";
+
+/** A usage event's `v` is compatible iff it is a semver-shaped string in the major-0 band. */
+function eventVersionCompatible(v: unknown): boolean {
+  if (typeof v !== "string") return false;
+  const m = v.match(/^(\d+)\.(\d+)\.(\d+)$/);
+  return !!m && m[1] === "0";
+}
 
 // Sanitization — the locality boundary. Ids are emitted as JSON keys AND values, so they
 // must be bounded, metachar-free tokens, never a free-text/secret channel. Non-matching
@@ -117,15 +141,50 @@ const TREND_SERIES = [
   "benchmark.perf", "health.quality",
 ] as const;
 
-// Per-session cost measures (06-analytics "Per-session cost"; loop-runner-design §4 Phase 1.4).
-// A `dispatch-complete` event carries a `metrics` object bearing `tokens_per_session` — the
-// dispatched session's whole cost. Read by a CLOSED numeric allowlist under the SAME discipline
-// as TREND_SERIES (typeof number + Number.isFinite + non-negative): a non-numeric, NaN-string,
-// negative, or non-finite (Infinity / absurd-magnitude overflow) value is dropped. dispatch-complete
-// is a MEASURE event — it never advances current_stage.
-const SESSION_COST_KEYS = [
-  "tokens_per_session",
+// HOOK-captured token usage (D69 / #21, design §2/§4). The three usage event kinds the plugin
+// hooks append; each carries a 6-component `token_usage` block. These are the ONLY source of cost —
+// the model never authors token numbers (the rejection below closes that channel).
+const USAGE_KINDS = new Set(["unit-usage", "session-usage", "dispatch-usage"]);
+
+// The closed 6-component token_usage allowlist (matches lib/transcript-usage.ts UsageComponents).
+// Read value-by-value with a finite + non-negative guard; any bad/missing component drops the whole
+// point (a cost figure must be trustworthy or absent). The block is NEVER spread verbatim.
+const USAGE_COMPONENT_KEYS = [
+  "input", "output", "cache_creation_5m", "cache_creation_1h", "cache_read", "total",
 ] as const;
+
+// ANALYZER-derived process-cost events (Cluster A §3.2/§3.3, #28). The analyzer emits per-session
+// friction-record + cross-session stall-record rows; the publisher reads them on an ADDITIVE path
+// (parallel to USAGE_KINDS) and surfaces a Process-cost block. These carry ONLY categorised
+// counts/enums + bounded ids/ts — never the raw denial command / rejection reason (those stay in the
+// analyzer's local log; §3.2 no-free-text rule).
+const FRICTION_KINDS = new Set(["friction-record", "stall-record"]);
+
+// The closed numeric allowlist for a friction-record (parallel to USAGE_COMPONENT_KEYS). Each is read
+// value-by-value with a finite + non-negative integer guard; a bad value drops THAT field (degrade to
+// 0), never the whole row — a friction count is independently meaningful. The permission_decisions
+// sub-object + permission_mode enum are read separately below. NEVER spread the row verbatim.
+// Keep in lockstep with build-analytics.ts FRICTION_KEYS and docs/workspace-portal-design.md.
+const FRICTION_KEYS = [
+  "permission_denials", "rejected_calls", "tool_errors",
+] as const;
+
+// The closed permission-mode enum — a friction-record's permission_mode is echoed into the snapshot
+// (it is a render value), so it is a locality boundary: only these known modes pass, anything else
+// (incl. a smuggled free-text mode) renders as "" (dropped, never echoed).
+const PERMISSION_MODES = new Set(["auto", "default", "plan", "acceptEdits", "bypassPermissions"]);
+
+// FABRICATION GUARD (design §4): the model body emits only STRUCTURAL events (unit-complete /
+// dispatch-complete / exit) — never token numbers. A `tokens_per_*` / `token_usage` key arriving in a
+// model-authored `metrics` object is REJECTED (dropped + counted) so the 25× cache-blind fabrication
+// cannot re-enter through a stale node body. Cost rides ONLY the hook usage events above.
+const BANNED_METRIC_TOKEN_KEYS = [
+  "tokens_per_iu", "tokens_per_session", "token_usage", "tokens_total",
+] as const;
+
+// Model ids are emitted as values in session_costs, so they are a locality boundary — validate
+// against a bounded token grammar (same shape as ID_RE); a non-conforming model renders "unknown".
+const MODEL_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
 
 // UX-conformance: the ONLY gate token the publisher inspects. It is a closed-allowlist token,
 // matched exactly; the publisher surfaces only the pass/fail TALLY, never the gate string. All
@@ -162,13 +221,29 @@ function resolveTriple(ev: RawEvent): { carrier_id: string; carrier_kind: string
 }
 
 function repoRoot(): string {
-  // Walk up from __dirname until we find a .git directory.
-  let dir = path.dirname(new URL(import.meta.url).pathname);
+  const start = path.dirname(new URL(import.meta.url).pathname);
+  // Worktree-correct resolution (design §11). In a linked git worktree, `.git` is a FILE pointing
+  // at <main>/.git/worktrees/<name>, and the per-worktree checkout is NOT where the shared
+  // `.stack-graph/` org-root event log lives. `git rev-parse --git-common-dir` resolves to the MAIN
+  // `.git` from anywhere (a worktree or a normal checkout); its parent is the org root. The bound
+  // SG_EVENT_LOG / STACK_GRAPH_EVENTS_DIR (set by harness-init) always wins over this default; this
+  // only fixes the fallback path so a worktree run does not silently read a worktree-local log.
+  try {
+    const commonDir = execSync("git rev-parse --git-common-dir", { cwd: start, encoding: "utf8" }).trim();
+    if (commonDir) {
+      const abs = path.isAbsolute(commonDir) ? commonDir : path.resolve(start, commonDir);
+      return path.dirname(abs);
+    }
+  } catch {
+    // git unavailable — fall through to the directory walk.
+  }
+  // Fallback: walk up until a `.git` entry (file OR dir) is found.
+  let dir = start;
   while (dir !== path.dirname(dir)) {
     if (fs.existsSync(path.join(dir, ".git"))) return dir;
     dir = path.dirname(dir);
   }
-  throw new Error("Could not locate repo root (no .git found above " + path.dirname(new URL(import.meta.url).pathname) + ")");
+  throw new Error("Could not locate repo root (no .git found above " + start + ")");
 }
 
 function gitHead(root: string): string {
@@ -217,8 +292,8 @@ interface RawEvent {
   // exit-specific
   outcome?: string;
   gates?: string[];
-  // trend measurements (optional) — sanitised to the TREND_SERIES / SESSION_COST_KEYS allowlists
-  // on read, never copied verbatim
+  // trend measurements (optional) — sanitised to the TREND_SERIES allowlist on read, never copied
+  // verbatim; a banned token key here (model-authored fabrication) is rejected + counted.
   metrics?: Record<string, unknown>;
   // traverse-specific
   from?: string;
@@ -226,6 +301,29 @@ interface RawEvent {
   arc?: string;
   // ax aggregate object (optional) — sanitised to a numeric allowlist on read, never copied verbatim
   ax?: Record<string, unknown>;
+  // hook-captured usage events (D69 / #21) — unit-usage / session-usage / dispatch-usage. token_usage
+  // is read by the closed 6-component allowlist; the rest are sanitised on read (model→grammar,
+  // scope→ID_RE or session-anonymised, v→version gate). NEVER spread verbatim.
+  token_usage?: Record<string, unknown>;
+  scope_id?: string;
+  model?: string;
+  cumulative?: boolean;
+  agent_id?: string;
+  iu?: string;
+  v?: string;
+  // analyzer-derived process-cost fields (friction-record / stall-record, §3.2/§3.3). Read by the
+  // FRICTION_KEYS numeric allowlist + the permission-decision sub-object + the permission-mode enum;
+  // stall fields are bounded ids + a numeric gap. NEVER spread verbatim.
+  permission_denials?: unknown;
+  rejected_calls?: unknown;
+  tool_errors?: unknown;
+  permission_decisions?: unknown;
+  permission_mode?: unknown;
+  gap_ms?: unknown;
+  before_node?: unknown;
+  after_node?: unknown;
+  session_before?: unknown;
+  session_after?: unknown;
 }
 // NOTE: deliberately NO index signature. A future `{...ev}` then becomes a type error
 // rather than a silent leak — the output is constructed field-by-field from an allowlist.
@@ -265,14 +363,83 @@ interface ConformanceProjection {
   experience_contract: { pass: number; fail: number };
 }
 
+/** The 6 disjoint token categories + their sum (mirrors lib/transcript-usage.ts UsageComponents).
+ *  The cache split is preserved so the renderer prices cache writes/reads at their real multipliers
+ *  (the 25×-error fix); by_model is deliberately NOT carried (kept off the event line, design §2). */
+interface UsagePoint {
+  input: number;
+  output: number;
+  cache_creation_5m: number;
+  cache_creation_1h: number;
+  cache_read: number;
+  total: number;
+}
+
 interface SessionCostPoint {
   at: string;
-  // the carrier triple this measure belongs to (dispatch-complete is carrier-keyed).
-  carrier_id: string;
-  carrier_kind: string;
-  arc: string;
-  // closed numeric allowlist (SESSION_COST_KEYS) — finite, non-negative.
-  tokens_per_session: number;
+  // which hook captured it: unit-usage (per-IU) / session-usage (per-session) / dispatch-usage (per
+  // arc-dispatch). Drives how the renderer groups and how reconciliation pairs children to parents.
+  kind: "unit-usage" | "session-usage" | "dispatch-usage";
+  // the scope this cost belongs to — an IU id (unit-usage), an ANONYMISED session label
+  // (session-usage; the raw session id is private and never echoed), or a carrier id (dispatch-usage).
+  scope_id: string;
+  // the carrier triple when present (null on a non-carrier session-usage). Sanitised allowlists.
+  carrier_id: string | null;
+  carrier_kind: string | null;
+  arc: string | null;
+  // dominant model of the scope, for rate selection at render (grammar-validated; "unknown" otherwise).
+  model: string;
+  // session-usage / dispatch-usage are cumulative (Stop fires per-turn) → the publisher keeps the
+  // LATEST per (kind, scope) so a growing per-turn total is never double-counted.
+  cumulative: boolean;
+  usage: UsagePoint;
+}
+
+/** Analyzer-derived process cost (Cluster A §3.2/§3.3): a per-session friction summary and the
+ *  cross-session stalls. Categorised counts + bounded enums/ids only — never the raw denial command or
+ *  rejection reason (those stay in the analyzer's local, gitignored log). The session id is ANONYMISED
+ *  exactly as session-usage (the raw id is private and never echoed). */
+interface ProcessCostPoint {
+  at: string;
+  session_label: string; // anonymised label (sess-<n>), never the raw session id
+  permission_denials: number;
+  rejected_calls: number;
+  tool_errors: number;
+  permission_decisions: { allow: number; deny: number; ask: number };
+  permission_mode: string; // closed enum or "" (a non-allowlisted/free-text mode is dropped)
+}
+
+interface StallPoint {
+  at: string;
+  gap_ms: number;
+  before_node: string | null; // ID_RE-clean graph node id or null
+  after_node: string | null;
+  session_before: string; // anonymised
+  session_after: string; // anonymised
+}
+
+/** The Process-cost projection: per-session friction + the cross-session stalls. Empty arrays when no
+ *  friction/stall events exist (the renderer shows a degraded "analyzer not yet run" state). */
+interface ProcessCosts {
+  friction: ProcessCostPoint[];
+  stalls: StallPoint[];
+}
+
+/** Instrumentation-health reconciliation (design §7) — coverage + inequality, the tripwire that would
+ *  have caught the 25× gap. Σ(child unit usage per carrier) ≤ that carrier's dispatch/session usage;
+ *  missing-child / missing-parent / version / fabrication-rejection states are surfaced as notes. */
+interface Reconciliation {
+  unit_usage: number;
+  session_usage: number;
+  dispatch_usage: number;
+  measured_iu_total: number;
+  session_total: number;
+  // Σchild ≤ parent + tolerance across carriers where both sides exist; null when not checkable.
+  inequality_ok: boolean | null;
+  instrumentation_errors: number;
+  rejected_model_token_keys: number;
+  version_incompatible_events: number;
+  notes: string[];
 }
 
 interface PortalProjection {
@@ -280,6 +447,12 @@ interface PortalProjection {
     commit: string;
     generated_at: string;
     generator_version: string;
+    // event-schema version + compatible band (design §9), kept separate from generator_version so the
+    // renderer banner can name BOTH and prescribe the re-vendor fix on a mismatch.
+    event_schema_version: string;
+    compatible_event_range: string;
+    // the distinct per-event `v` values actually observed in this log (sorted); empty when none.
+    observed_event_versions: string[];
   };
   carriers: Record<string, CarrierProjection>;
   nodes: Record<string, NodeProjection>;
@@ -289,27 +462,76 @@ interface PortalProjection {
   trends: Record<string, TrendPoint[]>;
   // UX-conformance tallies derived from the closed-allowlist gate tokens.
   conformance: ConformanceProjection;
-  // Per-session dispatch cost — one point per admitted dispatch-complete event carrying a
-  // finite, non-negative tokens_per_session (SESSION_COST_KEYS). The dispatch-efficiency
-  // measure (06-analytics "Per-session cost"). dispatch-complete is a MEASURE event: it never
-  // contributes to any carrier's current_stage. Empty list when no dispatch-complete events exist.
+  // Per-scope token cost from the HOOK usage events (06-analytics "Per-session cost"; D69). One point
+  // per (kind, scope), latest-per-scope for cumulative kinds. NEVER advances current_stage. Empty
+  // when no usage events exist.
   session_costs: SessionCostPoint[];
+  // Analyzer-derived process cost (Cluster A §3.2/§3.3): per-session friction + cross-session stalls.
+  // Empty arrays when no friction/stall events exist. Parallel to session_costs.
+  process_costs: ProcessCosts;
+  // Instrumentation-health reconciliation (coverage + inequality + health states).
+  reconciliation: Reconciliation;
 }
 
 // ---------------------------------------------------------------------------
 // Core logic
 // ---------------------------------------------------------------------------
 
+function emptyProvenance(commit: string, generatedAt: string, observed: string[] = []) {
+  return {
+    commit,
+    generated_at: generatedAt,
+    generator_version: GENERATOR_VERSION,
+    event_schema_version: EVENT_SCHEMA_VERSION,
+    compatible_event_range: COMPATIBLE_EVENT_RANGE,
+    observed_event_versions: observed,
+  };
+}
+
+function emptyReconciliation(): Reconciliation {
+  return {
+    unit_usage: 0, session_usage: 0, dispatch_usage: 0,
+    measured_iu_total: 0, session_total: 0,
+    inequality_ok: null, instrumentation_errors: 0,
+    rejected_model_token_keys: 0, version_incompatible_events: 0, notes: [],
+  };
+}
+
 function buildEmptySnapshot(commit: string, generatedAt: string): PortalProjection {
   return {
-    provenance: { commit, generated_at: generatedAt, generator_version: GENERATOR_VERSION },
+    provenance: emptyProvenance(commit, generatedAt),
     carriers: {},
     nodes: {},
     ax: {},
     trends: {},
     conformance: { experience_contract: { pass: 0, fail: 0 } },
     session_costs: [],
+    process_costs: { friction: [], stalls: [] },
+    reconciliation: emptyReconciliation(),
   };
+}
+
+/** Count model-authored token keys present in a `metrics` object (the fabrication guard). */
+function countBannedTokenKeys(metrics: unknown): number {
+  if (!metrics || typeof metrics !== "object" || Array.isArray(metrics)) return 0;
+  const src = metrics as Record<string, unknown>;
+  let n = 0;
+  for (const k of BANNED_METRIC_TOKEN_KEYS) if (k in src) n++;
+  return n;
+}
+
+/** Read the 6-component token_usage block by the closed allowlist. Any missing/non-finite/negative
+ *  component drops the whole point (a cost figure is trustworthy or absent). Never spreads verbatim. */
+function readUsageBlock(tu: unknown): UsagePoint | null {
+  if (!tu || typeof tu !== "object" || Array.isArray(tu)) return null;
+  const src = tu as Record<string, unknown>;
+  const out = {} as Record<string, number>;
+  for (const k of USAGE_COMPONENT_KEYS) {
+    const v = src[k];
+    if (typeof v !== "number" || !Number.isFinite(v) || v < 0) return null;
+    out[k] = v;
+  }
+  return out as unknown as UsagePoint;
 }
 
 /**
@@ -364,10 +586,25 @@ function deriveProjection(
   interface TripleTransitions { carrier_id: string; carrier_kind: string; arc: string; entries: TransitionEntry[]; }
   const carrierTransitions = new Map<string, TripleTransitions>();
 
-  // Per dispatch-complete event: a session-cost point (carrier-keyed, finite non-negative
-  // tokens_per_session). dispatch-complete is a MEASURE event — it is read ONLY here, never for
-  // current_stage (it is excluded from the enter-driven stage projection above).
-  const sessionCosts: SessionCostPoint[] = [];
+  // HOOK-captured usage events (D69). Latest-per (kind, scope) so a cumulative per-turn total
+  // (session-usage / dispatch-usage from a per-turn Stop) is never double-counted; unit-usage scopes
+  // are distinct per IU so all are kept. Plus the instrumentation-health counters + the session-id
+  // anonymiser (a raw session id is private and never echoed — session-usage scope is anonymised).
+  const usageLatest = new Map<string, SessionCostPoint>();
+  const sessionAnon = new Map<string, string>();
+  // Analyzer-derived process cost (§3.2/§3.3). friction is per-session (latest-per anonymised session);
+  // stalls accumulate (one per cross-session gap). Sanitised exactly as the usage path (ts/ID_RE/anon).
+  const frictionLatest = new Map<string, ProcessCostPoint>();
+  const stallPoints: StallPoint[] = [];
+  let instrumentationErrors = 0;
+  let rejectedModelTokenKeys = 0;
+  let versionIncompatible = 0;
+  const observedVersions = new Set<string>();
+  const anonSession = (id: string): string => {
+    let a = sessionAnon.get(id);
+    if (!a) { a = `sess-${sessionAnon.size + 1}`; sessionAnon.set(id, a); }
+    return a;
+  };
 
   // Per-node: last_used ts (as ms for comparison) and traversal timestamps within 30d
   const nodeLastUsedMs = new Map<string, number>();
@@ -384,52 +621,148 @@ function deriveProjection(
   const conformanceTally = { pass: 0, fail: 0 };
 
   for (const ev of events) {
-    // Process enter/exit (stage + measure projection) and dispatch-complete (measure-only).
+    // ── instrumentation-error (loud-fail signal from a hook) — count for the degraded-state banner.
+    if (ev.kind === "instrumentation-error") {
+      instrumentationErrors++;
+      if (typeof ev.v === "string") observedVersions.add(ev.v);
+      continue;
+    }
+
+    // ── HOOK usage events (D69) — the ONLY source of token cost. Version-gated, ts-validated,
+    //    token_usage read by the closed 6-component allowlist, model + scope sanitised. Latest-per
+    //    (kind, scope) for cumulative kinds. NEVER advances current_stage.
+    if (typeof ev.kind === "string" && USAGE_KINDS.has(ev.kind)) {
+      if (typeof ev.v === "string") observedVersions.add(ev.v);
+      if (!eventVersionCompatible(ev.v)) {
+        versionIncompatible++;
+        console.warn(`  [WARN] ${ev.kind} with incompatible/absent version \`${String(ev.v)}\` dropped (expected ${COMPATIBLE_EVENT_RANGE}).`);
+        continue;
+      }
+      const uts = ev.ts;
+      if (typeof uts !== "string" || !ISO_UTC_RE.test(uts)) { console.warn(`  [WARN] ${ev.kind} non-ISO-8601 ts — dropped.`); continue; }
+      const uMs = new Date(uts).getTime();
+      if (isNaN(uMs) || uMs > now) { console.warn(`  [WARN] ${ev.kind} unparseable/future ts — dropped.`); continue; }
+      const uIso = new Date(uMs).toISOString();
+
+      const usage = readUsageBlock(ev.token_usage);
+      if (!usage) { console.warn(`  [WARN] ${ev.kind} with missing/invalid token_usage — dropped.`); continue; }
+
+      const model = (typeof ev.model === "string" && MODEL_RE.test(ev.model)) ? ev.model : "unknown";
+      const triple = resolveTriple(ev); // null when no/invalid carrier triple (session-usage may omit)
+
+      // scope_id: session-usage is anonymised (raw session id is private); unit/dispatch-usage carry
+      // an iu/carrier id that must pass ID_RE (else the point can't be safely attributed → dropped).
+      let scope_id: string;
+      if (ev.kind === "session-usage") {
+        const sid = typeof ev.scope_id === "string" ? ev.scope_id : (typeof ev.session === "string" ? ev.session : "");
+        scope_id = anonSession(sid || `anon-${usageLatest.size}`);
+      } else {
+        const raw = typeof ev.scope_id === "string" ? ev.scope_id : "";
+        if (!ID_RE.test(raw)) { console.warn(`  [WARN] ${ev.kind} with non-conforming scope_id — dropped.`); continue; }
+        scope_id = raw;
+      }
+
+      const point: SessionCostPoint = {
+        at: uIso,
+        kind: ev.kind as SessionCostPoint["kind"],
+        scope_id,
+        carrier_id: triple ? triple.carrier_id : null,
+        carrier_kind: triple ? triple.carrier_kind : null,
+        arc: triple ? triple.arc : null,
+        model,
+        cumulative: ev.cumulative === true,
+        usage,
+      };
+      const key = `${point.kind}::${scope_id}`;
+      const prior = usageLatest.get(key);
+      if (!prior || new Date(point.at).getTime() >= new Date(prior.at).getTime()) usageLatest.set(key, point);
+      continue;
+    }
+
+    // ── ANALYZER process-cost events (Cluster A §3.2/§3.3) — friction-record / stall-record. Additive
+    //    read path, sanitised EXACTLY as the usage path: version-gated, ts-validated (strict UTC ISO,
+    //    no future), counts read by a finite-non-negative-INTEGER guard (a bad value → 0, never echoed),
+    //    permission_mode against a closed enum, node tags against ID_RE, session ANONYMISED. NEVER spread
+    //    a row verbatim — a smuggled free-text command / non-ID node / free-text mode cannot ride through.
+    if (typeof ev.kind === "string" && FRICTION_KINDS.has(ev.kind)) {
+      if (typeof ev.v === "string") observedVersions.add(ev.v);
+      if (!eventVersionCompatible(ev.v)) {
+        versionIncompatible++;
+        console.warn(`  [WARN] ${ev.kind} with incompatible/absent version \`${String(ev.v)}\` dropped (expected ${COMPATIBLE_EVENT_RANGE}).`);
+        continue;
+      }
+      const fts = ev.ts;
+      if (typeof fts !== "string" || !ISO_UTC_RE.test(fts)) { console.warn(`  [WARN] ${ev.kind} non-ISO-8601 ts — dropped.`); continue; }
+      const fMs = new Date(fts).getTime();
+      if (isNaN(fMs) || fMs > now) { console.warn(`  [WARN] ${ev.kind} unparseable/future ts — dropped.`); continue; }
+      const fIso = new Date(fMs).toISOString();
+
+      // A non-negative finite integer, else 0 — a count is independently meaningful, so a bad field
+      // degrades that field rather than dropping the row. Never echoes a non-number.
+      const readCount = (v: unknown): number =>
+        typeof v === "number" && Number.isFinite(v) && v >= 0 ? Math.floor(v) : 0;
+      // A bounded ID_RE-clean node tag, else null (a non-string or free-text tag is never echoed).
+      const readNodeTag = (v: unknown): string | null =>
+        typeof v === "string" && ID_RE.test(v) ? v : null;
+
+      if (ev.kind === "friction-record") {
+        // permission_decisions sub-object: read ONLY the three known keys, each count-guarded.
+        const pd = ev.permission_decisions;
+        const pdSrc = pd && typeof pd === "object" && !Array.isArray(pd) ? (pd as Record<string, unknown>) : {};
+        // permission_mode: closed enum or "" (a smuggled free-text mode is dropped, never echoed).
+        const mode = typeof ev.permission_mode === "string" && PERMISSION_MODES.has(ev.permission_mode)
+          ? ev.permission_mode : "";
+        const rawSess = typeof ev.session === "string" ? ev.session : (typeof ev.scope_id === "string" ? ev.scope_id : "");
+        const fp: ProcessCostPoint = {
+          at: fIso,
+          session_label: anonSession(rawSess || `anon-${frictionLatest.size}`),
+          permission_denials: readCount(ev.permission_denials),
+          rejected_calls: readCount(ev.rejected_calls),
+          tool_errors: readCount(ev.tool_errors),
+          permission_decisions: {
+            allow: readCount(pdSrc["allow"]),
+            deny: readCount(pdSrc["deny"]),
+            ask: readCount(pdSrc["ask"]),
+          },
+          permission_mode: mode,
+        };
+        // Latest-per anonymised session (the analyzer emits one settled friction-record per session,
+        // but a re-publish over a re-run log is idempotent — keep the latest by ts).
+        const prior = frictionLatest.get(fp.session_label);
+        if (!prior || new Date(fp.at).getTime() >= new Date(prior.at).getTime()) frictionLatest.set(fp.session_label, fp);
+        continue;
+      }
+
+      // stall-record — one per cross-session gap. gap_ms numeric-guarded; node tags ID_RE; sessions anon.
+      const gap = ev.gap_ms;
+      if (typeof gap !== "number" || !Number.isFinite(gap) || gap < 0) { console.warn(`  [WARN] stall-record with invalid gap_ms — dropped.`); continue; }
+      const sb = typeof ev.session_before === "string" ? ev.session_before : "";
+      const sa = typeof ev.session_after === "string" ? ev.session_after : "";
+      stallPoints.push({
+        at: fIso,
+        gap_ms: Math.floor(gap),
+        before_node: readNodeTag(ev.before_node),
+        after_node: readNodeTag(ev.after_node),
+        session_before: anonSession(sb || `anon-${frictionLatest.size}`),
+        session_after: anonSession(sa || `anon-${frictionLatest.size}`),
+      });
+      continue;
+    }
+
+    // Process enter/exit (stage + measure projection) and dispatch-complete (structural-only now).
     // gate/traverse are not used for projection.
     if (ev.kind !== "enter" && ev.kind !== "exit" && ev.kind !== "dispatch-complete") continue;
 
     const ts = ev.ts;
 
-    // dispatch-complete is carrier-keyed but NOT node-bound (a subagent-completion measure event,
-    // like unit-complete) — it has no `node` and is handled separately below. It is a MEASURE
-    // event: it NEVER advances current_stage, so it is excluded from the enter-driven stage
-    // projection by construction (its branch never touches carrierTransitions).
+    // dispatch-complete is now a STRUCTURAL-ONLY event (carrier + outcome) — the model body no
+    // longer authors token numbers on it (design §4/§12). Cost rides the hook `dispatch-usage`
+    // event handled above. Here we only enforce the FABRICATION GUARD: any model-authored
+    // `tokens_per_*` / `token_usage` key still riding its `metrics` is rejected + counted (a stale
+    // node body cannot re-introduce the 25× cache-blind figure). dispatch-complete never advances
+    // current_stage, so once the guard runs there is nothing more to read.
     if (ev.kind === "dispatch-complete") {
-      // Validate ts under the SAME strict UTC ISO-8601 + future-ts discipline as stage events.
-      if (typeof ts !== "string" || !ISO_UTC_RE.test(ts)) {
-        console.warn(`  [WARN] dispatch-complete with non-ISO-8601 timestamp rejected — skipped.`);
-        continue;
-      }
-      const dcMs = new Date(ts).getTime();
-      if (isNaN(dcMs)) { console.warn(`  [WARN] dispatch-complete with unparseable timestamp rejected — skipped.`); continue; }
-      if (dcMs > now) { console.warn(`  [WARN] dispatch-complete with future timestamp rejected — skipped.`); continue; }
-      const dcIso = new Date(dcMs).toISOString();
-
-      // Resolve the carrier triple. dispatch-complete must carry the full (carrier, kind, arc)
-      // triple; any element missing or non-conforming drops the measure (degrade, never guess).
-      const triple = resolveTriple(ev);
-      if (!triple) {
-        console.warn(`  [WARN] dispatch-complete missing/non-conforming carrier triple — measure dropped.`);
-        continue;
-      }
-      // Read tokens_per_session by the closed SESSION_COST_KEYS allowlist with a finite +
-      // non-negative guard — a non-numeric (NaN-string), negative, or non-finite (Infinity /
-      // absurd-magnitude overflow) value is dropped; the `metrics` object is NEVER spread verbatim.
-      if (ev.metrics && typeof ev.metrics === "object" && !Array.isArray(ev.metrics)) {
-        const src = ev.metrics as Record<string, unknown>;
-        for (const key of SESSION_COST_KEYS) {
-          const v = src[key];
-          if (typeof v === "number" && Number.isFinite(v) && v >= 0) {
-            sessionCosts.push({
-              at: dcIso,
-              carrier_id: triple.carrier_id,
-              carrier_kind: triple.carrier_kind,
-              arc: triple.arc,
-              tokens_per_session: v,
-            });
-          }
-        }
-      }
+      rejectedModelTokenKeys += countBannedTokenKeys(ev.metrics);
       continue;
     }
 
@@ -517,6 +850,10 @@ function deriveProjection(
         if (Object.keys(existing).length > 0) axAggregates.set(nodeId, existing);
       }
 
+      // FABRICATION GUARD — a model-authored exit must NOT carry token numbers; reject + count any
+      // tokens_per_* / token_usage key on its metrics (design §4). Cost rides the hook usage events.
+      rejectedModelTokenKeys += countBannedTokenKeys(ev.metrics);
+
       // Trend measurements — read ONLY the closed series allowlist from `metrics`; NEVER spread
       // the object. Each accepted value is a finite number appended as a {at, value} point. A
       // non-numeric or unknown-series measurement is dropped (same discipline as ax).
@@ -597,21 +934,75 @@ function deriveProjection(
     trends[series] = points.slice().sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
   }
 
-  // Session costs — ordered by time so the dispatch-efficiency read is a clean slope.
-  const session_costs = sessionCosts.slice().sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+  // Session costs — latest-per-scope points, ordered by time so the cost read is a clean slope.
+  const session_costs = [...usageLatest.values()].sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+
+  // Process costs (§3.2/§3.3) — per-session friction (latest-per anonymised session) + cross-session
+  // stalls, each ordered by time for a clean render.
+  const process_costs: ProcessCosts = {
+    friction: [...frictionLatest.values()].sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime()),
+    stalls: stallPoints.slice().sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime()),
+  };
+
+  // ── Reconciliation (instrumentation health, design §7): coverage + the Σchild ≤ parent inequality.
+  const unitPoints = session_costs.filter((p) => p.kind === "unit-usage");
+  const sessionPoints = session_costs.filter((p) => p.kind === "session-usage");
+  const dispatchPoints = session_costs.filter((p) => p.kind === "dispatch-usage");
+  const measured_iu_total = unitPoints.reduce((s, p) => s + p.usage.total, 0);
+  const session_total = sessionPoints.reduce((s, p) => s + p.usage.total, 0);
+
+  const notes: string[] = [];
+  // Σ(unit children) per carrier vs that carrier's dispatch-usage parent.
+  const unitByCarrier = new Map<string, number>();
+  for (const u of unitPoints) if (u.carrier_id) unitByCarrier.set(u.carrier_id, (unitByCarrier.get(u.carrier_id) ?? 0) + u.usage.total);
+  const dispatchByCarrier = new Map<string, number>();
+  for (const d of dispatchPoints) if (d.carrier_id) dispatchByCarrier.set(d.carrier_id, d.usage.total);
+
+  let inequality_ok: boolean | null = null;
+  for (const [cid, childSum] of unitByCarrier) {
+    const parent = dispatchByCarrier.get(cid);
+    if (parent === undefined) {
+      notes.push(`carrier ${cid}: ${childSum} tok of unit usage measured but no dispatch-usage parent (coverage gap)`);
+      continue;
+    }
+    if (inequality_ok === null) inequality_ok = true;
+    if (childSum > parent) {
+      inequality_ok = false;
+      notes.push(`carrier ${cid}: Σ child unit usage ${childSum} exceeds dispatch usage ${parent} (inequality breach)`);
+    }
+  }
+  for (const d of dispatchPoints) {
+    if (d.carrier_id && !unitByCarrier.has(d.carrier_id)) {
+      notes.push(`carrier ${d.carrier_id}: dispatch-usage present but no unit-usage children measured`);
+    }
+  }
+  if (instrumentationErrors > 0) notes.push(`${instrumentationErrors} instrumentation-error event(s) — a hook fired but failed (loud, never silent)`);
+  if (versionIncompatible > 0) notes.push(`${versionIncompatible} usage event(s) dropped for version incompatibility — re-vendor the plugin`);
+  if (rejectedModelTokenKeys > 0) notes.push(`${rejectedModelTokenKeys} model-authored token key(s) rejected (fabrication guard)`);
+
+  const reconciliation: Reconciliation = {
+    unit_usage: unitPoints.length,
+    session_usage: sessionPoints.length,
+    dispatch_usage: dispatchPoints.length,
+    measured_iu_total,
+    session_total,
+    inequality_ok,
+    instrumentation_errors: instrumentationErrors,
+    rejected_model_token_keys: rejectedModelTokenKeys,
+    version_incompatible_events: versionIncompatible,
+    notes,
+  };
 
   return {
-    provenance: {
-      commit,
-      generated_at: generatedAt,
-      generator_version: GENERATOR_VERSION,
-    },
+    provenance: emptyProvenance(commit, generatedAt, [...observedVersions].sort()),
     carriers,
     nodes,
     ax,
     trends,
     conformance: { experience_contract: { pass: conformanceTally.pass, fail: conformanceTally.fail } },
     session_costs,
+    process_costs,
+    reconciliation,
   };
 }
 
@@ -626,9 +1017,13 @@ async function main() {
   const commit = gitHead(root);
   const generatedAt = new Date().toISOString();
 
-  // Resolve events path
+  // Resolve events path. The default is the analyzer's derived output —
+  // `.stack-graph/derived/analyzer-events.jsonl` (the A6c event-log migration, #28): the analyzer
+  // writes that file, the publisher reads it. All three resolution paths converge on it — the
+  // `STACK_GRAPH_EVENTS_DIR` default below, the `--events` flag (`argEvents`), and the bound
+  // `SG_EVENT_LOG` the harness passes as `--events`.
   const eventsDir = process.env["STACK_GRAPH_EVENTS_DIR"] ?? path.join(root, ".stack-graph");
-  const eventsFile = argEvents ?? path.join(eventsDir, "events.jsonl");
+  const eventsFile = argEvents ?? path.join(eventsDir, "derived", "analyzer-events.jsonl");
 
   // Resolve output path
   const defaultOut = path.join(root, "workspace", "dist", "portal-projection.json");
@@ -659,7 +1054,12 @@ async function main() {
       console.log("  [INFO] Nodes found      :", Object.keys(snapshot.nodes).length);
       console.log("  [INFO] AX nodes found   :", Object.keys(snapshot.ax).length);
       console.log("  [INFO] Trend series     :", Object.keys(snapshot.trends).length);
-      console.log("  [INFO] Session costs    :", snapshot.session_costs.length);
+      console.log("  [INFO] Cost points      :", snapshot.session_costs.length,
+        `(${snapshot.reconciliation.unit_usage} unit / ${snapshot.reconciliation.session_usage} session / ${snapshot.reconciliation.dispatch_usage} dispatch)`);
+      if (snapshot.reconciliation.instrumentation_errors > 0)
+        console.log("  [WARN] Instrumentation errors:", snapshot.reconciliation.instrumentation_errors, "(hook fired but failed)");
+      if (snapshot.reconciliation.rejected_model_token_keys > 0)
+        console.log("  [WARN] Rejected model token keys:", snapshot.reconciliation.rejected_model_token_keys, "(fabrication guard)");
       console.log("  [INFO] Conformance      :", `${snapshot.conformance.experience_contract.pass} pass / ${snapshot.conformance.experience_contract.fail} fail`);
     }
   }

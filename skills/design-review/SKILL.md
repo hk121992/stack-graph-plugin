@@ -110,12 +110,6 @@ plus any gate touched. You write no carrier field; your events are the projectio
 - In mutating depths: atomic fix commits with before/after screenshots and per-fix classification
   (verified / best-effort / reverted / deferred).
 
-## Imported references
-
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
-
-@references/instrumentation-preamble.md
-
 ## On-demand references
 
 Read these at the step of need (single-sourced into this primitive's bundle):

@@ -19,7 +19,6 @@ edges:
   composes-into:
     - { id: dev-sprint, stage: debrief }
   references:
-    - { id: instrumentation-preamble, load: import }
 # analytics — the loop
 goals:
   - outcome: Outcomes are actually read back against what was promised — the work-item's outcome_link is resolved to a verdict, not left open.

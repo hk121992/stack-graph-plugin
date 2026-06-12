@@ -26,7 +26,7 @@ edges:
     - { id: findings-schema,    load: import }
     - { id: severity-scale,     load: import }
     - { id: confidence-anchors,       load: import }
-    - { id: instrumentation-preamble, load: import }
+    - { id: analytics-vocabulary,     load: import }
     - { id: carrier-interface,        load: on-demand }
   precedes:
     - { id: verify, arc: dev-sprint }
@@ -173,6 +173,23 @@ mutations and run no fix-loop. This is the standalone / qa-only shape.
 Machine-consumable. Apply `safe_auto` fixes in a single pass, then return the structured
 finding set (ranked actionable findings + soft buckets + coverage note + verdict) with no
 operator turn and no per-finding prompts.
+
+## Emit the verdict — a `<sg-signal>` block in your final result
+
+The review verdict is a **model judgment** the analyzer cannot derive from the transcript, so state it
+as a fenced `<sg-signal>` block in your **final output/result message** (per `analytics-vocabulary`),
+not on an event. Carry your gate verdict(s) in the block's `gates` array as `<gate>:<pass|fail>`
+tokens:
+
+```
+<sg-signal>{"gates":["experience-contract:pass"]}</sg-signal>
+```
+
+The analytics layer tallies only the `experience-contract` gate token; any other (free-text) gate
+name you carry is recorded in your result for the operator but not tallied (it may carry a private
+decision name). The analyzer reads the block from your run's final message (the **subagent**
+transcript's final message when you run dispatched); absent or malformed, it is simply **not
+recorded** (honest under-capture, never invented).
 
 ## Output
 

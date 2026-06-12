@@ -34,7 +34,6 @@ edges:
     - { id: handbook,                   load: on-demand, external: true }
     - { id: experience-contract-schema, load: on-demand }
     - { id: experience-contract,        load: on-demand, external: true }
-    - { id: instrumentation-preamble,  load: import }
   precedes:
     - { id: specify }
 # analytics — the loop

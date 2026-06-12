@@ -225,10 +225,3 @@ pass; it does not author the amendment (that is `specify`).
 - A **stage-complete signal** — the projection advances `current_stage`. You write **no carrier
   field** and record **no gate decision**; advancing the lifecycle and passing the gate remain
   PM/operator calls, and align-context operates inside the in-delivery window without advancing it.
-
-## Imported references
-
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
-
-@references/instrumentation-preamble.md
-

@@ -22,7 +22,6 @@ determinism: generative
 # mechanism, not a node primitive — the body names the OUTCOME (reflow, dynamic heights), engine-agnostic.
 edges:
   references:
-    - { id: instrumentation-preamble, load: import }
     - { id: ux-principles,            load: on-demand }
   composes-into:
     - { id: dev-sprint, stage: build }

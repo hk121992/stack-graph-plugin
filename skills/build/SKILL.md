@@ -100,10 +100,12 @@ From kick-off to review handoff, you run the span unattended. The discipline:
   derived from the IU `goal`. Commit only passing state — if you cannot write a meaningful commit
   message, the unit is not done. No `WIP:` messages. In worktree-isolated parallel mode each subagent
   commits within its own branch; in a shared-directory fallback only the orchestrator commits.
-- **Emit unit-complete.** After the commit, emit the **unit-complete event** carrying the IU `id`, the
-  raw `acceptance_check` output, and **`tokens_per_iu`** — the per-IU build token cost — into the
-  analytics product-outcomes event log (per the imported `instrumentation-preamble`). This is the
-  projection's signal; it is not a write to the carrier.
+- **Emit unit-complete.** After the commit, emit the **structural unit-complete event** carrying the
+  IU `id` and the raw `acceptance_check` output — the **acceptance evidence only the body knows** — per
+  the imported `instrumentation-preamble`. **Emit NO token numbers**: the per-IU cost is captured by the
+  plugin hook (a `unit-usage` event joined to this one by scope id), because a body cannot see cache
+  reads and a body-emitted figure is fabrication (the preamble's do-NOT-emit list; the publisher
+  rejects `tokens_per_iu`). This event is the projection's structural signal; it is not a write to the carrier.
 - **Catch and repair in-span.** When a unit fails its acceptance check, diagnose and fix it within the
   span before emitting the complete event. Surface a passing unit to review, not one that "mostly works."
   In-span rework is cheaper than a review→build re-entry.
@@ -249,9 +251,9 @@ Still deferred (F7 — wired once the endpoint/ref lands):
 ## Output
 
 - **All modes:** the **IU set delivered** — each unit passing its acceptance criteria, evidenced by the
-  raw `acceptance_check` output. A **unit-complete event** per IU (carrying the IU `id`, the raw evidence,
-  and `tokens_per_iu`) and an **incremental commit** per IU. A **stage-complete event** when all units are
-  done. No carrier write.
+  raw `acceptance_check` output. A **structural unit-complete event** per IU (carrying the IU `id` and the
+  raw evidence — **no token numbers**; the hook captures cost as a joined `unit-usage`) and an **incremental
+  commit** per IU. A **stage-complete event** when all units are done. No carrier write.
 - **Parallel mode:** a **merged result** assembled from per-worktree worker outputs in dependency order,
   after the worktree-teardown sequence, before review handoff.
 - **Blocker report** (if triggered): the affected IU, the blocker, the options — surfaced to the operator
@@ -262,7 +264,6 @@ Still deferred (F7 — wired once the endpoint/ref lands):
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
 @references/IU-schema.md
-@references/instrumentation-preamble.md
 
 ## On-demand references
 
