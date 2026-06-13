@@ -825,7 +825,7 @@ function deriveProjection(
       if (carrierId) {
         const triple = resolveTriple(ev);
         if (triple) {
-          const key = `${triple.carrier_id} ${triple.carrier_kind} ${triple.arc}`;
+          const key = `${triple.carrier_id}::${triple.carrier_kind}::${triple.arc}`;
           const tt = carrierTransitions.get(key) ?? {
             carrier_id: triple.carrier_id, carrier_kind: triple.carrier_kind, arc: triple.arc, entries: [],
           };
