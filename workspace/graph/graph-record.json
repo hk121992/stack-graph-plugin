@@ -1,9 +1,9 @@
 {
-  "generated": "2026-06-12T18:15:46Z",
-  "node_count": 47,
-  "reference_count": 28,
+  "generated": "2026-06-14T00:00:00Z",
+  "node_count": 49,
+  "reference_count": 29,
   "handbook_reference_count": 0,
-  "edge_count": 205,
+  "edge_count": 209,
   "nodes": {
     "align-context": {
       "primitive": "skill",
@@ -182,6 +182,29 @@
           {
             "id": "decisions-store",
             "load": "on-demand"
+          }
+        ]
+      }
+    },
+    "checkpoint-replay": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "title": "Checkpoint Replay",
+      "status": "v0.1.0 — drafted 2026-06-14 (be-civic Tier-0 lift; pending stack-graph adoption)",
+      "edges": {
+        "references": [
+          {
+            "id": "instrumentation-preamble",
+            "load": "import"
+          },
+          {
+            "id": "findings-schema",
+            "load": "import"
+          },
+          {
+            "id": "checkpoint-manifest",
+            "load": "on-demand",
+            "external": true
           }
         ]
       }
@@ -696,6 +719,20 @@
       "title": "Link validator",
       "status": "v0.1.0 — 2026-06-10",
       "edges": {}
+    },
+    "local-graph-maintainer": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "title": "Local graph maintainer",
+      "status": "v0.1.0 — 2026-06-14",
+      "edges": {
+        "references": [
+          {
+            "id": "local-node-schema",
+            "load": "on-demand"
+          }
+        ]
+      }
     },
     "log-decision": {
       "primitive": "agent",
@@ -1479,6 +1516,7 @@
       "title": "Finding contract — schema",
       "status": "v0.1.0 — 2026-05-30",
       "consumed_by": [
+        "checkpoint-replay",
         "design",
         "plan",
         "qa",
@@ -1508,7 +1546,9 @@
       "kind": "reference",
       "title": "Instrumentation preamble — RETIRED (analyzer-derived; tombstone)",
       "status": "v1.0.0 — 2026-06-12 — RETIRED (cluster A, #28, supersedes #21)",
-      "consumed_by": []
+      "consumed_by": [
+        "checkpoint-replay"
+      ]
     },
     "integrator-checklist": {
       "kind": "reference",
@@ -1535,6 +1575,14 @@
         "plan",
         "review",
         "specify-slice"
+      ]
+    },
+    "local-node-schema": {
+      "kind": "reference",
+      "title": "Local node authoring contract",
+      "status": "v0.1.0 — 2026-06-14",
+      "consumed_by": [
+        "local-graph-maintainer"
       ]
     },
     "okr-schema": {
@@ -1779,6 +1827,25 @@
       "to": "decisions-store",
       "type": "references",
       "load": "on-demand"
+    },
+    {
+      "from": "checkpoint-replay",
+      "to": "instrumentation-preamble",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "checkpoint-replay",
+      "to": "findings-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "checkpoint-replay",
+      "to": "checkpoint-manifest",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
     },
     {
       "from": "debrief",
@@ -2192,6 +2259,12 @@
     {
       "from": "lens-tests",
       "to": "test-discipline",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "local-graph-maintainer",
+      "to": "local-node-schema",
       "type": "references",
       "load": "on-demand"
     },

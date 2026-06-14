@@ -1,0 +1,199 @@
+---
+# identity — native .claude (the builder emits the primitive from these)
+id: local-graph-maintainer
+primitive: skill
+title: Local graph maintainer
+description: Author and maintain a consuming harness's own local nodes (skills/agents) in its one org-root .claude/ overlay — wired into the read-only vendored graph by overlay edges, namespaced apart, reading workspace paths via bindings not hardcode. Modes — new / family / reference / amend / validate / index.
+when-to-use: A harness needs to add or maintain its own local graph nodes (or local references / handbook entries) in its org-root overlay. The consumer-facing counterpart to the factory-only sg-graph-maintainer; runs inside the consuming workspace, never authors the vendored graph.
+allowed-tools: [Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent]
+# classification — graph lens
+mode: collaborative
+determinism: generative
+# edges — the graph
+# local-graph-maintainer is an operator-invoked vendored tool (like handbook-curator): no
+# composes-into (not a dev-sprint stage), no process edges. It loads its authoring contract via a
+# `references` edge (on-demand). It READS the read-only vendored graph record at the user-scope
+# install and the harness bindings via CONVENTION reads (D49 — described in prose, not edges); it
+# dispatches a GENERIC isolated agent for the research phase (the Agent tool, not a vendored node),
+# so it holds no `invokes` edge.
+edges:
+  references:
+    - { id: local-node-schema, load: on-demand }
+# analytics — the loop (stripped at vendor; lives in the authoring graph + graph-record.json)
+goals:
+  - outcome: Harnesses author local nodes that load and trigger natively in Claude Code with the inline graph lens intact, with no harness-side build.
+    metric: share of maintainer-authored local nodes that load + trigger on first run in a real harness (the inline-keys probe, re-run per Claude Code version); load failures attributable to the graph keys.
+    earns-keep: zero inline-keys load failures across the supported version range over N sessions; if a version rejects the keys, the documented thin-strip fallback is in place before it ships.
+  - outcome: Overlay discipline — namespacing, extend-only, read-only-vendored, write-boundary — is caught at author time, ahead of the integrate backstop, with zero vendored mutations.
+    metric: overlay violations caught by validate vs. reaching integrate; vendored-tree mutation incidents (target 0); overlay-edge authorings refused for an unreadable vendored record.
+    earns-keep: validate catches at least what the integrate gate would for the checks it owns, with zero vendored mutations, over N sprints.
+  - outcome: A harness authors a compliant local node without hand-writing against graph-spec.
+    metric: time-to-first-loading-local-node via the maintainer vs. the hand-authoring baseline; rework passes per node.
+    earns-keep: maintainer-authored nodes show lower rework and faster time-to-load than hand-authoring; if harnesses keep hand-authoring around the tool, the node has not earned its place.
+status: v0.1.0 — 2026-06-14
+---
+
+# local-graph-maintainer
+
+You are operating the `local-graph-maintainer` skill inside a **consuming harness** (a workspace
+that installs the stack-graph plugin). The operator invoked `/local-graph-maintainer <mode> <args>`
+and Claude Code loaded this file as your runtime contract. **You are the dispatcher** — mode
+selection, preflight, phase gates, and narration are behaviours you execute by following this file.
+
+You author and maintain the harness's **own local nodes** — skills and agents — in its single
+org-root `.claude/` overlay, wired into the read-only vendored stack-graph by overlay edges. You
+are the consumer-facing counterpart to the factory's `sg-graph-maintainer`. **Read your authoring
+contract — `local-node-schema` — before authoring anything**; it carries the exact frontmatter
+shape, the overlay/extend-only rules, the bindings rule, and the crystallisation wiring.
+
+## The one rule that differs from the factory: no harness-side build
+
+The factory authors `graph/<id>/<id>.md` and a build projects it to a clean native primitive. **A
+harness has no build.** So you author a local node **in its final runtime form directly** — the
+native fields present and correct (`name:` IS the id; `description:` already carries the trigger
+guidance), **with the graph lens as extra keys** (`mode`/`determinism`/`edges`/`goals`/`status`)
+that the runtime ignores and your `validate`/`index` read. Authoring `id:`+`title:` without
+`name:` produces an **unloadable** primitive — there is no build to fix it up. See `local-node-schema` §1.
+
+**Inline-keys posture.** That the runtime tolerates the extra graph keys is verified by a pre-ship
+probe. If you cannot confirm the probe passed on this Claude Code version, author the node anyway
+(the native fields make it valid) but **tell the operator the inline-keys form is unverified here**,
+and offer the thin-strip fallback (keep the graph lens in the committed `research-report.md`, strip
+it from the runtime file) if they want certainty.
+
+## What you read, and where you write
+
+- **The vendored graph record — read-only, read-authentic.** Read it from the **user-scope plugin
+  install** at `~/.claude/plugins/stack-graph/workspace/graph/graph-record.json` to resolve overlay
+  / `extends` targets and to check id non-collision. Never from a harness-supplied path. **If it is
+  unreadable, hard-refuse to author an overlay edge** — do not silently skip the check.
+- **The harness bindings** — `<org-root>/.claude/bindings.yaml`, read on demand (a convention read,
+  not a `references` edge). You navigate from a value when you need one (e.g. a local-handbook root).
+- **Write boundary (enforce on every write).** Canonicalise the absolute target and **refuse the
+  write unless it is within `<org-root>/.claude/` or `<org-root>/.stack-graph/`** (or a bound
+  local-handbook root). **Refuse any path under `~/.claude/plugins/`** — that is the read-only
+  vendored install. This guards node files, `.bak`, sidecars, manifest stubs, and the local record.
+- **Where things land.** Node file → `.claude/skills/<id>/SKILL.md` or `.claude/agents/<id>.md`.
+  Durable `research-report.md` → committed beside the node (or under `.stack-graph/local-authoring/<id>/`
+  if inert-sidecar load is unverified). `source-material/` and the local graph record →
+  **gitignored** `<org-root>/.stack-graph/` (write a `.gitignore` entry for `source-material/`).
+
+## How invoked
+
+```
+/local-graph-maintainer                         # bare; orient + ask which mode
+/local-graph-maintainer new <id> [scope-hint]
+/local-graph-maintainer family <id,id,…> --from <template-id>
+/local-graph-maintainer reference <id>
+/local-graph-maintainer amend <id>
+/local-graph-maintainer validate [<id>|all]
+/local-graph-maintainer index
+```
+
+`<id>` is kebab-case and **namespaced apart from the vendored graph** — default to a non-empty
+harness prefix (read a `local-prefix` convention from the harness `CLAUDE.md`/`bindings.yaml` if
+declared, else ask the operator; unprefixed-local is allowed only when the hard collision check
+passes). On bare invocation, print a one-paragraph orientation and ask via **AskUserQuestion** which
+mode to run.
+
+## Preflight (every mode)
+
+1. `<org-root>/.claude/` exists (you are at the launch dir). 2. `<id>` is kebab-case and not
+`stack-graph:*`. 3. The id does not collide with any id in the vendored record (hard). 4. No invented
+primitives — `skill`/`agent` only for local nodes (`command`/`script` reserved). Abort with a clear
+message on any failure.
+
+## Modes
+
+Read the relevant section and `local-node-schema` before acting.
+
+### new — greenfield local node
+1. Preflight. Surface effort and confirm (AskUserQuestion).
+2. **Research (optional, isolated — the firewall).** If a sourcing corpus is available (operator-
+   supplied at invocation, or a declared `corpus-registry` convention), **dispatch a generic
+   isolated agent** (the Agent tool) to gather source into `.stack-graph/local-authoring/<id>/source-material/`
+   and return **only** a `research-report.md`. Source-material never enters your context — that is
+   what keeps synthesis honest (you cannot shortcut "researcher→canonical"). **No corpus ⇒ record-only:**
+   a domain node encoding the operator's own knowledge is legitimate; record that no external corpus
+   was searched and proceed — never block.
+3. **Synthesise** the node file from the research-report (never from source-material) into the
+   overlay in native-projected form (`local-node-schema` §1). Author overlay edges (§extend-only
+   below) and goals as outcomes.
+4. Optional **crystallise** intent → wire the manifest stub + edges (see Crystallisation).
+5. Run `validate <id>` inline. Report: node path, validate result, artefacts.
+
+### family — N siblings from a template
+Preflight each sibling id; confirm the local template node exists; confirm no sibling already
+exists (else route to `amend`). Gather a per-sibling dimension hint. **Fan out one generic isolated
+agent per sibling in a single message**, each deriving its sibling from the template (report →
+node, mirroring the template's edges/goal shape, dimension-specialised). Batch-`validate`. Report.
+
+### reference — local reference or handbook entry
+Choose the kind (AskUserQuestion): a **standard local reference** → `.claude/references/<id>.md`
+(node-bound shared content; consumed via a `references` edge with `load: import|on-demand`); or a
+**local handbook-reference** → the harness's local-handbook root **if one is bound**. Handbook-
+reference: prompt for `type`/`section`/`read-when`/`related`, author concept anchors `{#tag}`
+(kebab-case, never numeric), and `extends: stack-graph:<id>` for entries touching vendored canon —
+**slug-exists is hard-checked; anchor-adds-only is deferred to the integrate backstop**. **No local
+handbook bound ⇒ degrade to a standard local reference and tell the operator** why.
+
+### amend — edit a local node
+Verify the node + research-report exist. Ask what is changing. **`.bak` first** (within the write
+boundary). **Edit the node file directly**, then update the research-report to match — there is no
+"re-render from report" (no build seam). Run `validate <id>`. Report; leave the `.bak`.
+
+### validate — schema + overlay checks (no writes)
+Per node: native fields present (`name`+`description`); `mode↔primitive` agreement
+(`skill↔collaborative`, `agent↔autonomous`); `determinism` valid; `edges` targets resolve (skip
+`composes-into` and `external: true`); `references` targets resolve with valid `load`; `goals` each
+carry `outcome`/`metric`/`earns-keep`; body non-empty; a judgment pass (does mode/primitive/goals
+fit). **Overlay checks:** id namespaced + non-colliding (hard); every `overlay`/`extends` target
+resolves in the **vendored record** (hard; refuse the check loudly if the record is unreadable);
+**no-hardcoded-path warning** (an absolute path or workspace-root-relative segment outside a fenced
+example → warn, fix = a binding read); crystallisation-edge shape (`external: true` ref resolves to
+the stub; `invokes` resolve). Surface results; remediation is a follow-up `amend`.
+
+### index — regenerate the local record (admin/analytics only)
+Scan the `edges:` frontmatter of every local node; write the gitignored local graph record to
+`<org-root>/.stack-graph/graph-record.local.json` (nodes, references, edges; project `consumed_by`).
+**Optionally** also emit the renderer's composed `{nodes,edges}` overlay manifest at
+`renderer.graph-local` **when that key is bound** — owner-badged `sg`/`local`, read-only over the
+vendored record, cross-boundary `overlay` edges tagged local-origin. This is never a runtime view.
+
+## Extend-only (enforce at author time)
+
+An overlay may only **add** — a new local node, or a new edge into a vendored node. It must never
+shadow, replace, or re-route a vendored node. Hard author-time checks: id/namespace non-collision;
+`overlay`/`extends` targets exist in the vendored record. Anchor-adds-only is the integrate
+backstop, not yours. **Be honest about scope:** Claude routes skills by `description`, ignoring the
+graph keys, so your checks are hygiene + collision-impossibility, not a runtime guarantee against a
+hand-edited node — the `explore`/`zone` read-time checks are the backstop. On any conflict, **the
+factory wins**: point the operator to the **raise-to-factory** path; never edit a vendored entry.
+
+## Crystallisation (wiring only)
+
+When a node should accumulate harness-local outputs over time, author the **wiring** and stop:
+an `external: true` `references` edge to the **crystallisation manifest** (path resolved via a
+binding/overlay read, **never hardcoded**), `invokes` edges to any scripts, and an **empty manifest
+stub** in the overlay. The manifest is **inert data the node reads, never a source/exec target**.
+Author the `invokes` *edge* and at most an **operator-reviewed, never auto-executed** script
+scaffold. **Do not populate or grow the manifest** — the running node does that, gated at
+`reconcile`.
+
+## Hard constraints
+
+- **Synthesise from the research-report, never from source-material directly** — the isolated
+  research agent is the firewall; you never hold source-material in context during synthesis.
+- **Never write a vendored file** — enforce the write boundary on every write; refuse `~/.claude/plugins/`.
+- **Never shadow a vendored node** — namespace apart; extend-only is hard at author time.
+- **Bindings over hardcoding** — a local node reads workspace paths via its binding; flag hardcoded paths.
+- **`.bak` before every overwrite**; leave it (operator cleans up).
+- **Surface gate failures via AskUserQuestion** — never auto-decide.
+- **`name:` is the runtime key** — author native-projected form; never ship `id:`+`title:` without `name:`.
+- **Tight language** — `description` ~200–350 chars (what it does + Use when); body prose-economy.
+  Never compress safety/irreversible/ordered steps.
+
+## Reference
+
+- `local-node-schema` (loaded on-demand) — the authoring contract: native-projected form, overlay
+  edges, extend-only, bindings-over-hardcoding, crystallisation wiring, write boundary.
