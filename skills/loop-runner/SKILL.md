@@ -50,6 +50,30 @@ incremental arc's *own stages*; you never traverse the arc yourself. Concretely:
 1. **Resolve bindings and list candidates.** Resolve `improvements-root` / `improvements-manifest` /
    `event-log` via the `bindings-contract`. Read the manifest; list open standalone IUs
    (`lifecycle_state: proposed` or `in-delivery`, not terminal).
+   - **Ancestry reconcile — drop already-landed IUs (the manifest is not the landed-signal).** The
+     manifest `lifecycle_state` lags the real merge state: an IU merged into the integration branch
+     **out-of-band** (a UI-side merge, a hand-merge, or a state-advance lost to a manifest co-edit)
+     still reads `proposed`/`in-delivery` here, so a naïve listing would re-dispatch work that is
+     already shipped. So **after** listing, filter the candidate set by **git ancestry**: resolve the
+     **integration branch generically from the `deploy-config` / branch-policy binding** (the
+     harness-configured target branch the same surface `ship`/`deploy` read — per-repo, via the
+     mapping Phase 0.5 builds; **never hardcode** a branch name), then for each listed IU whose
+     `iu/<id>` branch exists, test **`git merge-base --is-ancestor iu/<id> <integration-branch>`**. A
+     **hit** (exit 0 — the IU's commit is already an ancestor of the integration branch) means it is
+     **already landed**: **drop it from the dispatch set** (do **not** re-dispatch it), and
+     **reconcile its lifecycle** — set `lifecycle_state: landed` and append a retroactive
+     `gate: commit-to-land, decision: reconciled` entry to its `gate_decisions[]` **naming the
+     out-of-band merge** (the integration branch it was found merged into, and that the merge
+     happened outside the loop), so the carrier and the manifest stop reading it as open. This
+     terminal write **honours the IU-schema writer split** — it is still the **single
+     `commit-to-land` gate** writing the terminal transition, only with a `reconciled` decision
+     recording an already-true merge rather than enacting a fresh one (the same legitimacy as the
+     coordinator's attended `dropped`-via-promotion write, Phase 1.3) — not a second lifecycle writer.
+     The **manifest is still coordinator-regenerated** (refresh-index) from the reconciled carrier — you
+     write the carrier reconcile, not the manifest. An IU with **no `iu/<id>` branch**, or a
+     **non-hit** (exit 1), is a genuine open candidate and proceeds to step 2. *(This is the intake
+     half of the ancestry gate; Phase 2.3 applies the same pre-check at the land queue so an
+     already-merged IU is never double-merged.)*
 2. **The operator approves the batch subset.** Present each candidate: for a formalised IU — id,
    title, improves, `slice_type`, size, files; for a `proposed` stub (content fields not yet
    formalised) — id, title, improves, plus **the `## Decisions` AFK/HITL call and a `## Context`
@@ -189,6 +213,55 @@ Per scheduled IU:
    per-IU `unit-usage`. `dispatch-complete` is **not a stage event**: the projection never reads it for
    `current_stage`.
 
+## Mid-run deferred work — route by one discriminator, never a chip
+
+A running loop — you (the coordinator) across the dispatch span, or a dispatched session inside its
+own stages — will spot **follow-on / out-of-scope work** mid-run. Do **not** surface it as an
+ephemeral `spawn_task` chip or a prose "follow-on candidate" note: that exits the IU pipeline with no
+AFK/HITL classification, no decision-completeness capture, no path into a later wave — a human then
+reconstitutes it from scratch. **Route it by a single discriminator instead:**
+
+> **Does the finding carry a decision only the operator can settle?**
+
+That one question — not "is it in scope?" — decides the branch. **Decision-complete work is
+*completed*, never deferred to a human;** deferral-to-operator is reserved for the open branch alone.
+The waste this removes is exactly the inverse default: shipping complete AFK work to a future operator
+session when no operator input is needed. Three branches, and only three:
+
+1. **Decision-complete + in the current session's scope → done inline now, no carrier.** The finding
+   is settled (the codebase + carrier answer it; no operator call) **and** it lands within the work in
+   hand — for a dispatched session, inside its IU's declared `files`; for you, inside the batch's own
+   declared scope. It is part of the work in hand: **complete it directly, now.** Raise **no** carrier
+   and **no** chip — there is nothing to defer.
+2. **Decision-complete + out of the current scope + AFK → autonomous loop work.** The finding is
+   settled (no operator decision) but fixing it would breach the slice's `files` contract if done
+   inline. **Complete it this run if the loop has capacity;** otherwise **scaffold a `proposed`,
+   decision-complete carrier** that the next loop-runner **AFK intake auto-picks** (Phase 0). It is
+   **never parked on the attended queue** — there is nothing for an operator to decide, so the
+   attended queue is the wrong home. No chip either.
+3. **Open — a decision only the operator can settle → the sole raise-and-defer-to-operator path.**
+   The finding turns on a call the operator must make (what the behaviour *should* be, not how to
+   build an agreed behaviour). **Harvest the live context into a carrier** — `## Context` (verbatim
+   evidence, pointers) plus **the open decision named** in `## Decisions` / `hitl_point` — and route
+   it to the **next attended session**. If the open call is a product/design *"what should it do,"*
+   that is a **wholesale** signal: escalate it per the route rule (a tracked work-item at the
+   dev-sprint front), **not** an AFK incremental IU.
+
+**Carrier vs no carrier.** Scaffold a carrier **only** for (2) tracked out-of-scope autonomous loop
+work, or (3) an operator-decision deferral. An in-scope decision-complete fix (1) needs none — it is
+just done.
+
+**Reuse triage's capture flow unchanged — author no new capture path here.** Branches (2) and (3)
+both **reuse `triage`'s existing capture flow** — the same documented flow you already invoke as the
+intake define-now fallback (Phase 0.2-0.3): its harvest into the carrier's definition body
+(`## Context` + `## Decisions`, the AFK/HITL call recorded) and its cold-handoff gate, routed by the
+**route rule** (derivable-spec ⇒ incremental loop work; needs-a-product-call ⇒ wholesale escalate).
+You do **not** add a second capture mechanism: a branch-(2) carrier is a `proposed` decision-complete
+standalone IU exactly as triage scaffolds one; a branch-(3) operator-decision deferral runs triage's
+route rule, escalating wholesale when the open call is a product/design one. This section adds the
+**mid-run discriminator and routing** to your coordinator guidance; the capture itself stays triage's,
+unchanged.
+
 ## Phase 2 — Integration dry-run + land queue (collaborative)
 
 1. **Batch report.** Per-IU outcomes with evidence, the five buckets named; escalations enacted
@@ -205,15 +278,95 @@ Per scheduled IU:
    (writing the terminal `lifecycle_state` + `gate_decisions` entry) and **owns the real merge** via its
    ship → deploy sub-arc, per the consuming repo's branch policy. **One merge owner, no double-merge:**
    your Phase 2.2 merge was a discarded dry-run; land's is the real one.
-4. **Worktree teardown — order-bearing, do not reorder.**
+   - **Ancestry pre-check before `land` — never double-merge an already-merged IU.** A `built` IU can
+     reach this queue already merged into the integration branch out-of-band (a UI-side merge between
+     dispatch and close, or a mid-batch hand-merge), in which case invoking `land` would merge it a
+     second time. So **before invoking `land`**, apply the **same ancestry check as Phase 0.1**:
+     resolve the **integration branch generically from the `deploy-config` / branch-policy binding**
+     (the harness-configured target branch `ship`/`deploy` read — per-repo; **never hardcode**), and
+     test **`git merge-base --is-ancestor iu/<id> <integration-branch>`**. A **hit** (exit 0 — already
+     an ancestor) means it is **already landed**: **skip `land` for that IU** (do not re-merge), and
+     **reconcile it the same way** as the intake filter — set `lifecycle_state: landed` and append the
+     retroactive `gate: commit-to-land, decision: reconciled` entry naming the out-of-band merge,
+     surfacing it in the batch report as reconciled-not-landed. Only a **non-hit** (exit 1) proceeds to
+     the operator's land decision and `land` invocation. This makes the no-double-merge guarantee hold
+     even when the merge state changed **after** intake, not just at it.
+4. **Block-and-emit — before surfacing a blocking question, drop a structured resume artifact.** When a
+   close-phase decision cannot be resolved unattended and you are about to **call `AskUserQuestion`** —
+   the **land decision** (2.3), a **merged-tree-failure options** prompt (2.2), or any close-phase fork —
+   **first emit a structured handoff artifact**, *then* surface the question. The artifact is itself a
+   **cold-handoff prompt** (a future session, possibly fresh, resumes from it), so author it in the
+   `handoff-prompt-convention` field form (imported) — the delta-only `GOAL / WHERE / DO / DONE-WHEN /
+   POL / EPH` envelope — never free prose. Capture, mapped onto the fields:
+   - **`GOAL:`** — what this loop set out to do (the batch/IU it was driving), one line.
+   - **`WHERE:`** — the repo(s) `@` the **active branch**, plus the carrier path(s) and any retained
+     `iu/<id>` worktree/branch the resume touches (`<repo>@<branch> — <paths>`).
+   - **`DO:`** — **how far it got** (what landed / what did not) and the **resume action** once the
+     decision is answered (the exact next step — e.g. *"on `land #N`, resume the land queue from IU
+     `<id>`"*), as bullets.
+   - **`DONE-WHEN:`** — the acceptance for that resume step + its verify command.
+   - **`POL:`** — the **event-log binding** and **`deploy-config`** by path only (policy by pointer,
+     never copied; the resuming session auto-loads the repo `CLAUDE.md`).
+   - **`EPH(<date>):`** — the **expiring** facts, dated so a later reader sees at a glance if they still
+     hold: the **exact blocking decision(s) + the options weighed**, and the **verified stop-time state**
+     — current branch, per-IU **PR statuses**, and any **uncommitted tracked changes** (the same
+     `git status --porcelain` read Phase 2.7's commit guard runs).
+   Omit `META:` — that line attributes a *dispatched sub-session*; this artifact is the dispatcher's own
+   resume note, carrying no carrier context. Write it to the batch report (and the exit summary) so it is
+   durable when the loop halts — the resume state survives the stop, instead of living only in the
+   transient question prompt a next session would have to re-derive from transcripts. (Field form +
+   rules: `handoff-prompt-convention`.)
+5. **Worktree teardown — order-bearing, do not reorder.**
    - **Landed (merged) IU:** build's sequence applies — test on merged result → `git worktree unlock` →
      `git worktree remove` → `git branch -d`. **Always lowercase `-d`, never `-D`.** `git branch -d`
      refuses to delete a branch whose commits are not merged; that refusal is the guard against losing
      unmerged work — `-D` force-deletes and destroys it.
+     - **Then delete the remote head — idempotently:** after the local `git branch -d`, run
+       `git push origin --delete iu/<branch>` so the IU's `origin/iu/<branch>` head does not linger.
+       **Tolerate "remote ref does not exist" gracefully** — on the PR/squash-merge path GitHub already
+       deleted the head on merge, so the command is a harmless no-op (exactly the issue's ask); on the
+       direct-merge path it is what reaps the otherwise-orphaned head. **One line covers both paths** —
+       idempotence, not path-discrimination. **Authorization is narrow:** the land operator-go for this
+       IU implicitly authorises deleting **only that IU's own `origin/iu/<branch>` head**, not a general
+       remote-ref-delete grant.
    - **Parked outcome** (`review-flagged` / `hitl-parked` / `blocked`): remove the worktree but
      **retain the branch**, recording its name in the batch report. `git branch -d` would rightly refuse
      the unmerged work, and a parked slice's commits are the resume point for the attended follow-up.
      These retained `iu/<id>` branches are why Phase 1.1 carries the branch-exists guard.
+6. **Wakeup barrier — Stop wipes any pending wakeup; it does not merely refrain from re-arming.**
+   The dispatcher's self-paced/idle turns may **arm a `ScheduleWakeup` heartbeat** (e.g. while waiting
+   on a gated operator action), so the loop re-enters on its own timer. That wakeup lifecycle is
+   **single-owner — arm / replace / cancel** — and **Stop is a hard barrier** on it. **Stop** here means
+   any of: an **operator stop**, **terminal completion of the batch**, or a **`TaskStop`** signal.
+   - **Arm / replace.** At most **one** heartbeat is pending at a time: arming a new one **replaces** the
+     prior (cancel-then-arm), never stacks a second. A turn that re-enters the loop replaces its own
+     wakeup; it does not accumulate timers.
+   - **Cancel on Stop (the barrier).** On Stop, **actively cancel any pending `ScheduleWakeup`** — do not
+     simply skip arming the next one. Use the **native wakeup-cancel call where the runtime exposes one**
+     (cancel the pending wakeup by its handle); **absent one, set a stop-sentinel** that the loop's
+     **entry checks first and self-aborts on** before running any intake, so a wakeup armed in an earlier
+     turn that fires after Stop is a no-op. **The settled barrier holds either way** — which mechanism is
+     a platform-mechanical detail, not a behavioural difference.
+   - **Confirm "0 wakeups pending".** The stop path **emits an explicit `0 wakeups pending` confirmation**
+     in the exit summary, so the close is auditable: the operator sees the heartbeat was wiped, not just
+     un-renewed.
+   **A stopped loop never re-fires from a prior in-flight heartbeat.** This closes the failure mode where
+   a wakeup armed in a turn *before* an interrupting operator message survived a subsequent Stop and fired
+   on its old timer — re-injecting the loop prompt and re-entering a fresh intake, which reads to the
+   operator as an unwanted restart of a stopped loop. "Didn't re-arm" is **not** "nothing is pending"; the
+   cancel + the `0 wakeups pending` confirmation make the two the same.
+7. **Commit guard — before declaring the loop done, no dirty tracked tree exits unresolved.** As the
+   final close-path step, run **`git status --porcelain` on each tracked repo** in the batch (the
+   `deploy-config` per-repo roots; include any in-place fix from Phase 2.2). If any tracked file is
+   dirty, resolve it **preference-ranked, and record which option was taken** in the batch report:
+   - **commit on the active branch (preferred)** — the change is real work; land it where it belongs;
+   - **stash with a labelled message (fallback)** — `git stash push -m "<batch/IU label>"` when a
+     commit is not yet appropriate, so the change is recoverable and named, not anonymous;
+   - **surface it explicitly in the exit summary (last resort)** — name the repo, the dirty paths, and
+     why it was left, as an explicit unresolved item.
+   **Tested-but-uncommitted changes are never silently orphaned.** This catches the failure mode where
+   a loop modified a tracked file (e.g. a fix proven green in-session), then exited leaving it as an
+   uncommitted `M <file>` riding on an open PR branch — a UI-side merge would orphan it silently.
 
 ## Instrumentation
 

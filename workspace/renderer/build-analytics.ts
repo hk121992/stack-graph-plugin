@@ -16,6 +16,7 @@ import {
   renderMarkdown, assetBasenames, type CorePage,
 } from "./vendor/bc-renderer-core/src/index.js";
 import { renderSurfacePage } from "./shell-host.js";
+import { rewriteStaticAssetPrefix } from "./lib/asset-prefix.js";
 import {
   loadPricing, priceUsage, cacheEfficiency, type Pricing, type UsageComponents,
 } from "./lib/pricing.ts";
@@ -99,10 +100,14 @@ for (const a of assetBasenames) {
   const src = path.join(vendorAssetsDir, a);
   if (existsSync(src)) copyFileSync(src, path.join(surfaceDir, a));
 }
+// ASSET_PREFIX: per-surface style.css carries @font-face url("/fonts/…"). No-op when empty.
+rewriteStaticAssetPrefix(path.join(surfaceDir, "style.css"));
 for (const a of ["brand-overrides.css", "favicon.svg"]) {
   const src = path.join(brandDir, a);
   if (existsSync(src)) copyFileSync(src, path.join(surfaceDir, a));
 }
+// ASSET_PREFIX: brand-overrides.css carries Geist @font-face url("/fonts/…"). No-op when empty.
+rewriteStaticAssetPrefix(path.join(surfaceDir, "brand-overrides.css"));
 
 const projPath = resolveProjectionPath();
 let proj: Projection | null = null;

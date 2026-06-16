@@ -111,6 +111,28 @@ Print:
 - The **version + `gitCommitSha` landed** — the concrete state the install moved to.
 - The **RESTART-REQUIRED** reminder: the new skill set loads only on a Claude Code **restart**; until
   the operator restarts, the session is still running the old skills.
+- **Vendored-renderer currency check (only when a `renderer` binding is present).** A harness that
+  vendors the renderer carries a **second currency axis** the install update never touches: the
+  vendored snapshot in the consuming repo. **Gate this whole check on the binding's presence** — if
+  the harness binds **no** `renderer` block, print nothing here (an install-only harness has no second
+  axis). When a `renderer` block *is* bound, read the **vendored snapshot's recorded version** from
+  the tree the renderer binding already points at — resolve it through the existing
+  **`renderer.graph-root`** binding (the vendored render's root), reading that tree's recorded-version
+  marker (its `plugin.json` `version`, or a `VENDORED.*` version line if the tree stamps one). This
+  introduces **no new binding key** — you reuse the `renderer` block the harness already declares.
+  Then compare that recorded version against the **just-installed** plugin version (the one Update
+  landed):
+  - If the vendored snapshot is **behind** the just-installed version → emit a clear **WARNING** that
+    **names both versions** — the vendored snapshot's recorded version and the just-installed plugin
+    version — and **points (by pointer, not restated here) at the harness's own re-vendor runbook**,
+    so the operator knows the live portal still builds from a stale render and where to re-vendor. You
+    **do not re-vendor** — this is **warning only**, consistent with *never mutate the consuming
+    build*: you stage, commit, and touch **nothing** in the vendored tree.
+  - If the vendored snapshot **already matches** the just-installed version (or is **ahead** —
+    ordinary local renderer iteration) → print **nothing new**; this is not a divergence to warn on.
+
+  **No false positives:** with no `renderer` binding, or a vendored snapshot already at (or ahead of)
+  the installed version, this check is silent. The warning fires only on a genuine behind-divergence.
 
 ## Hard constraints
 

@@ -33,6 +33,7 @@ import { createHash } from "node:crypto";
 
 import { assetBasenames, renderMarkdown, type CorePage, type NavGroup } from "./vendor/bc-renderer-core/src/index.js";
 import { renderSurfacePage } from "./shell-host.js";
+import { rewriteStaticAssetPrefix } from "./lib/asset-prefix.js";
 import { brandRoot } from "./brand/brand.js";
 
 const rendererDir = path.dirname(fileURLToPath(import.meta.url));
@@ -898,10 +899,14 @@ for (const basename of assetBasenames) {
   if (existsSync(src)) copyFileSync(src, path.join(surfaceDir, basename));
   else warn(`asset missing: ${src}`);
 }
+// ASSET_PREFIX: per-surface style.css carries @font-face url("/fonts/…"). No-op when empty.
+rewriteStaticAssetPrefix(path.join(surfaceDir, "style.css"));
 for (const brandAsset of ["brand-overrides.css", "favicon.svg"]) {
   const src = path.join(brandDir, brandAsset);
   if (existsSync(src)) copyFileSync(src, path.join(surfaceDir, brandAsset));
 }
+// ASSET_PREFIX: brand-overrides.css carries Geist @font-face url("/fonts/…"). No-op when empty.
+rewriteStaticAssetPrefix(path.join(surfaceDir, "brand-overrides.css"));
 // The forked graph viewer (this surface's interactivity).
 const browserSrc = path.join(localAssetsDir, "graph-browser.js");
 if (!existsSync(browserSrc)) {
