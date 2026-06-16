@@ -13,6 +13,7 @@
 // value so a future full rebrand can parameterise those two vendored files.
 
 import { readFileSync } from "node:fs";
+import { rootAbs } from "../lib/asset-prefix.js";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 
@@ -81,13 +82,14 @@ export function brandHead(assetUrl: (basename: string) => string): string {
 /** The full favicon set. Absolute root paths — the files are copied to the
  *  deploy root (like /fonts/), so the same links resolve from every surface. */
 export function faviconHead(): string {
+  const a = rootAbs;
   return [
-    `<link rel="icon" href="/favicon.ico" sizes="any">`,
-    `<link rel="icon" href="/favicon.svg" type="image/svg+xml">`,
-    `<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">`,
-    `<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">`,
-    `<link rel="apple-touch-icon" href="/apple-touch-icon.png">`,
-    `<link rel="manifest" href="/site.webmanifest">`,
+    `<link rel="icon" href="${a("/favicon.ico")}" sizes="any">`,
+    `<link rel="icon" href="${a("/favicon.svg")}" type="image/svg+xml">`,
+    `<link rel="icon" type="image/png" sizes="32x32" href="${a("/favicon-32x32.png")}">`,
+    `<link rel="icon" type="image/png" sizes="16x16" href="${a("/favicon-16x16.png")}">`,
+    `<link rel="apple-touch-icon" href="${a("/apple-touch-icon.png")}">`,
+    `<link rel="manifest" href="${a("/site.webmanifest")}">`,
     `<meta name="theme-color" content="#0c0d0e">`,
   ].join("\n");
 }

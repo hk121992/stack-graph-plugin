@@ -10,6 +10,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { wordmarkSlot, brand, faviconHead, brandRoot } from "./brand/brand.js";
 import { assetBasenames } from "./vendor/bc-renderer-core/src/index.js";
+import { rewriteStaticAssetPrefix } from "./lib/asset-prefix.js";
 
 const rendererDir = path.dirname(fileURLToPath(import.meta.url));
 const distRoot = path.join(rendererDir, "..", "dist");
@@ -23,8 +24,12 @@ for (const a of assetBasenames) {
   const src = path.join(vendorAssetsDir, a);
   if (existsSync(src)) copyFileSync(src, path.join(distRoot, a));
 }
+// ASSET_PREFIX: style.css @font-face url("/fonts/…") at the deploy root. No-op when empty.
+rewriteStaticAssetPrefix(path.join(distRoot, "style.css"));
 if (existsSync(path.join(brandDir, "brand-overrides.css")))
   copyFileSync(path.join(brandDir, "brand-overrides.css"), path.join(distRoot, "brand-overrides.css"));
+// ASSET_PREFIX: brand-overrides.css Geist @font-face at the deploy root. No-op when empty.
+rewriteStaticAssetPrefix(path.join(distRoot, "brand-overrides.css"));
 // The full favicon set → deploy root (head links use absolute paths).
 const faviconDir = path.join(brandDir, "favicons");
 if (existsSync(faviconDir)) {
@@ -33,6 +38,8 @@ if (existsSync(faviconDir)) {
     copyFileSync(path.join(faviconDir, f), path.join(distRoot, f));
   }
 }
+// ASSET_PREFIX: rewrite the root-absolute icon srcs inside the copied site.webmanifest.
+rewriteStaticAssetPrefix(path.join(distRoot, "site.webmanifest"));
 // Shared client script for the detail pop-out drawer (dashboard IUs + canvas entries).
 const popoutSrc = path.join(rendererDir, "assets", "popout.js");
 if (existsSync(popoutSrc)) copyFileSync(popoutSrc, path.join(distRoot, "popout.js"));

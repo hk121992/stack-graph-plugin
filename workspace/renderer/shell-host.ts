@@ -4,7 +4,7 @@
 
 import { renderShell } from "./vendor/bc-renderer-core/src/index.js";
 import type { ShellArgs, CorePage, NavGroup } from "./vendor/bc-renderer-core/src/index.js";
-import { makeAssetUrl, makePageHref, assetPrefix } from "./lib/asset-prefix.js";
+import { makeAssetUrl, makePageHref, assetPrefix, rootAbs } from "./lib/asset-prefix.js";
 import { wordmarkSlot, brandHead, brand } from "./brand/brand.js";
 
 // Site title/description follow the brand's hub copy so a harness's surfaces carry
@@ -81,7 +81,7 @@ export function renderSurfacePage(opts: SurfacePageOptions): string {
     // win last). The shared sheet is identical for every brand, so headers + drawers
     // never drift.
     headExtras: () =>
-      `<link rel="stylesheet" href="/workspace.css">\n` +
+      `<link rel="stylesheet" href="${rootAbs("/workspace.css")}">\n` +
       brandHead(assetUrl) +
       (opts.extraHead ? "\n" + opts.extraHead() : ""),
     footer: () =>

@@ -106,9 +106,23 @@ any per-change `raise`.
 
 ### `refresh-index` — regenerate the page index (idempotent)
 
-Run the canon's index generator over the handbook root. If unchanged, say so and stop; if
-changed, report the changed slugs (or, when called from `raise`, surface only the count — the
-diff is in the PR).
+Run the canon's index generator over the handbook root. The generator **ships in the plugin** —
+the vendored renderer's `workspace/renderer/build-handbook-index.ts` — and is **parameterised by
+the bound canon root**, so there is no per-harness reimplementation: it projects the page index
+deterministically from page frontmatter (one entry per `<NN>-<section>/README.md` → slug
+`<section>` and per `<NN>-<page>.md` → slug `<section>/<page>`; the `archive` section and any
+sub-directory depth are excluded; entries carry `slug, title, type, read-when, related` and are
+sorted by slug). Invoke it via overlay, pointing `--handbook-root` at the bound canon content
+root (the `handbook-root` the `renderer` overlay binds, i.e. the `handbook` reference's content
+dir) — never a hardcoded path:
+
+```
+bun run <plugin>/workspace/renderer/build-handbook-index.ts --handbook-root <bound-canon-content-root>
+```
+
+It writes `<canon-content-root>/index.json` in place; pass `--check` to verify freshness without
+writing (exit 1 on drift). If unchanged, say so and stop; if changed, report the changed slugs
+(or, when called from `raise`, surface only the count — the diff is in the PR).
 
 ## Hard constraints
 

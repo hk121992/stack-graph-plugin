@@ -26,6 +26,7 @@ import { fileURLToPath } from "node:url";
 
 import { assetBasenames, type CorePage } from "./vendor/bc-renderer-core/src/index.js";
 import { renderSurfacePage } from "./shell-host.js";
+import { rewriteStaticAssetPrefix } from "./lib/asset-prefix.js";
 import { brandRoot } from "./brand/brand.js";
 
 const rendererDir = path.dirname(fileURLToPath(import.meta.url));
@@ -258,10 +259,14 @@ for (const a of assetBasenames) {
   const src = path.join(vendorAssetsDir, a);
   if (existsSync(src)) copyFileSync(src, path.join(surfaceDir, a));
 }
+// ASSET_PREFIX: per-surface style.css carries @font-face url("/fonts/…"). No-op when empty.
+rewriteStaticAssetPrefix(path.join(surfaceDir, "style.css"));
 for (const a of ["brand-overrides.css", "favicon.svg"]) {
   const src = path.join(brandDir, a);
   if (existsSync(src)) copyFileSync(src, path.join(surfaceDir, a));
 }
+// ASSET_PREFIX: brand-overrides.css carries Geist @font-face url("/fonts/…"). No-op when empty.
+rewriteStaticAssetPrefix(path.join(surfaceDir, "brand-overrides.css"));
 
 // ── BMC grid (Strategyzer layout) ────────────────────────────────────────────
 // [cssClass, label, slotKey] in render order; normaliseBlock runs per slot.

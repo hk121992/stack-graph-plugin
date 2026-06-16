@@ -27,6 +27,7 @@ import {
 import { discover, rewriteMdLinks } from "./lib/content.js";
 import { prepareHeadings, applyHeadingIdsAndNumbers } from "./lib/heading-render.js";
 import { renderSurfacePage } from "./shell-host.js";
+import { rewriteStaticAssetPrefix } from "./lib/asset-prefix.js";
 import { brandRoot } from "./brand/brand.js";
 
 const rendererDir = path.dirname(fileURLToPath(import.meta.url));
@@ -76,10 +77,14 @@ for (const basename of assetBasenames) {
   if (existsSync(src)) copyFileSync(src, path.join(surfaceDir, basename));
   else warn(`asset missing: ${src}`);
 }
+// ASSET_PREFIX: per-surface style.css carries @font-face url("/fonts/…"). No-op when empty.
+rewriteStaticAssetPrefix(path.join(surfaceDir, "style.css"));
 for (const brandAsset of ["brand-overrides.css", "favicon.svg"]) {
   const src = path.join(brandDir, brandAsset);
   if (existsSync(src)) copyFileSync(src, path.join(surfaceDir, brandAsset));
 }
+// ASSET_PREFIX: brand-overrides.css carries Geist @font-face url("/fonts/…"). No-op when empty.
+rewriteStaticAssetPrefix(path.join(surfaceDir, "brand-overrides.css"));
 // Handbook search client (queries the Pagefind index at /pagefind/). The index
 // itself is built by the harness build wiring; search.js degrades gracefully if
 // absent. Copied to the surface root so the surface-relative assetUrl resolves.
@@ -87,6 +92,8 @@ for (const brandAsset of ["brand-overrides.css", "favicon.svg"]) {
   const src = path.join(rendererDir, "assets", "search.js");
   if (existsSync(src)) copyFileSync(src, path.join(surfaceDir, "search.js"));
 }
+// ASSET_PREFIX: search.js does import("/pagefind/pagefind.js"). No-op when empty.
+rewriteStaticAssetPrefix(path.join(surfaceDir, "search.js"));
 
 const allWarnings: string[] = [];
 

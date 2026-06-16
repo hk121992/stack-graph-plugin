@@ -45,3 +45,44 @@ export function makePageHref(slug: string): (targetSlug: string) => string {
     return normT === "" ? pfx : `${pfx}${normT}/`;
   };
 }
+
+/**
+ * Deploy-root prefix for the handful of references that MUST be root-absolute
+ * (they point at assets that live only at the deploy root: /fonts/, /workspace.css,
+ * favicons, /site.webmanifest, /pagefind/). Empty by default — single-tenant
+ * deploys are unchanged. Under the shared path-routed workspace the driver sets
+ * ASSET_PREFIX="/<project>" so these resolve under the project's mount.
+ *
+ * Normalised to: "" or "/seg" (leading slash, no trailing slash).
+ */
+export function rootPrefix(): string {
+  const raw = (process.env["ASSET_PREFIX"] ?? "").trim();
+  if (!raw || raw === "/") return "";
+  const noTrail = raw.replace(/\/+$/, "");
+  return noTrail.startsWith("/") ? noTrail : `/${noTrail}`;
+}
+
+/** Prefix a single root-absolute path (e.g. "/fonts/x.woff2") with rootPrefix(). */
+export function rootAbs(p: string): string {
+  return rootPrefix() + (p.startsWith("/") ? p : `/${p}`);
+}
+
+/**
+ * Rewrite the root-absolute references inside an already-copied static asset
+ * (style.css @font-face, site.webmanifest icons, search.js pagefind import) in
+ * place. No-op when ASSET_PREFIX is empty. Idempotent: only rewrites the known
+ * literal tokens, and only when the prefix is not already present.
+ */
+export function rewriteStaticAssetPrefix(filePath: string): void {
+  const pfx = rootPrefix();
+  if (!pfx) return;
+  const fs = require("node:fs") as typeof import("node:fs");
+  if (!fs.existsSync(filePath)) return;
+  let s = fs.readFileSync(filePath, "utf8");
+  const tokens = ["/fonts/", "/icon-", "/pagefind/", "/favicon", "/apple-touch-icon", "/site.webmanifest"];
+  for (const tok of tokens) {
+    // Strip any already-present prefix first (idempotent), then re-apply once.
+    s = s.split(`${pfx}${tok}`).join(tok).split(tok).join(`${pfx}${tok}`);
+  }
+  fs.writeFileSync(filePath, s, "utf8");
+}
