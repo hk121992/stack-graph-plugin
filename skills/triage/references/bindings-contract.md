@@ -3,8 +3,9 @@ kind: reference
 id: bindings-contract
 title: Bindings contract — the keys a harness supplies, and the surface template
 description: The factory contract the plugin ships so a consuming workspace can instantiate a harness — the complete set of binding keys the vendored graph may require, the bindings.yaml file format, the org-root CLAUDE.md ambient-surface template, and the dashboard + improvements surface-structure templates harness-init scaffolds. The plugin carries this contract; the harness supplies the values. No product data.
-status: v0.7.1 — 2026-06-18
+status: v0.8.0 — 2026-06-18
 changelog:
+  - v0.8.0 (2026-06-18): renderer-vestige removal (RESTRUCTURE-PLAN D1) — local-portal rendering retired; the renderer moved out of the installed plugin to the shared mm-workspace. Removed the `renderer` key from §2 (the vendored workspace-render overlay no longer ships in the plugin); dropped "the renderer" from the §intro surfaces list; §6 `SG_PRICING` consumer retitled "renderer Cost block" → "analytics Cost block". **Key removed** — consumers drop `renderer` from `bindings.yaml` on the contract-drift re-bind (harness-update §Contract-drift). The analyzer/event-log substrate (`workspace/renderer/analyzer/…`, §6) is owned by `wi-analytics-lifecycle-review` and is untouched here.
   - v0.7.1 (2026-06-18): dead-reference scrub (curator removal, wi-unified-front-workflow IU-7) — §3 surface-structure template: the two "content is added later via [the removed curator]" / "added by [the removed curator], not scaffolded" notes now read "added later via the front's `raise`" / "added via the front's `raise`, not scaffolded". No key change; the surface shape is unchanged.
   - v0.7.0 (2026-06-12): A6c unified transcript-analytics (#28, supersedes #21) — §6 retooled to the transcript analyzer: add `SG_TRANSCRIPT_ROOT` (analyzer input env, not a binding key); remove the hook-activation env (`SG_TOKEN_EVENT_KIND`) and the per-scope dispatch env (`SG_IU_ID`/`SG_SCOPE_ID`/`SG_CARRIER_*`/`SG_ARC`); repurpose `event-log`/`SG_EVENT_LOG` to the analyzer's **output** and migrate its filename to `derived/analyzer-events.jsonl`; replace the live-hook probe with the analyzer dry-run probe + the scheduled-task install runbook
   - v0.6.0 (2026-06-10): D69 token instrumentation — add optional `pricing` key; note the absolute `SG_EVENT_LOG` consumer on `event-log`; add §6 (the token-instrumentation env the harness exports + the per-scope dispatcher env + the validate live-hook probe)
@@ -15,7 +16,7 @@ changelog:
 # Bindings contract
 
 The vendored graph is **general**: its nodes read a workspace's surfaces (the work ledger, the
-strategy + objectives docs, the handbook, the event log, the renderer) **through bindings**, never
+strategy + objectives docs, the handbook, the event log) **through bindings**, never
 through hardcoded paths. This reference is the **factory contract** — the keys the graph may
 require and the shape of what they point at. The **plugin ships this contract**; a **harness
 supplies the values** (`harness-init` writes them, the loop nodes read them). It carries **no
@@ -54,7 +55,6 @@ target does not resolve.
 | `experience-contract` | the session-shape invariants doc | authored by `design`; per `experience-contract-schema` |
 | `event-log` | the **analyzer's derived event stream** | path + shape under `.stack-graph/` (gitignored, local). Now the **deterministic transcript-derived log the scheduled analyzer writes and the publisher reads** — **one writer, full rewrite each run** (no append-only / atomic-append semantics). Its filename is **migrated to `.stack-graph/derived/analyzer-events.jsonl`** (the named A6c migration; the publisher's three resolution paths and the `SG_EVENT_LOG` scaffold value resolve the same file). The harness exports it as an **absolute** path `SG_EVENT_LOG` (the analyzer runs out-of-band, in arbitrary cwd) — see §6. |
 | `pricing` | the host token-pricing table | **optional** — the operator-maintained `pricing.json` (rates + cache multipliers + `verified_on`) the analytics Cost block prices with (D69). Exported as `SG_PRICING`; absent → the Cost block renders components without `$` (degrades, never $0). The plugin ships a default `pricing.json`; a harness binds its own to override |
-| `renderer` | the vendored workspace render (0.5.0+) | the bound surface roots it is pointed at (`handbook-root` / `dashboard-root` / `canvas-root` / `brand-root` / `graph-root`, plus optional `graph-local` — the harness's local graph-overlay manifest, composed onto the vendored graph so the surface shows the **whole** graph by owner) + the output/portal dir + degraded-policy. The renderer ships in the plugin; this overlays it onto the harness's surfaces (optional). **`canvas-root` (a sub-key of `renderer`, optional):** when bound, the dashboard bets rollup reads `canvas.json` from this root and renders the two-axis posture (lifecycle state + evidence-strength rung) and four-risks coverage on the Direction and Vision & strategy pages. When absent, the dashboard **must degrade gracefully** — rendering the narrative and OKR cascade without the bets rollup, never crashing or silently vanishing. No new first-class required binding is introduced; `canvas-root` is and remains a sub-key of the optional `renderer` block. |
 | `deploy-config` | the deploy target | e.g. the portal's `wrangler.jsonc` (optional) |
 | `plan-policy` | in-body vs linked plan threshold + link shape | scalar policy (see `IU-schema`) |
 | `terminal-recorder` | who freezes the timeline at a terminal state | the recorder binding (`work-item-schema` §frozen) |
@@ -154,7 +154,7 @@ launch profile where the harness uses one):
 |---|---|---|
 | `SG_TRANSCRIPT_ROOT` | the raw-transcript root (default `~/.claude/projects`) | the analyzer's **input** — where the session transcripts live. **An env var, not a binding key:** no graph node resolves it (the earns-a-binding test — a key earns a binding only when a *node* must resolve it; the analyzer is out-of-band), so it stays env. Absent ⇒ the analyzer defaults to `~/.claude/projects` |
 | `SG_EVENT_LOG` | **absolute** path to `<org-root>/.stack-graph/derived/analyzer-events.jsonl` (the `event-log` binding, absolutised) | the analyzer's **output** — where it writes the derived rows the publisher reads; absolute because the analyzer runs out-of-band in arbitrary cwd |
-| `SG_PRICING` | absolute path to the `pricing` binding's `pricing.json` | the renderer Cost block prices with it (optional; absent ⇒ components-without-$) |
+| `SG_PRICING` | absolute path to the `pricing` binding's `pricing.json` | the analytics Cost block prices with it (optional; absent ⇒ components-without-$) |
 
 **Scheduled-task registration.** The analyze→publish job is installed as a **scheduled task** the
 operator owns. `harness-init scaffold` **emits the exact command + a short install runbook** for the

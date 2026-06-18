@@ -8,7 +8,7 @@ description: "Stands up a harness in a consuming workspace — writes bindings.y
 
 You stand up, re-point, or verify a **harness** — a consuming workspace's specialising layer over
 the vendored, general graph — in the **current workspace**. The vendored loop reads a workspace's
-surfaces (the work ledger, strategy + objectives, the handbook, the event log, the renderer)
+surfaces (the work ledger, strategy + objectives, the handbook, the event log)
 **through bindings**, never hardcoded paths; you are the executable instantiation of that contract.
 The operator invokes you with a mode; you run that mode's branch, pausing at every judgment point
 (which directory is the org root, where the dashboard surface should live, which existing docs the
@@ -62,9 +62,8 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    value** for the operator to confirm or correct: the `surface-root` (where the work ledger should
    live), `handbook-index` (an existing handbook `index.json`), `personas` (an existing profiles
    doc, optional pre-launch), `event-log` (the `.stack-graph/` stream — generated/local),
-   `learnings-archive` (the committed prior-proposals surface, D60), `renderer` + `deploy-config`
-   (the vendored workspace render overlaid onto the bound surface roots — `handbook-root` /
-   `dashboard-root` / `canvas-root` / `brand-root` / `graph-root` + output + deploy target; optional),
+   `learnings-archive` (the committed prior-proposals surface, D60), `deploy-config` (the deploy
+   target, e.g. the portal's `wrangler.jsonc`; optional),
    and the scalar dials (`maturity`, `plan-policy`, `okr-binding`,
    `stale-projection-policy`, `terminal-recorder`). Mark optional keys that don't apply yet rather
    than inventing targets.
@@ -117,6 +116,9 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    1. **(default) Emit the exact command + a short runbook** for the operator to install — the
       analyze→publish job run from the org root with `SG_TRANSCRIPT_ROOT` in scope, default cadence
       twice daily (e.g. `0 6,18 * * * cd <org-root> && bun run <plugin>/workspace/renderer/analyzer/analyze.ts && bun run <plugin>/workspace/renderer/publish-projection.ts`).
+      TODO(wi-analytics-lifecycle-review): the `<plugin>/workspace/renderer/analyzer/...` path is
+      broken post-D1 (the renderer/analyzer moved out of the installed plugin to mm-workspace); the
+      analyzer's new home is owned by `wi-analytics-lifecycle-review` — do not fix the path here.
       Print it for the operator to run as the privileged step (the established provisioning-runbook
       pattern — `harness-init` scaffolds; the operator runs the cron step). **You write no crontab.**
    2. **OR**, where the runtime exposes a scheduling surface, register the job via
