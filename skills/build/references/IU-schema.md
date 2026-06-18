@@ -2,8 +2,8 @@
 kind: reference
 id: IU-schema
 title: Implementation-Unit schema — the plan↔build field contract (two shapes)
-description: The field contract for an implementation unit (IU) — a strict oneOf of two shapes. A CHILD IU (channel sprint, has parent) is the work item a plan decomposes a carrier into and build consumes; it is not a carrier. A STANDALONE IU (channel incremental, no parent) is a carrier-lite — it carries its own minimal lifecycle, a single recorded gate, an improves target, and the vertical-slice/testing contract.
-status: v0.7.0 — 2026-06-10
+description: The field contract for an implementation unit (IU) — a strict oneOf of two shapes. A CHILD IU (channel sprint, has parent) is the work item a plan decomposes a carrier into and build consumes; it is not a carrier. A STANDALONE IU (channel incremental, no parent) is a carrier-lite — it carries its own minimal lifecycle, a single recorded gate, an improves target, a spec-status, and the vertical-slice/testing contract.
+status: v0.8.0 — 2026-06-16
 ---
 
 # Implementation-Unit schema
@@ -72,6 +72,7 @@ fields below over the common set:
 | `hitl_point` | when `slice_type: HITL` | `{ stage, decision }` — the stage that must run **attended** (where the human decision/review falls) and what is decided. **The node composing into that stage honours it** (pauses / forces interactive) — e.g. `{ stage: review }` is honoured by `review`, not `build`. **Required when `slice_type: HITL`**, omitted for `AFK`. Without it a HITL slice cannot tell the loop where to run attended. |
 | `gate_decisions[]` | yes (empty until landed) | The append-only gate log — **same entry shape as the work-item's**: `{seq, hash, gate, decision, owner, timestamp, evidence_refs, confidence}` (`seq` a monotonic 0-based integer; `hash` a content hash of the entry excluding `seq`/`hash`). The loop fires a **single** `commit-to-land` gate; no commit-to-build (there is no plan to commit to). Empty until the slice lands. |
 | `verification` | yes | **The vertical-slice proof** — `{ end_to_end: <the complete observable behaviour the slice delivers>, tests: [<the tests that prove that path>] }`. Names the tracer bullets and the end-to-end behaviour they exercise. The structured home for "demoable/verifiable on its own." |
+| `spec-status` | yes (default `unspecified`) | **Whether the slice is already specified** — `specified \| unspecified`. `unspecified` (default): the content fields are formalised by `specify-slice` from the captured definition body (the standard path). `specified`: an upstream **working session** already authored the content fields in-session, so `specify-slice` **only checks** they hold — verify, not derive (see the spec-status invariant). A *verifiable* claim, not a trust-token: a `specified` slice that fails the check is routed out, so the flag cannot silently lie. |
 
 ## Invariants
 
@@ -166,6 +167,25 @@ fields below over the common set:
   parked, never dispatched; surfaced **mid-dispatch** (specify-slice, unattended, hits a gap) →
   `blocked: insufficiently-defined`, back to raise-capture — **never** defined-now, no operator is
   present in the loop. (Consumed by `loop-runner`'s Phase 0 decision-completeness gate.)
+- **The cold-handoff bar is the universal front exit (at every depth).** Whatever depth the front
+  ran — a thin slice or a deep worked session — it exits by certifying this same cold-handoff test
+  on each IU it produces; the bar does not relax with depth. (This generalises the older
+  incremental-arc-only Definition-of-Ready to the one unified front.) The front's **other** exit is
+  a **no-IU terminal disposition**: an input the front resolves as not worth an IU is
+  **parked / killed / deferred** on its carrier — the disposition recorded there (see
+  `work-item-schema`) — producing **no** IU rather than a dangling open state. Because the front
+  dispatches its spine nodes (`design` / `specify` / `plan`) **independently by depth**, the universal
+  bar **cross-checks** those gates so coverage cannot split: **a spec touchpoint ⇒ `spec-status:
+  specified` before exit**, and **a detected fork ⇒ `design` ran** — an IU that resolved a fork but
+  left a touched spec area un-amended (or vice versa) fails the bar, not just a per-layer shape check.
+- **Spec-status governs derive-vs-check (T4).** `spec-status` records whether the content fields
+  were already authored upstream. `unspecified` (default) → `specify-slice` **formalises** them from
+  the captured definition body. `specified` → an upstream working session authored them in-session,
+  so `specify-slice` **only checks**: it asserts the full standalone shape is present and the
+  vertical-slice + testing + decision-complete invariants hold, and **does not re-derive**. The flag
+  is **verifiable, not a trust-token** — a `specified` slice that fails the check is routed out
+  (`blocked: insufficiently-defined`), never waved through; marking `specified` skips only the
+  redundant re-derivation, never the bar.
 - **Three-writers, reduced (R2/R6).** Reuses `work-item-schema`'s discipline at reduced scope:
   - **Lifecycle writers, per state (split explicitly):**
     - `proposed` — **authored** by `triage` at scaffold (workflow state, not gated).

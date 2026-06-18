@@ -3,7 +3,7 @@ kind: reference
 id: carrier-interface
 title: Carrier interface — the field-set a reused node may assume about its carrier
 description: The explicit carrier interface a reused node (build, review, land) reads, abstracting over the two carrier kinds — work-item and standalone-IU. Declares the common fields present per kind, the fields a shared node must NOT assume, and the carrier-keyed projection key (carrier id + kind + arc id) that keeps current_stage from bleeding between arcs.
-status: v0.1.0 — 2026-06-04
+status: v0.2.0 — 2026-06-16
 ---
 
 # Carrier interface
@@ -89,6 +89,17 @@ correctly across the shared nodes, an event must also be resolvable to its **car
 > (id, kind, arc) triple. (Implementing that key in `publish-projection.ts` is the input-gated
 > follow-up — no incremental-arc carrier events exist yet.)
 
+## The write-boundary is structural
+
+The split between **content** (authored), **`current_stage`** (projected), and **`lifecycle_state`**
+(gate-written) is enforced **structurally**, not by any single writer: `current_stage` is *projected*
+from the event log — no node writes it (above) — and `lifecycle_state` advances **only** at a gate. A
+reused node therefore reads the projected stage and the gate-written lifecycle the same way under
+**either** carrier kind and **regardless of which node authors content**. So distributing content
+authoring across the front (per `product-dashboard-conventions`) leaves the boundary intact: the
+two-carrier model (work-item + standalone-IU) and this separation both hold **independently of any
+content-curator skill**.
+
 ## Related
 
 - `IU-schema` — the **standalone-IU** carrier (the carrier-lite shape): `improves`, `slice_type`,
@@ -96,3 +107,5 @@ correctly across the shared nodes, an event must also be resolvable to its **car
 - `work-item-schema` — the **work-item** carrier (the full shape): `children`, `outcome_link`,
   `risk_state`, `tier`, `frozen_timeline`, the three-kinds-of-state discipline.
 - `instrumentation-preamble` — the event emit contract the projection reads (see the seam above).
+- `product-dashboard-conventions` — the content conventions the front follows when authoring dashboard
+  content; the structural boundary above is what keeps that content-writer role curator-independent.

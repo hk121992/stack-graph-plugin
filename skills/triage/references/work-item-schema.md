@@ -3,8 +3,9 @@ kind: reference
 id: work-item-schema
 title: Work-item schema — the carrier on the product-dashboard
 description: The structured state of a work item (a carrier, D44) on the product-dashboard's work ledger. Keeps three kinds of state strictly separate — authored facts (committed), projected facts (derived), and the terminal snapshot (frozen at close).
-status: v0.3.1 — 2026-06-06
+status: v0.4.0 — 2026-06-16
 changelog:
+  - v0.4.0 (2026-06-16): unified front — the WI is the catch-all raise (`raise` is its create action); content authored per `product-dashboard-conventions` (a role, not a named curator); add the no-IU terminal disposition (park/kill/defer) as the front's non-IU exit
   - v0.3.1 (2026-06-06): clarify that `value_prop_link` may resolve to a canvas entry id (the work-item→bet expression; no new field)
 ---
 
@@ -15,17 +16,22 @@ rendered on the product-dashboard. It is **not a scalar stage** and **not a grap
 runtime instance. Its state is kept in **three strictly separate kinds** (conflating them is the core
 modelling risk):
 
+The work item is the front's **catch-all raise** — the universal first-capture inbox: a thought, a
+fragment, an issue-pulled context, or a framed problem. "Raise a work item for that" is always valid
+and needs no shape judgment. A WI is **created by `raise`** (the front's create action for a carrier);
+how much shaping it then needs is resolved downstream by the working session, not decided at raise.
+
 ## 1. Authored facts — committed, in the work-item file
 
 | field | value | written by |
 |---|---|---|
-| `id`, `title` | identity | author, at creation |
+| `id`, `title` | identity | the `raise` action (at creation) |
 | `lifecycle_state` | `idea → discovery → defined → committed → in-delivery → shipped → live → (parked \| killed)` | **gates** (operator go/no-go) |
 | `gate_decisions[]` | append-only `{seq, hash, gate, decision, owner, timestamp, evidence_refs, confidence, conditions?, override?}` — **the committed record of every lifecycle transition** (the *when* + *why* of each gate); `seq` is a monotonic integer (0-based position in the log), `hash` is a content hash of the entry (excluding `seq`/`hash` themselves) | **gates** (operator) |
 | `stage_override` | optional — an explicit operator override of the projected stage, when the projection is wrong | **operator** (authored) |
-| `children[]` | planned child work-item ids (decomposition); each materialises as its own work item at `build`; the parent aggregates | **curator** (from the plan) |
+| `children[]` | planned child work-item ids (decomposition); each materialises as its own work item at `build`; the parent aggregates | the content author, from the plan (per `product-dashboard-conventions`) |
 
-Plus the **curator-maintained content** (PR-gated): the problem/opportunity (the *why*), `outcome_link`
+Plus the **authored content** (PR-gated, governed by `product-dashboard-conventions`): the problem/opportunity (the *why*), `outcome_link`
 (the OKR it serves → vision; an **authored** link, D38), `value_prop_link` (VPC job/pain/gain — **may
 resolve to a canvas entry id**, e.g. a BMC/VPC hypothesis block; this is how "work-item → bet" is
 expressed without a new field; the dashboard renders a navigable link to the canvas entry when the id
@@ -44,7 +50,7 @@ parked/killed: the reason — kept, the anti-portfolio).
 | `current_stage` | the dev-sprint stage the carrier is at (when `in-delivery`) | the **latest stage event** for this carrier in the `.stack-graph/` event log — **unless** a `stage_override` is set, which wins |
 | `dev_transition_history` | the dev-stage traversal sequence | the **sequence of stage events** in the log |
 
-**No stage or curator writes these** (D44). The dashboard *joins* them onto the authored file at render.
+**No stage or content author writes these** (D44). The dashboard *joins* them onto the authored file at render.
 On a context without the event log (a fresh clone), they are simply **unknown/stale** — see the
 artefacts spec's degraded mode.
 
@@ -71,9 +77,11 @@ event log is gone.
 
 ## Invariants
 
-- **Three writers, three kinds, never crossed.** Gates write `lifecycle_state` + `gate_decisions`; the
-  curator writes content + `children`; the projection *derives* `current_stage`/`dev_transition_history`
-  (writes nothing in the file); a recorder freezes `frozen_timeline` once, at close.
+- **Three writers, three kinds, never crossed.** Gates write `lifecycle_state` + `gate_decisions`;
+  **content + `children`** are authored per `product-dashboard-conventions` (by the front node owning
+  the action — `raise` at create, the working session as it shapes); the projection *derives*
+  `current_stage`/`dev_transition_history` (writes nothing in the file); a recorder freezes
+  `frozen_timeline` once, at close.
 - **One identity, many projections** — forward workspace, delivery traversal, durable record are facets of
   one carrier; never forked.
 - **Problem-framed until `committed`** — the solution crystallises only at `committed` (Torres).
@@ -87,3 +95,8 @@ event log is gone.
   **implies** `frozen_timeline` present. CI should treat a terminal item lacking `frozen_timeline` as a
   **data-integrity warning** — the portal flags it visibly rather than silently omitting the timeline
   (the freeze may have been missed; the event log may already be gone).
+- **The no-IU terminal disposition (the front's other exit).** Not every raised WI yields an IU. A WI
+  the working session resolves as **not worth an IU** reaches a terminal `lifecycle_state` — `parked`
+  or `killed` (a *deferred* item is `parked` with intent to revisit) — carrying its `disposition`,
+  written via a dashboard `edit`. This is the front's no-IU exit, complementing the cold-handoff IU
+  exit (`IU-schema`); the item is **kept**, never deleted (the durable-record invariant).
