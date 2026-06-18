@@ -85,7 +85,7 @@ real tradeoffs, and crystallise side-effects as decisions land. Every grilled ca
 terminal disposition**, recorded in the `.md` sibling's `candidates[].disposition`:
 
 - **Pursued** → **escalate to `triage`** (it owns incremental-vs-wholesale and reaches
-  `product-dashboard-curator` on the wholesale branch). Link the **work-item id** `triage` created into the
+  `triage`'s `raise` on the wholesale branch). Link the **work-item id** `triage` created into the
   disposition. You never route work directly — hand `triage` the improvement and let it own the route.
 - **Rejected (load-bearing)** → **invoke `log-decision`** to write an ADR into the decisions store (its only
   writer). Link the **decision id** into the disposition. This is what stops the candidate being

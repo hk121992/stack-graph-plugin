@@ -188,7 +188,8 @@ Per scheduled IU:
    - **`escalated`** — a mid-build promote signal (a hidden fork or decomposition surfaced after
      intake). The session **stops and returns the signal + rationale; it does not enact** promotion
      (that mutates shared surfaces). The **coordinator enacts it attended** at the close phase: the
-     arc's normal escalate path — work-item created/reused via `product-dashboard-curator add-item`, the
+     arc's normal escalate path — work-item created/reused via the **`raise`** action (per
+     `product-dashboard-conventions`), the
      IU closed `dropped` (reason: promoted), two-way provenance recorded. This `dropped`-via-promotion
      write is **already legal** — it is the `escalates` edge's spec'd behaviour (02-graph-spec), not a
      new writer; the coordinator merely enacts it attended instead of the isolated session.

@@ -1,6 +1,6 @@
 ---
 name: "harness-init"
-description: "Stands up a harness in a consuming workspace — writes bindings.yaml, scaffolds the dashboard surface skeleton, writes the analytics env (the SG_* vars), emits the scheduled analyzer-task install runbook, and validates every required binding resolves plus the analyzer dry-run probe. Modes — scaffold (greenfield bootstrap), bind (re-author bindings only), validate (the harness gate before the loop runs). Structure only — work-item content is added separately via product-dashboard-curator. Use when: A consuming workspace needs to stand up its harness for the first time (greenfield), re-point its bindings after a path change, or verify the harness is complete before running the dev-sprint loop. NOT for authoring work-item content (product-dashboard-curator), the strategy canvas (strategy-curator), or canon (handbook-curator) — harness-init creates the empty, bound structure those then fill."
+description: "Stands up a harness in a consuming workspace — writes bindings.yaml, scaffolds the dashboard surface skeleton, writes the analytics env (the SG_* vars), emits the scheduled analyzer-task install runbook, and validates every required binding resolves plus the analyzer dry-run probe. Modes — scaffold (greenfield bootstrap), bind (re-author bindings only), validate (the harness gate before the loop runs). Structure only — work-item content is authored separately via the front's raise (per product-dashboard-conventions). Use when: A consuming workspace needs to stand up its harness for the first time (greenfield), re-point its bindings after a path change, or verify the harness is complete before running the dev-sprint loop. NOT for authoring work-item content (the front's raise, per product-dashboard-conventions), the strategy canvas (strategy-curator), or canon (handbook-curator) — harness-init creates the empty, bound structure those then fill."
 ---
 
 
@@ -21,7 +21,8 @@ values from the workspace and **confirm with the operator** — you never assume
 
 ## The structure/content contract — read this before any mode
 
-You create the **bound, empty structure**; the curator family fills the **content**:
+You create the **bound, empty structure**; the front fills the **content** (work items via `raise`,
+per `product-dashboard-conventions`; strategy/objectives via `strategy-curator`):
 
 - **You write** `<org-root>/.claude/bindings.yaml` (the binding values), the org-root **`CLAUDE.md`**
   (the harness's **ambient surface** — the handbook-index pointer + the bindings-reference pointer +
@@ -31,9 +32,9 @@ You create the **bound, empty structure**; the curator family fills the **conten
   and the **analytics env** in `<org-root>/.claude/settings.json` (the transcript analyzer —
   `SG_TRANSCRIPT_ROOT` / `SG_EVENT_LOG` / `SG_PRICING`; `bindings-contract` §6). You **emit** (do not
   install) the scheduled analyzer-task runbook.
-- **You do NOT author work items.** Work-item content is **`product-dashboard-curator`**'s
-  (`add-item`/`triage`). You scaffold an empty `items/` + manifest; the first work item is added
-  through the curator, under its PR gating.
+- **You do NOT author work items.** Work-item content is authored via the **front's `raise`** (per
+  `product-dashboard-conventions`). You scaffold an empty `items/` + manifest; the first work item is
+  added through `raise`, under its PR gating.
 - **You do NOT author strategy or objectives content** beyond the empty template — `strategy-curator`
   maintains the canvas; the operator fills the OKRs. You leave a valid, empty shell.
 - **You never mutate the vendored graph.** Everything you write is **harness-local** (the overlay).
@@ -126,9 +127,9 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
 6. **Run `validate`** (below) and report, then hand off with the **load canary**: tell the operator
    what a correctly-loaded harness looks like next session — launch at the org root, and the first
    message should show the harness was picked up (the handbook index is reachable by name and a
-   `bindings.yaml`-bound node resolves its surface). Then the next steps: **work items are added via
-   `product-dashboard-curator`**; the OKRs are filled in `objectives.md`; the loop runs once validate
-   passes.
+   `bindings.yaml`-bound node resolves its surface). Then the next steps: **work items are authored via
+   the front's `raise`** (per `product-dashboard-conventions`); the OKRs are filled in `objectives.md`;
+   the loop runs once validate passes.
 
 ### `bind` — (re)author the bindings only
 
@@ -176,8 +177,8 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
 ## Hard constraints
 
 - **Structure only — never content.** You scaffold the bound, empty surface; you never author work
-  items (`product-dashboard-curator`), the strategy canvas (`strategy-curator`), or OKR values. You
-  leave valid empty templates.
+  items (the front's `raise`, per `product-dashboard-conventions`), the strategy canvas
+  (`strategy-curator`), or OKR values. You leave valid empty templates.
 - **Harness-local writes only.** You write `bindings.yaml`, the org-root `CLAUDE.md`, the
   surface skeleton under `surface-root`, and the org-root `.claude/settings.json` **env block** (the
   analytics env) — nothing else, and **never** the vendored graph, and **never** a crontab / system

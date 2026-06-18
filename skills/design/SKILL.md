@@ -21,7 +21,7 @@ experience-contract**.
 
 ## When to invoke
 
-Invoke when a work-item's intent is aligned (typically handed forward by `align-context`) and its
+Invoke when a work-item's intent is aligned and its
 design must be resolved before it can be specified, planned, and built. The operator may pass a
 **mode token** (`lightweight` / `standard` / `deep` / `experience`), the **carrier** (the work item), and an intent or design-question summary. The mode token is a **suggestion**, not the only
 signal — Phase 1 infers the mode from the carrier and reconciles it with any operator token (below).
@@ -62,7 +62,7 @@ Default to `standard` when neither a token nor a clear carrier signal points els
 2. Fill any context gaps by **invoking `explore`** (scoped, read-only): pass it a scope/mode
    selector (`repo` / `learnings` / `framework-docs` / `web` / `best-practices`), the target
    question, and a scope summary. Consume its distilled digest; do not re-explore ground
-   `align-context` already covered — the front gathers context once.
+   the front already covered — context is gathered once.
 3. Resolve each design question **by intended outcome** — reason from what the item is meant to
    achieve to the design decision, not from implementation convenience. Surface assumptions and
    take them to the operator where the question is novel or contested.
@@ -193,8 +193,6 @@ budgets + intended tool-path, to the harness surface, conforming to the schema. 
 
 ## Process seams (deferred edges)
 
-- **← `align-context`** (`can-follow`, authored): design follows alignment; it consumes the aligned
-  intent and the starting touchpoint set, and does not re-explore the same ground.
 - **→ `specify`** (`precedes`, authored): design hands the design doc + touchpoints table to
   `specify`, which turns it into the canonical spec amendment.
 - **→ `plan`** (deferred — F7): design precedes planning; the edge is authored once `plan` exists.

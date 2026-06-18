@@ -1,6 +1,6 @@
 ---
 name: "specify-slice"
-description: "Formalise a decision-complete standalone IU into a build-ready vertical slice — render the carrier's captured definition into the content fields and enforce the vertical-slice + testing + single-slice invariants before build. The collapsed front of the incremental loop; replaces align-context/design/specify/plan for one slice. Runs collaborative when hand-run, unattended inside a loop-runner-dispatched session. Use when a triaged single improvement needs formalising before build. Use when: A standalone IU has been triaged decision-complete (Context + Decisions captured at raise) and must be formalised before build — render goal/files/acceptance/verification, formalise slice_type from the recorded AFK/HITL decision, and reject a horizontal slice (or escalate a hidden fork) here rather than downstream. Reached as a dispatched session's entry (unattended) or hand-run (collaborative)."
+description: "Formalise a decision-complete standalone IU into a build-ready vertical slice — render the carrier's captured definition into the content fields and enforce the vertical-slice + testing + single-slice invariants before build. The thinnest depth of the unified front; does for one slice what the dev-sprint spine (design/specify/plan, orchestrated by working-session) does for a work-item. Runs collaborative when hand-run, unattended inside a loop-runner-dispatched session. Use when a triaged single improvement needs formalising before build. Use when: A standalone IU has been triaged decision-complete (Context + Decisions captured at raise) and must be formalised before build — render goal/files/acceptance/verification, formalise slice_type from the recorded AFK/HITL decision, and reject a horizontal slice (or escalate a hidden fork) here rather than downstream. Reached as a dispatched session's entry (unattended) or hand-run (collaborative)."
 ---
 
 
@@ -10,9 +10,9 @@ You are the **single collapsed front stage** of the incremental-improvement loop
 **decision-complete standalone IU** — the carrier `triage` captured, carrying a `## Context` and
 `## Decisions` body — and turn it into a **build-ready vertical slice**: you **render** its captured
 definition into the content fields and **enforce** the vertical-slice, testing, and single-slice
-invariants **before** build runs. For one understood slice you do the job the dev-sprint spreads
-across `align-context → design → specify → plan` — at a fraction of the weight, because the slice
-has no design fork to resolve and no decomposition to plan.
+invariants **before** build runs. For one understood slice you do the job the dev-sprint front spine
+`design → specify → plan` (orchestrated by `working-session`) spreads across — at a fraction of the
+weight, because the slice has no design fork to resolve and no decomposition to plan.
 
 Your job is **translation + enforcement, not specification.** `triage` ran the operator Q&A at
 raise time and recorded every call (including the AFK/HITL call) in the carrier's Decisions; you
@@ -70,9 +70,28 @@ definition; a slice that needs a wide context sweep is a signal it may be wholes
 
 ## Phase 2 — Render the slice's content fields
 
-**Derive** the standalone IU's content fields from the carrier's Context + Decisions, against the
-IU-schema standalone shape — confirming mechanical detail from Phase 1, not re-deciding anything
-already settled in Decisions:
+**Branch on the carrier's `spec-status` first** (IU-schema, the derive-vs-check rule). It records
+whether the content fields were already authored upstream, and it decides whether this phase
+**derives** or only **checks**:
+
+- **`unspecified`** (the default) — the content fields are not yet authored. **Derive** them from
+  the carrier's Context + Decisions, as below. This is the standard path.
+- **`specified`** — an upstream **`working-session`** already authored the content fields in-session.
+  **Do not re-derive.** **Check** instead: assert the full standalone shape is present and the
+  vertical-slice + testing + single-slice invariants (Phase 3) hold over the fields as authored. A
+  `specified` slice that **fails the check routes out as `blocked: insufficiently-defined`** (the
+  same route-out as a gap below) — the flag is verifiable, never waved through.
+
+  **Trust model — the `specified` check is shape/completeness, not content-correctness.** You assert
+  the fields are *present and well-formed* and the invariants hold; you do **not** re-judge whether
+  the captured decisions are *right*. Content-correctness rests on `working-session`'s **HITL framing
+  gate** — the operator touchpoint, the only human sign-off before the AFK build span. Re-judging
+  content here would duplicate that gate and re-import the design judgment the unified front moved
+  upstream. Structural check here; the content was vetted by the human there.
+
+When `unspecified`, **derive** the standalone IU's content fields from the carrier's Context +
+Decisions, against the IU-schema standalone shape — confirming mechanical detail from Phase 1, not
+re-deciding anything already settled in Decisions:
 
 - **`goal`** — one sentence, outcome-framed ("so that X is true after build"). What build is held
   to. Not a task or solution description.
@@ -145,10 +164,12 @@ specify time, that is itself an escalate signal — it is wholesale.
 In **`unattended`** mode you never put a question to an operator who is not there. A definition gap
 is a **route-out**:
 
-- **`blocked: insufficiently-defined`** — you reached a content field you cannot formalise without
-  asking (the carrier's Context/Decisions do not settle it). Record the reason and return the
-  route-out; the IU goes **back to raise-capture** at `triage` (the carrier was not actually
-  decision-complete — the fix is upstream, not a mid-loop question). Never guess the missing call.
+- **`blocked: insufficiently-defined`** — either you reached a content field you cannot formalise
+  without asking (an `unspecified` slice whose Context/Decisions do not settle it), **or** a
+  `specified` slice **failed the Phase-2 check** (a field is missing/malformed or an invariant does
+  not hold over the authored fields). Record the reason and return the route-out; the IU goes **back
+  to raise-capture** at `triage` (the carrier was not actually decision-complete — the fix is
+  upstream, not a mid-loop question). Never guess the missing call.
 - **escalate signal** — a design fork or a decomposition surfaces at formalisation (see *Escalate*).
   In a dispatched session you **return the escalate signal + rationale to the coordinator; you do
   not enact it** (enacting mutates shared surfaces, which the dispatched-session write discipline
@@ -164,8 +185,9 @@ slice** is not a standalone IU. The escalate signal is the same in both modes; *
 differs**:
 
 - **`collaborative` (and any hand-run)** — **enact** the escalate. Follow the `escalates` edge to
-  the dev-sprint front entry (`align-context`). This is a one-way cross-arc handoff — it creates the
-  work-item via **`product-dashboard-curator` (its `add-item` mode)**, per `work-item-schema` (or
+  the dev-sprint front orchestrator (`working-session`). This is a one-way cross-arc handoff — it
+  creates the work-item via the **`raise`** action (per `product-dashboard-conventions`), per
+  `work-item-schema` (or
   reuses a matching one), closes this standalone IU as `dropped` (reason: promoted) with a pointer
   to the work-item, and records the two-way provenance: the new work-item cites this slice
   (`promoted_from`); the slice cites the work-item.
@@ -204,9 +226,10 @@ You write **no carrier lifecycle field** and **no gate decision**. The projectio
   `acceptance`, `acceptance_check`, `size`, `slice_type`, `verification`) and the vertical-slice / testing / single-slice
   invariants enforced — build-ready, handed to `build`. The **stage-complete signal carries the
   formalised `files`** (loop-runner's late-binding scheduling input).
-- **Or** an **escalation** to the dev-sprint front (`align-context`): enacted here (collaborative —
-  a work-item created/reused, this standalone IU closed `dropped` reason promoted, provenance linked
-  both ways) or **signalled to the coordinator** (unattended — the coordinator enacts it attended).
+- **Or** an **escalation** to the dev-sprint front orchestrator (`working-session`): enacted here
+  (collaborative — a work-item created/reused, this standalone IU closed `dropped` reason promoted,
+  provenance linked both ways) or **signalled to the coordinator** (unattended — the coordinator
+  enacts it attended).
 - **Or** (unattended only) a **route-out** — `blocked: insufficiently-defined`, reason recorded,
   returned for raise-capture.
 - A **stage-complete signal** — the projection advances `current_stage`. No carrier-lifecycle

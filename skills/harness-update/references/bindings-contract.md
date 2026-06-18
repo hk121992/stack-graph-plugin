@@ -3,8 +3,9 @@ kind: reference
 id: bindings-contract
 title: Bindings contract — the keys a harness supplies, and the surface template
 description: The factory contract the plugin ships so a consuming workspace can instantiate a harness — the complete set of binding keys the vendored graph may require, the bindings.yaml file format, the org-root CLAUDE.md ambient-surface template, and the dashboard + improvements surface-structure templates harness-init scaffolds. The plugin carries this contract; the harness supplies the values. No product data.
-status: v0.7.0 — 2026-06-12
+status: v0.7.1 — 2026-06-18
 changelog:
+  - v0.7.1 (2026-06-18): dead-reference scrub (curator removal, wi-unified-front-workflow IU-7) — §3 surface-structure template: the two "content is added later via [the removed curator]" / "added by [the removed curator], not scaffolded" notes now read "added later via the front's `raise`" / "added via the front's `raise`, not scaffolded". No key change; the surface shape is unchanged.
   - v0.7.0 (2026-06-12): A6c unified transcript-analytics (#28, supersedes #21) — §6 retooled to the transcript analyzer: add `SG_TRANSCRIPT_ROOT` (analyzer input env, not a binding key); remove the hook-activation env (`SG_TOKEN_EVENT_KIND`) and the per-scope dispatch env (`SG_IU_ID`/`SG_SCOPE_ID`/`SG_CARRIER_*`/`SG_ARC`); repurpose `event-log`/`SG_EVENT_LOG` to the analyzer's **output** and migrate its filename to `derived/analyzer-events.jsonl`; replace the live-hook probe with the analyzer dry-run probe + the scheduled-task install runbook
   - v0.6.0 (2026-06-10): D69 token instrumentation — add optional `pricing` key; note the absolute `SG_EVENT_LOG` consumer on `event-log`; add §6 (the token-instrumentation env the harness exports + the per-scope dispatcher env + the validate live-hook probe)
   - v0.5.0 (2026-06-10): add optional `architecture-reviews-root` — the committed home of architecture-review's report pair (the axis-root pattern: bound only when the harness runs the capability)
@@ -43,6 +44,7 @@ target does not resolve.
 | `items-root` | the work-items dir | `items/` under the surface; holds `<id>.md` |
 | `manifest-path` | the work-items manifest | committed derived index (`items/manifest.json`) |
 | `sprint-records-root` | the sprint-records dir | `sprints/`; assembled views |
+| `working-sessions-root` | the working-session records dir | `working-sessions/`; holds `<uid>.md`, one per session (`SG-NNNN`, directory-scan allocated — the dir **is** the registry, no ledger). Consumed by `working-session`'s emit step (the sole writer); committed (generative/non-replayable, the D60 test), **not** `.stack-graph/`. The per-session design-doc artefact + the WI ↔ session ↔ IU provenance bridge — see `working-session-record` |
 | `learnings-archive` | the prior-proposals archive **file** (`learnings/archive.md`) | `capture-learnings`' surviving-but-unenacted proposals — the gate writes it, `capture-learnings` reads it next sprint (D60); committed (generative/non-replayable), **not** `.stack-graph/`; scaffold creates the file empty |
 | `strategy-doc` | the **authored Product Strategy thesis** (vision narrative) | `strategy.md` — Rumelt kernel: diagnosis → guiding policy → coherent action; plus who & JTBD, open questions, decided/not-doing. This is the authored thesis, **not** a canvas/bmd inventory. A harness must not bind `strategy-doc` to a regenerated canvas or hypothesis corpus — that is redundant with the canvas surface. The vision statement itself lives in `objectives.md` (the `okr-schema` apex); `strategy.md` carries the kernel only and must not restate the vision. |
 | `objectives-doc` | the objectives / OKR doc | `objectives.md` per `okr-schema` |
@@ -69,7 +71,7 @@ target does not resolve.
 ## 3. The dashboard surface-structure template
 
 The shape `harness-init scaffold` creates under `surface-root` (empty skeleton + templates;
-content is added later via `product-dashboard-curator`). Matches `artefacts-design`:
+content is added later via the front's `raise`). Matches `artefacts-design`:
 
 ```
 <surface-root>/
@@ -77,7 +79,7 @@ content is added later via `product-dashboard-curator`). Matches `artefacts-desi
   objectives.md          # objectives / OKRs / north-star                  (per okr-schema, template)
   items/
     manifest.json        # committed derived index: [{id,file,title,lifecycle_state,tier,outcome_link}]
-    <id>.md              # one per work item (added by product-dashboard-curator, not scaffolded)
+    <id>.md              # one per work item (added via the front's raise, not scaffolded)
   sprints/
     <id>.md              # sprint-records (assembled views)
   learnings/
