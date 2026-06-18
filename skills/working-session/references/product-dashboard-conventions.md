@@ -3,7 +3,9 @@ kind: reference
 id: product-dashboard-conventions
 title: Product-dashboard conventions — how the front authors work-ledger content
 description: The content conventions the front follows when authoring product-dashboard work-ledger content (carriers) — the write-boundary (content only; never projected stage, gate-written lifecycle, or gate decisions), the problem-framed-and-laddered + durable-record invariants, raise-creates / edit-advances, and graduation via a labelled PR. Canonical so they hold whether or not a dedicated curator skill enacts them.
-status: v0.2.0 — 2026-06-18
+status: v0.3.0 — 2026-06-18
+changelog:
+  - v0.3.0 (2026-06-18): SEC-1 residual closed — the settled single-writer guard (`record-gate`-only; `vendor:check` rejects any non-`record-gate` edit and any product-gate `agent-auto`/unattended entry) replaces the convention-only note; add the **outstanding operator-actions "needs-you" surface** convention (attended-proposal discipline; fail-safe close). (wi-analytics-lifecycle-review, Track B + A6)
 ---
 
 # Product-dashboard conventions
@@ -69,17 +71,43 @@ disposition). The removal carries operator-accepted gaps, recorded here as the d
   until the upstream stand-up subsumes it. **Reversal cost:** re-instating either means **re-vendoring
   a removed *general* skill across every consuming harness** if the stand-up slips — the removal is
   cheap to make but expensive to undo, so it is taken deliberately, not reflexively.
-- **Write-boundary note (SEC-1).** After the curator's removal, `lifecycle_state` and `gate_decisions`
-  are **convention-guarded only** — the structural projection covers `current_stage` alone, so the
-  hard line above (never advance `lifecycle_state`, never append a `gate_decision`) is now enforced by
-  convention rather than by a writer-side guard. This residual integrity risk is **recorded here**
-  rather than mechanically guarded. A follow-on may add a `vendor:check`-time guard asserting that a
-  non-gate content edit touches neither field.
+- **Write-boundary guard (SEC-1 — settled).** `lifecycle_state` and `gate_decisions` are written by a
+  **single mechanical writer, `record-gate`** (`work-item-schema`, `carrier-interface`) — no content
+  edit and no other node touches either field. The residual is closed by a **`vendor:check` single-writer
+  guard**, not by convention alone: `vendor:check` **rejects** (a) any edit of `lifecycle_state` or
+  `gate_decisions` that does not come from `record-gate`, **and** (b) any `gate_decisions` entry on a
+  **product gate id** carrying `decision_provenance: agent-auto` or recorded from an **unattended**
+  (loop-runner-dispatched) context. So the hard line above (never advance `lifecycle_state`, never append
+  a `gate_decision`) is now mechanically enforced — a content author that touches either field fails the
+  build, and a product-gate decision can only be recorded operator-attested.
+
+## The outstanding operator-actions "needs-you" surface
+
+The dashboard renders a **"needs-you" list** of outstanding operator obligations — derived from the
+`<sg-operator-action>` open/close lifecycle (`analytics-vocabulary`), not authored on a carrier. Because a
+*close* about an obligation opened elsewhere can suppress an operator-facing item, the surface follows a
+**fail-safe, attended-proposal discipline** (a forged or colliding event can only **add** a marker, never
+**subtract** a real obligation):
+
+- **Only an attended/attested open populates the needs-you list.** An open emitted from an **unattended**
+  (loop-runner-dispatched) or non-authoritative context counts toward **friction metrics only** (an
+  aggregate, never an item-by-item surface) — so forged-open spam cannot bury a real needs-you.
+- **Only an attended/operator-attested close — or a `record-gate`-attested gate close — hides an item.**
+  An **unattended, non-authoritative, or cross-harness** close cannot hide; it derives the item to
+  **`close-proposed` (still visible, marked "someone proposed closing this")**, never to closed-and-hidden.
+- **Honest under capture.** Under partial merge an unmatched open is **`possibly-outstanding (capture
+  incomplete)`**, not a confident nag; it flips to closed (no phantom nag) when the missing log arrives.
+
+This mirrors the `record-gate` authority on the durable side: the *durable decision* rides `record-gate`
+(operator-attested); the *friction/outstanding view* rides `<sg-operator-action>` — a forged close adds a
+visible marker, never silently clears a real obligation.
 
 ## Related
 
 - `work-item-schema` — the carrier whose content these conventions author (the three-kinds-of-state
   discipline this boundary preserves).
+- `analytics-vocabulary` — the `<sg-*>` family and the `<sg-operator-action>` open/close lifecycle the
+  needs-you surface derives from.
 - `carrier-interface` — the structural write-boundary (projection + gates) these conventions ride.
 - `okr-schema` — the objective an `outcome_link` resolves to.
 - `bundling-rules` — when to bundle vs split a content PR.

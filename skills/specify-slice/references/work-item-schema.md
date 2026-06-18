@@ -3,8 +3,9 @@ kind: reference
 id: work-item-schema
 title: Work-item schema — the carrier on the product-dashboard
 description: The structured state of a work item (a carrier, D44) on the product-dashboard's work ledger. Keeps three kinds of state strictly separate — authored facts (committed), projected facts (derived), and the terminal snapshot (frozen at close).
-status: v0.4.0 — 2026-06-16
+status: v0.5.0 — 2026-06-18
 changelog:
+  - v0.5.0 (2026-06-18): single mechanical writer — name `record-gate` as the sole writer of `lifecycle_state`/`gate_decisions` (decision-authority = operator ≠ recording-mechanism); add `decision_provenance` (`agent-auto` structurally prohibited on product gate ids); replace the per-entry hash with a hash **chain** (closes reorder/truncation/replay). (wi-analytics-lifecycle-review, Track B)
   - v0.4.0 (2026-06-16): unified front — the WI is the catch-all raise (`raise` is its create action); content authored per `product-dashboard-conventions` (a role, not a named curator); add the no-IU terminal disposition (park/kill/defer) as the front's non-IU exit
   - v0.3.1 (2026-06-06): clarify that `value_prop_link` may resolve to a canvas entry id (the work-item→bet expression; no new field)
 ---
@@ -26,8 +27,8 @@ how much shaping it then needs is resolved downstream by the working session, no
 | field | value | written by |
 |---|---|---|
 | `id`, `title` | identity | the `raise` action (at creation) |
-| `lifecycle_state` | `idea → discovery → defined → committed → in-delivery → shipped → live → (parked \| killed)` | **gates** (operator go/no-go) |
-| `gate_decisions[]` | append-only `{seq, hash, gate, decision, owner, timestamp, evidence_refs, confidence, conditions?, override?}` — **the committed record of every lifecycle transition** (the *when* + *why* of each gate); `seq` is a monotonic integer (0-based position in the log), `hash` is a content hash of the entry (excluding `seq`/`hash` themselves) | **gates** (operator) |
+| `lifecycle_state` | `idea → discovery → defined → committed → in-delivery → shipped → live → (parked \| killed)` | **`record-gate`** — the single mechanical writer (decision-authority = the operator's go/no-go; recording-mechanism = `record-gate`) |
+| `gate_decisions[]` | append-only `{seq, hash, gate, decision, decision_provenance, owner, timestamp, evidence_refs, confidence, conditions?, override?}` — **the committed record of every lifecycle transition** (the *when* + *why* of each gate); `seq` is a monotonic integer (0-based position in the log); `hash` is a **chain** link, `hash_n = H(canonical(content_n) ‖ seq_n ‖ hash_{n-1})`, binding each entry to its position and to the prior entry (not a standalone per-entry hash); `decision_provenance` is `operator-attested \| agent-auto` — `agent-auto` is **structurally prohibited on a product gate id**, and an unattended (loop-runner-dispatched) context may record **only AFK-classed gates** | **`record-gate`** (single writer; operator-attested on product gates) |
 | `stage_override` | optional — an explicit operator override of the projected stage, when the projection is wrong | **operator** (authored) |
 | `children[]` | planned child work-item ids (decomposition); each materialises as its own work item at `build`; the parent aggregates | the content author, from the plan (per `product-dashboard-conventions`) |
 
@@ -77,7 +78,9 @@ event log is gone.
 
 ## Invariants
 
-- **Three writers, three kinds, never crossed.** Gates write `lifecycle_state` + `gate_decisions`;
+- **Three writers, three kinds, never crossed.** **`record-gate`** — the single mechanical writer —
+  writes `lifecycle_state` + `gate_decisions` (the operator decides go/no-go; `record-gate` enacts the
+  record, with the operator-attestation precondition on product gates);
   **content + `children`** are authored per `product-dashboard-conventions` (by the front node owning
   the action — `raise` at create, the working session as it shapes); the projection *derives*
   `current_stage`/`dev_transition_history` (writes nothing in the file); a recorder freezes
@@ -87,10 +90,17 @@ event log is gone.
 - **Problem-framed until `committed`** — the solution crystallises only at `committed` (Torres).
 - **The durable record** = `gate_decisions[]` + `risk_state` + `frozen_timeline` — proof we made the call
   deliberately on the best evidence available, and when.
-- **`gate_decisions[]` append-only — stable-identity definition.** For all prior indices i, entry at
-  position i is unchanged (verified by `seq` equality + `hash` equality); the log length only grows. The
-  CI append-only invariant is enforceable only against this stable-id'd log — a diff without `seq`+`hash`
-  cannot reliably detect edits to existing entries vs. reorderings.
+- **`gate_decisions[]` append-only — hash-chain definition.** The log is a hash **chain**:
+  `hash_n = H(canonical(content_n) ‖ seq_n ‖ hash_{n-1})` (the genesis entry chains over a fixed empty
+  predecessor). The append-only invariant is the conjunction of three properties on that chain — a
+  **valid head** (the last entry's `hash` recomputes from the entry below it), **contiguous `seq` from 0**
+  (no gaps, no repeats), and **growth-only** (the new log's chain extends the old as a prefix; the length
+  only increases). Together these close all four tampers, not just one: a **closing edit** to any past
+  entry breaks every downstream `hash`; a **reorder** breaks the chain at the swap (each link binds `seq`
+  + the prior hash); a **truncation** loses the head the prior chain committed to; a **replay** of an old
+  log fails the prefix-extension check. A diff without the chain (a bare `seq`+per-entry-`hash`) cannot
+  reliably detect reorder/truncation/replay — only an edit — which is why the per-entry hash is replaced
+  by the chain.
 - **Recorder-freeze invariant.** A terminal `lifecycle_state` (`shipped`/`live`/`parked`/`killed`)
   **implies** `frozen_timeline` present. CI should treat a terminal item lacking `frozen_timeline` as a
   **data-integrity warning** — the portal flags it visibly rather than silently omitting the timeline

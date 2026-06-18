@@ -3,7 +3,9 @@ kind: reference
 id: carrier-interface
 title: Carrier interface — the field-set a reused node may assume about its carrier
 description: The explicit carrier interface a reused node (build, review, land) reads, abstracting over the two carrier kinds — work-item and standalone-IU. Declares the common fields present per kind, the fields a shared node must NOT assume, and the carrier-keyed projection key (carrier id + kind + arc id) that keeps current_stage from bleeding between arcs.
-status: v0.2.0 — 2026-06-16
+status: v0.3.0 — 2026-06-18
+changelog:
+  - v0.3.0 (2026-06-18): write-boundary reframed onto the single mechanical writer — `lifecycle_state`/`gate_decisions` are written **only** by `record-gate` (operator-attestation precondition + a `vendor:check` single-writer guard); `current_stage` stays projection-owned; the `gate_decisions` entry shape gains `decision_provenance` + the hash-chain semantics (aligned with `work-item-schema`). (wi-analytics-lifecycle-review, Track B)
 ---
 
 # Carrier interface
@@ -31,8 +33,8 @@ carrier file):
 | `carrier_kind` | both | **derived** | `work-item \| standalone-iu`. The shape discriminator — **not a stored field**; derived from the IU-schema discriminator (`channel: incremental` + no `parent` ⇒ `standalone-iu`; otherwise `work-item`). See "Deriving carrier_kind and arc". A reused node branches on it where the kinds differ; it never assumes one. |
 | `arc` | both | **derived** | `dev-sprint \| incremental`. The traversal this run belongs to — **not a stored field**; a traversal property (which `composes-into` arc the current node belongs to for this run). Part of the projection key. See "Deriving carrier_kind and arc". |
 | `current_stage` | both | **derived** | **Projected**, never written by the node — the arc stage the carrier is at (the projection key below). Read-only to every node. |
-| `lifecycle_state` | both | **stored** | The carrier's life-phase. Value sets differ per kind (work-item: the seven-state `idea→…→live` + `parked\|killed`; standalone-IU: `proposed → in-delivery → landed → parked\|dropped`); a reused node reads it but writes only the terminal transition via its gate. |
-| `gate_decisions[]` | both | **stored** | Append-only gate log, **same entry shape** for both kinds: `{seq, hash, gate, decision, owner, timestamp, evidence_refs, confidence}`. A reused node appends one entry when it holds a gate. |
+| `lifecycle_state` | both | **stored** | The carrier's life-phase. Value sets differ per kind (work-item: the seven-state `idea→…→live` + `parked\|killed`; standalone-IU: `proposed → in-delivery → landed → parked\|dropped`); a reused node **reads** it but never writes it — the terminal transition is recorded **only** by the single mechanical writer `record-gate` (see "The write-boundary"). |
+| `gate_decisions[]` | both | **stored** | Append-only gate log, **same entry shape** for both kinds: `{seq, hash, gate, decision, decision_provenance, owner, timestamp, evidence_refs, confidence}` — `hash` is a **chain** link (`hash_n = H(canonical(content_n) ‖ seq_n ‖ hash_{n-1})`) and `decision_provenance` is `operator-attested \| agent-auto`, both per `work-item-schema`. A reused node **reads** the log; it never appends — `record-gate` is the only writer, and an entry is appended only after the gate's decision is settled (operator-attested on a product gate). |
 
 ### Deriving carrier_kind and arc
 
@@ -89,13 +91,22 @@ correctly across the shared nodes, an event must also be resolvable to its **car
 > (id, kind, arc) triple. (Implementing that key in `publish-projection.ts` is the input-gated
 > follow-up — no incremental-arc carrier events exist yet.)
 
-## The write-boundary is structural
+## The write-boundary
 
-The split between **content** (authored), **`current_stage`** (projected), and **`lifecycle_state`**
-(gate-written) is enforced **structurally**, not by any single writer: `current_stage` is *projected*
-from the event log — no node writes it (above) — and `lifecycle_state` advances **only** at a gate. A
-reused node therefore reads the projected stage and the gate-written lifecycle the same way under
-**either** carrier kind and **regardless of which node authors content**. So distributing content
+The split between **content** (authored), **`current_stage`** (projected), and **`lifecycle_state` +
+`gate_decisions`** (gate-recorded) holds along two axes:
+
+- **`current_stage` is PROJECTION-owned** — *projected* from the carrier-tagged event log, never written
+  by any node (above). This half is enforced **structurally**: no node has a write path to it.
+- **`lifecycle_state` + `gate_decisions` are written by ONE mechanical writer — `record-gate`.** A reused
+  node never writes either; it reads them. `record-gate` is **THE single writer**, with an
+  **operator-attestation precondition** on a product gate (the decision is the operator's; `record-gate`
+  enacts the record) — it is not a free write at "any gate the node holds." A **`vendor:check`
+  single-writer guard** asserts this: it rejects any non-`record-gate` edit of the two fields (see
+  `product-dashboard-conventions` SEC-1).
+
+A reused node therefore reads the projected stage and the `record-gate`-written lifecycle the same way
+under **either** carrier kind and **regardless of which node authors content**. So distributing content
 authoring across the front (per `product-dashboard-conventions`) leaves the boundary intact: the
 two-carrier model (work-item + standalone-IU) and this separation both hold **independently of any
 content-curator skill**.
