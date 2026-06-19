@@ -106,29 +106,27 @@ any per-change `raise`.
 
 ### `refresh-index` — regenerate the page index (idempotent)
 
-Run the handbook's index generator over the handbook root. The generator is **no longer vendored in
-the installed plugin** — RESTRUCTURE-PLAN D1 moved the renderer to the shared **mm-workspace**
-(workspace.middle-management.ai), and the handbook index generator lives there now. It is
-**parameterised by the bound handbook root**, so there is no per-harness reimplementation: it
-projects the page index
-deterministically from page frontmatter (one entry per `<NN>-<section>/README.md` → slug
-`<section>` and per `<NN>-<page>.md` → slug `<section>/<page>`; the `archive` section and any
-sub-directory depth are excluded; entries carry `slug, title, type, read-when, related` and are
-sorted by slug). Invoke it via overlay, pointing `--handbook-root` at the bound handbook content
-root (the `handbook` reference's content dir, resolved via the `handbook-index` binding) — never
-a hardcoded path:
+Run the handbook's index generator over the handbook root. The generator is **vendored in the
+installed plugin** at `scripts/refresh-index.ts` (shipped by the plugin build's scripts stage) —
+self-contained and **parameterised by the bound handbook root**, so every harness runs the *same*
+validated tool with no per-harness reimplementation. It projects the page index deterministically
+from page frontmatter (one entry per `<NN>-<section>/README.md` → slug `<section>` and per
+`<NN>-<page>.md` → slug `<section>/<page>`; the `archive` section and any sub-directory depth are
+excluded; entries carry `slug, title, type, read-when, related` and are sorted by slug). Invoke it
+through the plugin-root substitution, pointing `--root` at the bound handbook root — the directory
+*containing* `content/` (the parent of the `handbook` reference's content dir, resolved via the
+`handbook-index` binding) — never a hardcoded path:
 
 ```
-bun run <mm-workspace-renderer>/build-handbook-index.ts --handbook-root <bound-handbook-content-root>
+bun run ${CLAUDE_PLUGIN_ROOT}/scripts/refresh-index.ts --root <bound-handbook-root>
 ```
 
-The concrete `<mm-workspace-renderer>` invocation path (and whether it needs its own binding) is
-pending the renderer relocation (RESTRUCTURE-PLAN D1) — the old
-`<plugin>/workspace/renderer/build-handbook-index.ts` path is broken post-D1.
+`${CLAUDE_PLUGIN_ROOT}` resolves to the installed plugin directory — the way a vendored node reaches
+its own bundled files; `--root` takes the dir *containing* `content/` (equivalently `$HANDBOOK_ROOT`).
 
-It writes `<handbook-content-root>/index.json` in place; pass `--check` to verify freshness without
-writing (exit 1 on drift). If unchanged, say so and stop; if changed, report the changed slugs
-(or, when called from `raise`, surface only the count — the diff is in the PR).
+It writes `<handbook-root>/content/index.json` in place; pass `--check` to verify freshness without
+writing (exit 1 on drift, exit 0 when fresh). If unchanged, say so and stop; if changed, report the
+changed slugs (or, when called from `raise`, surface only the count — the diff is in the PR).
 
 ## Hard constraints
 

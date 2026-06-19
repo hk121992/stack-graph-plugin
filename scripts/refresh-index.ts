@@ -44,9 +44,11 @@
  * Flags:
  *   --root <path>   canon root (dir containing content/); overrides $HANDBOOK_ROOT + walk-up.
  *   --ascii         ASCII-escape non-ASCII output (default off = literal UTF-8).
+ *   --check         verify freshness without writing; exit 1 if index.json would change, 0 if fresh.
  *
  * Exit codes:
- *   0  success (idempotent — same output as last run if no changes)
+ *   0  success (idempotent — same output as last run if no changes; or --check found it fresh)
+ *   1  --check: the committed index.json is stale vs a fresh build (no write performed)
  *   2  handbook root cannot be resolved
  */
 
@@ -69,14 +71,18 @@ interface CliArgs {
   root?: string;
   /** ASCII-escape the output (default off = literal UTF-8). */
   ascii: boolean;
+  /** Verify freshness without writing (exit 1 on drift, 0 if fresh). */
+  check: boolean;
 }
 
 function parseArgs(argv: string[]): CliArgs {
-  const out: CliArgs = { ascii: false };
+  const out: CliArgs = { ascii: false, check: false };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--ascii") {
       out.ascii = true;
+    } else if (arg === "--check") {
+      out.check = true;
     } else if (arg === "--root") {
       out.root = argv[++i];
     } else if (arg.startsWith("--root=")) {
@@ -294,6 +300,20 @@ function main(): void {
 
   let prior = "";
   if (existsSync(outputPath)) prior = readFileSync(outputPath, "utf-8");
+
+  // --check: verify freshness without writing. Exit 0 if the committed index
+  // already matches a fresh build; exit 1 (no write) if it would change.
+  if (args.check) {
+    if (prior === json) {
+      console.log(`refresh-index: up to date (${entries.length} pages)`);
+      return;
+    }
+    console.error(
+      `refresh-index: STALE — ${outputPath} differs from a fresh build ` +
+        `(run without --check to regenerate)`,
+    );
+    process.exit(1);
+  }
 
   if (prior === json) {
     console.log(`refresh-index: unchanged (${entries.length} pages)`);
