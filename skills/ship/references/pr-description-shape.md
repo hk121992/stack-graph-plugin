@@ -1,12 +1,12 @@
 ---
 kind: reference
 id: pr-description-shape
-title: Canon PR description shape
+title: Handbook PR description shape
 description: The canonical shape of a curator PR body — the proposal surface the operator decides from. The PR description IS the amendment proposal; there is no separate proposal file.
 status: v0.1.0 — 2026-05-31
 ---
 
-# Canon PR description shape
+# Handbook PR description shape
 
 The PR description **is** the amendment proposal — there is no separate proposal file. The
 operator decides from this surface in under a minute, so it is complete and terse. Target
@@ -30,7 +30,7 @@ under ~300 words.
 
 ## Title convention
 
-A conventional-commit title naming the edit class and the canon surface, e.g.
+A conventional-commit title naming the edit class and the handbook surface, e.g.
 `docs(<section>): …` for content, `spec(<section>): …` for a spec amendment, or a
 `chore(<surface>): …` for hygiene. The dispatcher composes the title; the body is this shape.
 

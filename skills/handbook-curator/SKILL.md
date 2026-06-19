@@ -1,38 +1,38 @@
 ---
 name: "handbook-curator"
-description: "Maintains the curated-canon home (handbook + decisions). Modes — sweep (scan for drift), raise (author a labelled PR for an amendment, with duplicate detection), queue (list open canon PRs + collisions), integrate (gated batch-merge of the queue with cross-PR consistency + link checks), refresh-index (regenerate the page index). The vendored, general curator; a harness points it at its own canon via overlay. Use when: A session surfaced canon drift, a broken cross-reference, stale terminology, or a missing canonical page; or a node proposed a durable finding that belongs in curated canon; or the operator wants to inspect/integrate the open-PR queue. NOT for context-loading — readers navigate the canon directly via its page index."
+description: "Maintains the handbook. Modes — sweep (scan for drift), raise (author a labelled PR for an amendment, with duplicate detection), queue (list open handbook PRs + collisions), integrate (gated batch-merge of the queue with cross-PR consistency + link checks), refresh-index (regenerate the page index). The vendored, general curator; a harness points it at its own handbook via overlay. Use when: A session surfaced handbook drift, a broken cross-reference, stale terminology, or a missing canonical page; or a node proposed a durable finding that belongs in the handbook; or the operator wants to inspect/integrate the open-PR queue. NOT for context-loading — readers navigate the handbook directly via its page index."
 ---
 
 
 # Handbook curator
 
-You maintain the **curated-canon home** — the handbook (spec / domain) and the decisions store.
-You are the operator-facing dispatcher for the canon-maintenance loop: the operator (or an agent
+You maintain the **handbook** — this product's canonical reference (spec / domain).
+You are the operator-facing dispatcher for the handbook-maintenance loop: the operator (or an agent
 on their behalf) invokes you with a mode, and you run that mode's branch below.
 
-You are the **vendored, general** curator. A harness configures you by **overlay** — the canon
+You are the **vendored, general** curator. A harness configures you by **overlay** — the handbook
 **repo** and the queue **label** are supplied to you, never hardcoded, and your `handbook`
-reference resolves (by overlay) to this product's canon root + page index. Navigate the canon
-through that reference. The same body serves the *factory loop* (canon = the factory repo) and a
-*harness loop* (canon = the product repo).
+reference resolves (by overlay) to this product's handbook root + page index. Navigate the handbook
+through that reference. The same body serves the *factory loop* (handbook = the factory repo) and a
+*harness loop* (handbook = the product repo).
 
-**You are not for context-loading.** Readers navigate the canon directly via its page index. If
+**You are not for context-loading.** Readers navigate the handbook directly via its page index. If
 asked to "read the handbook," redirect.
 
 ## The loop you serve
 
-Canon maintenance is the analogue of a sprint's `reconcile`(open) → `land`(gate): **`raise`**
+Handbook maintenance is the analogue of a sprint's `reconcile`(open) → `land`(gate): **`raise`**
 opens a labelled PR per change; the **queue** *is* the set of open labelled PRs; **`integrate`**
 is the gated batch-merge. It is also the **write path for proposed durable findings** — when a
-node (e.g. `explore`) proposes a finding that belongs in curated canon, it arrives here as a
+node (e.g. `explore`) proposes a finding that belongs in the handbook, it arrives here as a
 `raise` PR, waits in the queue, and lands at `integrate`. There is no other write path to the
-curated-canon home.
+handbook.
 
 ## Preflight (before any mutating mode)
 
 Confirm the handbook root is reachable; confirm PR tooling is authenticated (abort and surface
-the auth error otherwise); for `raise`, confirm the working tree is clean before branching; for
-`integrate`, confirm the working tree is clean AND no stale preview worktree or preview branches
+the auth error otherwise); for `integrate`, confirm the working tree is clean AND no stale preview
+worktree or preview branches
 survive a prior aborted run (loose per-PR refs make the next preview fetch fail) — remove
 leftovers before starting.
 
@@ -40,13 +40,13 @@ leftovers before starting.
 
 ### `sweep` — scan for drift (report only)
 
-Resolve the page set (the slugs a session touched, or the full canon). Invoke **drift-detector**
+Resolve the page set (the slugs a session touched, or the full handbook). Invoke **drift-detector**
 over that read-set with a task summary and any forbidden-vocabulary the overlay declares. Group
 the returned candidates by severity and page; report them to the operator. **No mutations** — to
 act on a finding, the operator runs `raise`. In a session-end context, honour the forcing rule:
 detected drift is *raised*, never silently continued past.
 
-### `raise` — author a labelled canon PR
+### `raise` — author a labelled handbook PR
 
 1. **Read your gates** — the `what-belongs` and `bundling-rules` references.
 2. **Capture the proposal** — which pages change, what changes on each, and the trigger.
@@ -57,7 +57,7 @@ detected drift is *raised*, never silently continued past.
 4. **Apply the gates.** Refuse inferable content; refuse unresolved content in a page body (it
    goes in the PR description); enforce `bundling-rules` — **never bundle a structural / index
    change with content edits**; split when edits span more than one operator-decision frame.
-5. **Branch + edit.** Branch off the canon's main line; apply the edits, citing existing content,
+5. **Branch + edit.** Branch off the handbook's main line; apply the edits, citing existing content,
    introducing nothing inferable.
 6. **Refresh the index** if any page's frontmatter changed (run `refresh-index` inline) and stage
    it in the same commit.
@@ -65,7 +65,7 @@ detected drift is *raised*, never silently continued past.
 8. **Open the PR** with the queue label; report the URL. The PR description *is* the proposal —
    no separate file.
 
-### `queue` — list the open canon PRs (read only)
+### `queue` — list the open handbook PRs (read only)
 
 Invoke **queue-checker** in `list` mode. Report queue size; one row per PR (number, title, author,
 age, files, URL); and a **collisions** block naming any page touched by more than one open PR
@@ -77,7 +77,7 @@ The gate that closes the loop `raise` opens — operator-cadence, in a **separat
 any per-change `raise`.
 
 1. **List the queue** (**queue-checker**, `list`). Empty queue → report and stop.
-2. **Build a merged preview**: a scratch worktree off the canon's main line, merging each PR
+2. **Build a merged preview**: a scratch worktree off the handbook's main line, merging each PR
    head oldest-first. A conflict *only in the generated index* is not real — take either side
    and continue. A PR conflicting in authored content is excluded and pre-flagged deferred,
    recording which earlier merge it conflicted against (it rejoins if that blocker is later
@@ -106,35 +106,35 @@ any per-change `raise`.
 
 ### `refresh-index` — regenerate the page index (idempotent)
 
-Run the canon's index generator over the handbook root. The generator is **no longer vendored in
+Run the handbook's index generator over the handbook root. The generator is **no longer vendored in
 the installed plugin** — RESTRUCTURE-PLAN D1 moved the renderer to the shared **mm-workspace**
-(workspace.middle-management.ai), and the canon index generator lives there now. It is
-**parameterised by the bound canon root**, so there is no per-harness reimplementation: it
+(workspace.middle-management.ai), and the handbook index generator lives there now. It is
+**parameterised by the bound handbook root**, so there is no per-harness reimplementation: it
 projects the page index
 deterministically from page frontmatter (one entry per `<NN>-<section>/README.md` → slug
 `<section>` and per `<NN>-<page>.md` → slug `<section>/<page>`; the `archive` section and any
 sub-directory depth are excluded; entries carry `slug, title, type, read-when, related` and are
-sorted by slug). Invoke it via overlay, pointing `--handbook-root` at the bound canon content
+sorted by slug). Invoke it via overlay, pointing `--handbook-root` at the bound handbook content
 root (the `handbook` reference's content dir, resolved via the `handbook-index` binding) — never
 a hardcoded path:
 
 ```
-bun run <mm-workspace-renderer>/build-handbook-index.ts --handbook-root <bound-canon-content-root>
+bun run <mm-workspace-renderer>/build-handbook-index.ts --handbook-root <bound-handbook-content-root>
 ```
 
 The concrete `<mm-workspace-renderer>` invocation path (and whether it needs its own binding) is
 pending the renderer relocation (RESTRUCTURE-PLAN D1) — the old
 `<plugin>/workspace/renderer/build-handbook-index.ts` path is broken post-D1.
 
-It writes `<canon-content-root>/index.json` in place; pass `--check` to verify freshness without
+It writes `<handbook-content-root>/index.json` in place; pass `--check` to verify freshness without
 writing (exit 1 on drift). If unchanged, say so and stop; if changed, report the changed slugs
 (or, when called from `raise`, surface only the count — the diff is in the PR).
 
 ## Hard constraints
 
-- Canon changes land via a **labelled PR**, never a direct push — with one exception: the
+- Handbook changes land via a **labelled PR**, never a direct push — with one exception: the
   regenerated page index `integrate` commits to the main line after a batch (a generated
-  artifact, not authored canon). Every `raise` PR carries the queue label — without it the PR
+  artifact, not authored handbook). Every `raise` PR carries the queue label — without it the PR
   drops out of the operator's triage.
 - The **PR description is the proposal**. Write no separate proposal file and no audit file — PRs
   and history are the durable record.

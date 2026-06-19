@@ -110,7 +110,7 @@ Choose the kind (AskUserQuestion): a **standard local reference** → `.claude/r
 (node-bound shared content; consumed via a `references` edge with `load: import|on-demand`); or a
 **local handbook-reference** → the harness's local-handbook root **if one is bound**. Handbook-
 reference: prompt for `type`/`section`/`read-when`/`related`, author concept anchors `{#tag}`
-(kebab-case, never numeric), and `extends: stack-graph:<id>` for entries touching vendored canon —
+(kebab-case, never numeric), and `extends: stack-graph:<id>` for entries touching vendored handbook —
 **slug-exists is hard-checked; anchor-adds-only is deferred to the integrate backstop**. **No local
 handbook bound ⇒ degrade to a standard local reference and tell the operator** why.
 

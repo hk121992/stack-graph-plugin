@@ -125,31 +125,31 @@ independently.
    binding — the committed prior-proposals surface `capture-learnings` reads for recurrence
    detection, D60; pass `null` if the binding is unset).
    It returns a structured proposals list — each learning classified by knowledge home
-   (recall / canon / node-amend), and carrying:
+   (recall / handbook / node-amend), and carrying:
    - `priority` — `high` / `medium` / `low`, **with an explicit rationale**.
    - `target_sprint` — which sprint should act on the proposal.
    - a one-sentence summary and the evidence that grounds it.
 
    `target_sprint` + `priority` are what let a proposal **close** rather than just surface —
    without them the learn-goal earns-keep (re-derivation → zero) cannot be met. The **owner**
-   is not set here: it is routed by home per D40 (recall → operator inline; canon →
+   is not set here: it is routed by home per D40 (recall → operator inline; handbook →
    handbook-curator `raise`; node-amend → operator at a node-amend session).
 2. **Present the proposals list.** Walk the operator through it — high-priority proposals
    first. For each:
    - **Recall proposals** (causal insights, decision rationale): confirm enactment → write
      to gbrain via `mcp__gbrain__store` inline. This is a light write; no PR needed.
-   - **Canon proposals** (methodology, earns-keep updates): note for the handbook-curator's
+   - **Handbook proposals** (methodology, earns-keep updates): note for the handbook-curator's
      `raise` flow (D38 write-path) — do not invoke the curator here; park the proposal.
    - **Node-amend proposals**: note for a future operator-reviewed node amendment.
 2.5. **Ratify in-sprint design divergences.** Surface implementation choices that **departed
-   from the spec or canon** and were **not** logged at decision time — for explicit operator
+   from the spec or handbook** and were **not** logged at decision time — for explicit operator
    sign-off. Present them as numbered calls, each naming the decision made and what it diverges
    from (the be-civic W33 §3 "judgment calls — operator ratification requested" format). A
    ratified divergence is logged through the `log-decision` invoke in step 3; this surfaces the
    divergence so it is signed off rather than buried.
 2.6. **Persist the proposals archive (D60).** You are the gate that writes the committed
    `learnings-archive` file (`learnings_archive_path`): write the **surviving-but-unenacted**
-   proposals (the parked canon / node-amend items + any deferred low-priority ones — *not* the
+   proposals (the parked handbook / node-amend items + any deferred low-priority ones — *not* the
    recall items already enacted to gbrain in step 2) to the archive, so next sprint's
    `capture-learnings` reads them to detect `recurring_unacted`. Reconcile against the prior
    archive: **carry forward** entries still open; **drop** entries now enacted; **drop or mark
@@ -234,7 +234,7 @@ tested and the forward view it implied, without a direct edge.
 | mode | primary output | written to |
 |---|---|---|
 | `measure` | metrics report + `trend_delta` + verdict schema (`verdict` / `outcome_link` / `evidence` / `metric_deltas`); the perf + quality trend reads (`benchmark.perf` slope, `health.quality` direction) | work-item record (`items/<id>.md`, authored evidence); trend reads surfaced to operator |
-| `learn` | proposals list (`priority`+rationale, `target_sprint`); ratified divergences; enacted recall writes; the updated `learnings-archive` (surviving-but-unenacted proposals, D60) | gbrain (recall writes, inline); the committed `learnings-archive` (gate write); divergences via `log-decision`; canon proposals parked for curator raise |
+| `learn` | proposals list (`priority`+rationale, `target_sprint`); ratified divergences; enacted recall writes; the updated `learnings-archive` (surviving-but-unenacted proposals, D60) | gbrain (recall writes, inline); the committed `learnings-archive` (gate write); divergences via `log-decision`; handbook proposals parked for curator raise |
 | `seed-next` | next-sprint candidate(s) raised as the next-sprint carrier; the shipped-outcome → strategy-hypothesis **confirm/kill** evidence + the **reprioritise** signal (the PM loop close, D38) | candidate raised for the front (`working-session`/`design`); confirm/kill + reprioritise evidence written to the work-item record + `docs/decisions.md` + gbrain recall (the shared homes the readers sweep — no curator edge) |
 | **terminal transition** | `frozen_metrics` baseline (the next sprint's `measure-outcomes` `baseline:`) | closed work-item record (`items/<id>.md`); recorder freeze, once at close |
 | **all modes** | stage-complete signal | projection advances `current_stage`; no carrier field written by this node |

@@ -9,8 +9,8 @@ status: v0.1.0 — 2026-06-10
 # Integrator checklist
 
 The merge-walk discipline for `integrate`. The dispatcher follows this once the triage view is
-on the table and the operator has resolved every contested item. The canon **repo** and queue
-**label** come from the overlay; "the index" is the canon's own page index and generator.
+on the table and the operator has resolved every contested item. The handbook **repo** and queue
+**label** come from the overlay; "the index" is the handbook's own page index and generator.
 
 ## Ordering
 
@@ -34,7 +34,7 @@ For each PR, in the confirmed order:
    answer, a vocabulary pick, a merge-order or override call — is posted to the PR as a comment
    before merging ("Integrate <date>: <resolution>"). PRs and history are the durable record —
    a decision that lives only in chat is lost.
-3. **Base-drift gate.** Head-pinning protects the PR head, not the base: if the canon's main
+3. **Base-drift gate.** Head-pinning protects the PR head, not the base: if the handbook's main
    line advanced past the recorded preview base for any reason *other than this walk's own
    merges*, the batch would land on a page set the preview never checked. Refresh the remote
    refs fully (a bare single-branch fetch can leave the compared ref stale), then verify the
@@ -53,7 +53,7 @@ For each PR, in the confirmed order:
    preview was built from (recorded at preview time; with `gh`, `--match-head-commit <sha>`),
    deleting the branch. If the PR moved since validation the merge fails cleanly: re-validate
    that PR (or rebuild the preview) rather than merging unvalidated content. Squash is the
-   default — one canon change per PR → one commit; the operator may ask for a merge commit on
+   default — one handbook change per PR → one commit; the operator may ask for a merge commit on
    a PR whose individual commits matter.
 
 ## After the walk
@@ -65,11 +65,11 @@ worktree, so return first.
    remote's — if it is ahead, stop before step 3: the sanctioned direct push covers the
    generated index only, and pushing would smuggle unpushed commits past the PR-only
    constraint.
-2. Run the canon's index generator. Each `raise` PR refreshed the index against *pre-merge*
+2. Run the handbook's index generator. Each `raise` PR refreshed the index against *pre-merge*
    main, so a batch can leave it stale even when every PR was individually clean.
 3. If the index changed, stage **only the index**, commit to main
-   (`chore(<canon>): refresh index post-integrate`) and push. This is the one sanctioned
-   direct push — the index is a generated artifact, not authored canon. An unpushed index
+   (`chore(<handbook>): refresh index post-integrate`) and push. This is the one sanctioned
+   direct push — the index is a generated artifact, not authored handbook. An unpushed index
    commit defeats the point: future runs read the remote.
 4. Remove the merged-preview worktree and **all** preview branches — the preview branch and
    every per-PR ref (a stale per-PR ref makes the next run's fetch of an amended PR fail

@@ -1,7 +1,7 @@
 ---
 kind: reference
 id: bundling-rules
-title: Canon PR bundling rules
+title: Handbook PR bundling rules
 description: When the curator bundles several edits into one PR vs splits them, and the bundle-refusal cases. Lean toward one-bigger-PR, but never mix a structural change with content edits.
 status: v0.1.0 — 2026-05-31
 ---

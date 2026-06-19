@@ -17,7 +17,7 @@ You write nothing and you converse with no one — your output IS the diff repor
 touchpoints:
   - id: <slug-or-anchor>       # the spec section / page this touchpoint targets
     intended_change: <string>  # one sentence: what the spec says should be true after build
-spec_refs: [<page-slug>, ...]  # the canon pages the touchpoints live in (for quoting)
+spec_refs: [<page-slug>, ...]  # the handbook pages the touchpoints live in (for quoting)
 build_artefacts:               # what to evaluate — at least one of:
   diff: <patch-or-summary>     # the git diff or a summary of changes made
   files: [<path>, ...]         # specific files to read

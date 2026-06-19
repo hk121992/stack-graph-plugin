@@ -1637,7 +1637,7 @@
     },
     "what-belongs": {
       "kind": "reference",
-      "title": "What belongs in the canon — the gate principles",
+      "title": "What belongs in the handbook — the gate principles",
       "status": "v0.1.0 — 2026-05-31",
       "consumed_by": [
         "drift-detector",
