@@ -3,8 +3,9 @@ kind: reference
 id: bindings-contract
 title: Bindings contract — the keys a harness supplies, and the surface template
 description: The factory contract the plugin ships so a consuming workspace can instantiate a harness — the complete set of binding keys the vendored graph may require, the bindings.yaml file format, the org-root CLAUDE.md ambient-surface template, and the dashboard + improvements surface-structure templates harness-init scaffolds. The plugin carries this contract; the harness supplies the values. No product data.
-status: v0.8.0 — 2026-06-18
+status: v0.9.0 — 2026-06-19
 changelog:
+  - v0.9.0 (2026-06-19): analytics lifecycle review (wi-analytics-lifecycle-review IU-A2b) — §6 extended with the `harness_id` attribution-key field + the per-harness-local-derive / central-merge seam (the locality-honouring fleet model): each harness derives its own log LOCALLY; only the already-sanitised per-harness rows combine, in a central merge keyed on `harness_id` (no loss / no double-count). No new binding key — `harness_id` rides the META envelope the analyzer already parses (the earns-a-binding test: no node resolves it). The cron-path home named in §6 is the shared workspace's `workspace/renderer/analyzer/`, matching the harness-init runbook correction.
   - v0.8.0 (2026-06-18): renderer-vestige removal (RESTRUCTURE-PLAN D1) — local-portal rendering retired; the renderer moved out of the installed plugin to the shared mm-workspace. Removed the `renderer` key from §2 (the vendored workspace-render overlay no longer ships in the plugin); dropped "the renderer" from the §intro surfaces list; §6 `SG_PRICING` consumer retitled "renderer Cost block" → "analytics Cost block". **Key removed** — consumers drop `renderer` from `bindings.yaml` on the contract-drift re-bind (harness-update §Contract-drift). The analyzer/event-log substrate (`workspace/renderer/analyzer/…`, §6) is owned by `wi-analytics-lifecycle-review` and is untouched here.
   - v0.7.1 (2026-06-18): dead-reference scrub (curator removal, wi-unified-front-workflow IU-7) — §3 surface-structure template: the two "content is added later via [the removed curator]" / "added by [the removed curator], not scaffolded" notes now read "added later via the front's `raise`" / "added via the front's `raise`, not scaffolded". No key change; the surface shape is unchanged.
   - v0.7.0 (2026-06-12): A6c unified transcript-analytics (#28, supersedes #21) — §6 retooled to the transcript analyzer: add `SG_TRANSCRIPT_ROOT` (analyzer input env, not a binding key); remove the hook-activation env (`SG_TOKEN_EVENT_KIND`) and the per-scope dispatch env (`SG_IU_ID`/`SG_SCOPE_ID`/`SG_CARRIER_*`/`SG_ARC`); repurpose `event-log`/`SG_EVENT_LOG` to the analyzer's **output** and migrate its filename to `derived/analyzer-events.jsonl`; replace the live-hook probe with the analyzer dry-run probe + the scheduled-task install runbook
@@ -163,3 +164,26 @@ the job via the runtime's `mcp__scheduled-tasks__*` surface where the harness sc
 build-time choice). Default cadence: twice daily. `harness-init validate` **confirms (read-only)**
 the task is registered and runs an **analyzer dry-run probe** (replacing the old live-hook probe):
 analyze a tiny fixture transcript and assert a derived row lands in the event log (see that node).
+
+### `harness_id` in the seam — the per-harness-local-derive / central-merge model
+
+Analytics honour the **Locality invariant by construction at the fleet level too**: each harness
+**derives its own event log locally** — the analyzer runs only where that harness's transcripts live,
+and the raw transcripts + the derived `.stack-graph/derived/…` log **never leave that machine**. What
+**can** combine across a fleet is the **already-derived, already-sanitised** per-harness rows, joined
+by a **central merge** (`workspace/renderer/analyzer/merge.ts`) that combines them with **no loss and
+no double-count**. There is no central re-derivation and no raw-transcript collection — the merge sees
+only sanitised rows, never bytes.
+
+The join key carries **`harness_id`** — the harness a dispatch ran under, parsed from the dispatch-
+prompt **META envelope** (`META: … harness=<id>`) the analyzer already reads. It is part of the
+**attribution key**, so two **same-named carriers under different harnesses are distinct identities
+across the fleet** (the same-name-collision guard): the central merge keys on the row's full identity
+*including* `harness_id`, so those two rows never collapse, while a row that appears identically in two
+inputs collapses to one. An **absent** `harness=` field degrades to **`null`** — a clearly-local /
+unknown sentinel that can never equal another harness's real id, so an uncaptured transcript is never
+silently mis-attributed (the load-bearing cross-fleet honest-degradation property). `harness_id` is
+**NOT a binding key** — no graph node resolves it (the earns-a-binding test); it rides the META
+envelope the analyzer parses, the same way `carrier`/`kind`/`arc`/`iu` do. The merged output is
+**order-independent and byte-stable** (the canonical analyzer ordering), so a fleet roll-up is the same
+regardless of the order the per-harness logs are supplied.

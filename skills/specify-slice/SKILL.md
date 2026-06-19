@@ -112,8 +112,9 @@ re-deciding anything already settled in Decisions:
   tests: [<the tests that prove that path>] }`. This is the vertical-slice proof — the structured
   home for "demoable/verifiable on its own."
 
-You author **content only**: `improves` is already set (triage); `lifecycle_state` and
-`gate_decisions` are not yours.
+You author **content only**: `improves` is already fixed by triage. You write neither
+`lifecycle_state` nor `gate_decisions` — those are written only by `record-gate` (the single
+mechanical writer), never here.
 
 ## Phase 3 — Enforce the invariants (the gate of this stage)
 

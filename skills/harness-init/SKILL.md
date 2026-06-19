@@ -83,11 +83,17 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    prompt: follow the handoff-prompt convention (the stack-graph plugin's `handoff-prompt-convention`
    reference, shipped with harness-init) — delta only, policy by pointer not by copy."* Name the
    convention and where it ships rather than a brittle filesystem path (the reference travels inside
-   the vendored plugin, not at a bound surface). Keep the always-on cost to that single line.
+   the vendored plugin, not at a bound surface). **Keep the always-on cost to the closed minimal
+   floor:** the ambient pointers above plus a one-line pointer to the `always-on-floor` surface (the
+   closed, enumerated, byte-budgeted floor — navigation + substrate-consult-first + safety + the
+   one-line `<sg-*>` vocab pointer; shipped with the plugin). Do **not** inline operating instructions
+   into `CLAUDE.md` — the fat always-on operating-instructions reference is retired (M-1); the floor is
+   the standing surface and the live per-turn state is loaded just-in-time by the `jit-preamble`.
    Structure only; **idempotent** — never clobber an existing authored `CLAUDE.md`; if one exists,
    confirm it carries the ambient pointers and warn on anything missing rather than overwriting. (The
-   per-session runtime self-check is a harness hook / ambient rule, **not** your job — you scaffold
-   the file; you do not embed a session-start procedure.)
+   per-session runtime state load is the **`jit-preamble`** — the deterministic JIT preamble loads the
+   live carrier state from the derived projection and emits it for turn 1; you scaffold the file and
+   name the floor + preamble surfaces, you do not hand-author a session-start procedure into the body.)
 5. **Scaffold the surface skeleton** under `surface-root` per the template: `strategy.md` (vision ·
    guiding policy · JTBD · open questions — empty headings), `objectives.md` (per `okr-schema` —
    empty objective/north-star headings), `items/` with an **empty** `manifest.json` (`[]`),
@@ -115,10 +121,12 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    violates harness-local-writes-only. Do **one** of:
    1. **(default) Emit the exact command + a short runbook** for the operator to install — the
       analyze→publish job run from the org root with `SG_TRANSCRIPT_ROOT` in scope, default cadence
-      twice daily (e.g. `0 6,18 * * * cd <org-root> && bun run <plugin>/workspace/renderer/analyzer/analyze.ts && bun run <plugin>/workspace/renderer/publish-projection.ts`).
-      TODO(wi-analytics-lifecycle-review): the `<plugin>/workspace/renderer/analyzer/...` path is
-      broken post-D1 (the renderer/analyzer moved out of the installed plugin to mm-workspace); the
-      analyzer's new home is owned by `wi-analytics-lifecycle-review` — do not fix the path here.
+      twice daily (e.g. `0 6,18 * * * cd <org-root> && bun run <analyzer-home>/analyze.ts && bun run <analyzer-home>/publish-projection.ts`).
+      The analyzer is **NOT** in the installed plugin (it moved out post-D1, RESTRUCTURE-PLAN); its
+      real home is the **shared workspace** the org root carries — `<analyzer-home>` resolves to
+      `workspace/renderer/analyzer/` (analyze.ts) and `workspace/renderer/` (publish-projection.ts)
+      under the org root, the same locality `bindings-contract` §6 names. Emit the path against that
+      home, not `<plugin>/…`.
       Print it for the operator to run as the privileged step (the established provisioning-runbook
       pattern — `harness-init` scaffolds; the operator runs the cron step). **You write no crontab.**
    2. **OR**, where the runtime exposes a scheduling surface, register the job via

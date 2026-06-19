@@ -141,8 +141,8 @@ route you chose and why.
 
 You write the stub frontmatter, the **definition body** (Context + Decisions), and the manifest row.
 You do not advance `lifecycle_state` past `proposed`, you do not write any content field, and you do
-not record a gate decision — the build-enter event sets `in-delivery` and the single `land` gate
-writes the terminal state.
+not record a gate decision — the build-enter event sets `in-delivery`, and the single `land` gate's
+terminal state is written by `record-gate` (the single mechanical writer), never here.
 
 ## The cold-handoff test (the completeness invariant)
 

@@ -18,14 +18,16 @@ run the test suite yourself, you do not trigger the pipeline yourself — ship a
 their phases. Your job is to hold the gates, drive the sequence, and make every decision point
 visible to the operator.
 
-## You do not write the carrier
+## You do not write the carrier directly — you invoke the single writer
 
 Read the carrier for context: its `lifecycle_state`, the `commit-to-land`
 gate decision already recorded, the prior `transition_history`. You **do not write any carrier
-field** (D44). The gates advance `lifecycle_state` and append to `gate_decisions[]` — that is
-the gate mechanism's job, not yours. Your completion (and the live-confirmed gate decision) is
-what the projection picks up to advance `current_stage` from `land` and to record `shipped →
-live` in the carrier.
+field directly** (D44). When a gate you hold clears, the `lifecycle_state` advance and the
+`gate_decisions[]` append happen **via `record-gate`** — the single mechanical writer you
+**invoke** with the settled decision (you decide the go/no-go; `record-gate` enacts the record,
+under its operator-attestation precondition). You never edit those two fields yourself. Your
+completion (and the live-confirmed gate decision) is what the projection picks up to advance
+`current_stage` from `land` and to record `shipped → live` in the carrier.
 
 Consume the carrier through the **carrier-interface** (`graph/_refs/carrier-interface.md`).
 You are shared across two arcs, so the carrier is **either** a work-item (`carrier_kind:
@@ -39,14 +41,18 @@ work-item fields when `carrier_kind` is `standalone-iu`.
 When the carrier is a standalone IU (`carrier_kind: standalone-iu`, `arc: incremental`) there
 is no upstream `reconcile`/`commit-to-land` from a sprint — the incremental loop has no
 reconcile stage. So you **fire your own single `commit-to-land` gate directly**: the carrier
-holds no recorded gate yet, so surface it (with the readiness surface above). This one gate
-writes the terminal `lifecycle_state` (`landed | parked | dropped`) and appends the
-`gate_decisions` entry on the standalone IU — the carrier-lite is its own carrier.
+holds no recorded gate yet, so surface it (with the readiness surface above). On the settled
+decision, **invoke `record-gate`** to enact the terminal record — it is the single mechanical
+writer that advances the terminal `lifecycle_state` (`landed | parked | dropped`) and appends the
+`gate_decisions` entry on the standalone IU. You do not write those fields directly; the
+carrier-lite is its own carrier, and `record-gate` is its only writer.
 
 **The dial governs how the gate fires.** A standalone IU has no work-item `tier`, so `slice_type`
 + the harness maturity drive it: for an **AFK** slice in a mature harness, the maturity dial lets
-the gate auto-record on green (cheap, still logged); a **HITL** slice raises a hard operator gate.
-The gate is always in the model — the record always shows a deliberate land decision.
+the gate auto-record on green (cheap, still logged) — `record-gate` enacts it as an AFK-classed
+gate, the one record an unattended context may write; a **HITL** slice raises a hard operator gate.
+The gate is always in the model — the record (written by `record-gate`) always shows a deliberate
+land decision.
 
 Then sequence the sub-arc as usual: invoke **ship** (tests → coverage → PR) then **deploy** per
 your modes. On a **non-deploying harness**, run `staging-only` / PR-and-merge — the item reaches

@@ -30,7 +30,9 @@ The carrier (`work-item-schema`) splits by **who writes each field**. Content au
   derived, never authored (`carrier-interface`, `work-item-schema`).
 - **Never advance `lifecycle_state`** — it advances **only at a gate** (operator go/no-go). Render an
   item under its current zone; never move it.
-- **Never decide or append a `gate_decision`** — those are operator-appended at each gate.
+- **Never decide or append a `gate_decision` here** — `record-gate` (the single mechanical writer) is
+  the sole appender; the decision is the operator's at each gate, the append is `record-gate`'s, never
+  content's.
 
 A request to advance a stage, pass a gate, or mark an item shipped/live is **surfaced as an
 operator/gate action**, not performed. The boundary is **structural** (`carrier-interface`):
@@ -71,8 +73,8 @@ disposition). The removal carries operator-accepted gaps, recorded here as the d
   until the upstream stand-up subsumes it. **Reversal cost:** re-instating either means **re-vendoring
   a removed *general* skill across every consuming harness** if the stand-up slips — the removal is
   cheap to make but expensive to undo, so it is taken deliberately, not reflexively.
-- **Write-boundary guard (SEC-1 — settled).** `lifecycle_state` and `gate_decisions` are written by a
-  **single mechanical writer, `record-gate`** (`work-item-schema`, `carrier-interface`) — no content
+- **Write-boundary guard (SEC-1).** `lifecycle_state` and `gate_decisions` are written by the
+  **single mechanical writer `record-gate`** (`work-item-schema`, `carrier-interface`) — no content
   edit and no other node touches either field. The residual is closed by a **`vendor:check` single-writer
   guard**, not by convention alone: `vendor:check` **rejects** (a) any edit of `lifecycle_state` or
   `gate_decisions` that does not come from `record-gate`, **and** (b) any `gate_decisions` entry on a

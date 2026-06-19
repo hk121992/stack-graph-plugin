@@ -1,15 +1,15 @@
 {
-  "generated": "2026-06-19T10:30:53Z",
-  "node_count": 47,
-  "reference_count": 32,
+  "generated": "2026-06-19T14:34:48Z",
+  "node_count": 49,
+  "reference_count": 33,
   "handbook_reference_count": 0,
-  "edge_count": 210,
+  "edge_count": 218,
   "nodes": {
     "architecture-review": {
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Architecture review",
-      "status": "v0.1.0 — 2026-06-10",
+      "status": "v0.1.0 \u2014 2026-06-10",
       "edges": {
         "invokes": [
           {
@@ -41,7 +41,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Benchmark",
-      "status": "v0.1.0 — 2026-06-05",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "edges": {
         "references": [
           {
@@ -60,7 +60,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Build",
-      "status": "v0.5.0 — 2026-06-10",
+      "status": "v0.5.0 \u2014 2026-06-10",
       "edges": {
         "invokes": [
           {
@@ -100,6 +100,11 @@
             "load": "on-demand"
           }
         ],
+        "precedes": [
+          {
+            "id": "review"
+          }
+        ],
         "can-follow": [
           {
             "id": "review"
@@ -108,11 +113,6 @@
             "id": "reconcile",
             "arc": "dev-sprint"
           }
-        ],
-        "precedes": [
-          {
-            "id": "review"
-          }
         ]
       }
     },
@@ -120,7 +120,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Canary",
-      "status": "v0.1.0 — 2026-06-05",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "edges": {
         "references": [
           {
@@ -135,7 +135,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Capture learnings",
-      "status": "v0.2.0 — 2026-06-04",
+      "status": "v0.2.0 \u2014 2026-06-04",
       "edges": {
         "references": [
           {
@@ -154,14 +154,14 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Consistency checker",
-      "status": "v0.1.0 — 2026-06-10",
+      "status": "v0.1.0 \u2014 2026-06-10",
       "edges": {}
     },
     "debrief": {
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Debrief",
-      "status": "v0.4.0 — 2026-06-05",
+      "status": "v0.4.0 \u2014 2026-06-05",
       "edges": {
         "invokes": [
           {
@@ -193,7 +193,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Debug",
-      "status": "v0.1.0 — 2026-06-05",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "edges": {
         "invokes": [
           {
@@ -212,7 +212,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Deploy",
-      "status": "v0.2.0 — 2026-06-04",
+      "status": "v0.2.0 \u2014 2026-06-04",
       "edges": {
         "references": [
           {
@@ -226,7 +226,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Design",
-      "status": "v0.3.0 — 2026-06-05",
+      "status": "v0.3.0 \u2014 2026-06-05",
       "edges": {
         "invokes": [
           {
@@ -282,18 +282,18 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Design implement",
-      "status": "v0.1.0 — 2026-06-05",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "edges": {
-        "references": [
-          {
-            "id": "ux-principles",
-            "load": "on-demand"
-          }
-        ],
         "composes-into": [
           {
             "id": "dev-sprint",
             "stage": "build"
+          }
+        ],
+        "references": [
+          {
+            "id": "ux-principles",
+            "load": "on-demand"
           }
         ],
         "can-follow": [
@@ -307,7 +307,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Design review",
-      "status": "v0.1.0 — 2026-06-05",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "edges": {
         "composes-into": [
           {
@@ -327,18 +327,18 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Design shotgun",
-      "status": "v0.1.0 — 2026-06-05",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "edges": {
-        "references": [
-          {
-            "id": "ux-principles",
-            "load": "on-demand"
-          }
-        ],
         "composes-into": [
           {
             "id": "dev-sprint",
             "stage": "design"
+          }
+        ],
+        "references": [
+          {
+            "id": "ux-principles",
+            "load": "on-demand"
           }
         ],
         "precedes": [
@@ -352,7 +352,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Drift detector",
-      "status": "v0.1.0 — 2026-05-31",
+      "status": "v0.1.0 \u2014 2026-05-31",
       "edges": {
         "composes-into": [
           {
@@ -377,7 +377,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Explore (context-gathering agent)",
-      "status": "v0.4.0 — 2026-06-05",
+      "status": "v0.4.0 \u2014 2026-06-05",
       "edges": {
         "references": [
           {
@@ -401,7 +401,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Handbook curator",
-      "status": "v0.2.0 — 2026-06-10",
+      "status": "v0.2.0 \u2014 2026-06-10",
       "edges": {
         "invokes": [
           {
@@ -449,7 +449,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Harness init",
-      "status": "v0.5.0 — 2026-06-12",
+      "status": "v0.5.0 \u2014 2026-06-12",
       "edges": {
         "references": [
           {
@@ -475,7 +475,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Harness update",
-      "status": "v0.1.0 — 2026-06-12",
+      "status": "v0.1.0 \u2014 2026-06-12",
       "edges": {
         "references": [
           {
@@ -489,7 +489,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Health",
-      "status": "v0.1.0 — 2026-06-05",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "edges": {
         "references": [
           {
@@ -508,16 +508,38 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Investigate probe",
-      "status": "v0.1.0 — 2026-06-05",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "edges": {
         "references": []
+      }
+    },
+    "jit-preamble": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "title": "JIT preamble \u2014 the deterministic per-turn state loader",
+      "status": "v0.1.0 \u2014 2026-06-19",
+      "edges": {
+        "references": [
+          {
+            "id": "always-on-floor",
+            "load": "on-demand"
+          },
+          {
+            "id": "bindings-contract",
+            "load": "on-demand"
+          },
+          {
+            "id": "carrier-interface",
+            "load": "on-demand"
+          }
+        ]
       }
     },
     "land": {
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Land",
-      "status": "v0.3.0 — 2026-06-05",
+      "status": "v0.3.0 \u2014 2026-06-05",
       "edges": {
         "invokes": [
           {
@@ -528,6 +550,9 @@
           },
           {
             "id": "canary"
+          },
+          {
+            "id": "record-gate"
           }
         ],
         "composes-into": [
@@ -558,7 +583,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Correctness lens",
-      "status": "v0.1.0 — 2026-05-30",
+      "status": "v0.1.0 \u2014 2026-05-30",
       "edges": {
         "composes-into": [
           {
@@ -580,7 +605,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Maintainability lens",
-      "status": "v0.1.0 — 2026-05-30",
+      "status": "v0.1.0 \u2014 2026-05-30",
       "edges": {
         "composes-into": [
           {
@@ -608,7 +633,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Security lens",
-      "status": "v0.1.0 — 2026-05-30",
+      "status": "v0.1.0 \u2014 2026-05-30",
       "edges": {
         "composes-into": [
           {
@@ -630,7 +655,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Tests lens",
-      "status": "v0.1.0 — 2026-05-30",
+      "status": "v0.1.0 \u2014 2026-05-30",
       "edges": {
         "composes-into": [
           {
@@ -658,14 +683,14 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Link validator",
-      "status": "v0.1.0 — 2026-06-10",
+      "status": "v0.1.0 \u2014 2026-06-10",
       "edges": {}
     },
     "local-graph-maintainer": {
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Local graph maintainer",
-      "status": "v0.1.0 — 2026-06-14",
+      "status": "v0.1.0 \u2014 2026-06-14",
       "edges": {
         "references": [
           {
@@ -679,7 +704,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Log decision",
-      "status": "v0.2.0 — 2026-06-04",
+      "status": "v0.2.0 \u2014 2026-06-04",
       "edges": {
         "references": [
           {
@@ -693,7 +718,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Loop runner",
-      "status": "v0.3.0 — 2026-06-10",
+      "status": "v0.3.0 \u2014 2026-06-10",
       "edges": {
         "invokes": [
           {
@@ -707,6 +732,9 @@
           },
           {
             "id": "land"
+          },
+          {
+            "id": "record-gate"
           }
         ],
         "references": [
@@ -737,14 +765,14 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Measure outcomes",
-      "status": "v0.2.0 — 2026-06-10",
+      "status": "v0.2.0 \u2014 2026-06-10",
       "edges": {}
     },
     "optimise": {
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Optimise",
-      "status": "v0.1.0 — 2026-06-05",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "edges": {
         "invokes": [
           {
@@ -761,7 +789,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Plan",
-      "status": "v0.2.0 — 2026-06-05",
+      "status": "v0.2.0 \u2014 2026-06-05",
       "edges": {
         "invokes": [
           {
@@ -796,12 +824,12 @@
             "load": "import"
           }
         ],
-        "can-follow": [
+        "precedes": [
           {
             "id": "build"
           }
         ],
-        "precedes": [
+        "can-follow": [
           {
             "id": "build"
           }
@@ -812,7 +840,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "PR author",
-      "status": "v0.1.0 — 2026-05-31",
+      "status": "v0.1.0 \u2014 2026-05-31",
       "edges": {
         "composes-into": [
           {
@@ -840,7 +868,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Product lens",
-      "status": "v0.2.0 — 2026-06-04",
+      "status": "v0.2.0 \u2014 2026-06-04",
       "edges": {
         "composes-into": [
           {
@@ -878,7 +906,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "QA",
-      "status": "v0.1.0 — 2026-06-05",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "edges": {
         "composes-into": [
           {
@@ -898,14 +926,14 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Queue checker",
-      "status": "v0.1.0 — 2026-05-31",
+      "status": "v0.1.0 \u2014 2026-05-31",
       "edges": {}
     },
     "reconcile": {
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Reconcile",
-      "status": "v0.2.0 — 2026-06-04",
+      "status": "v0.2.0 \u2014 2026-06-04",
       "edges": {
         "invokes": [
           {
@@ -935,14 +963,36 @@
             "load": "import"
           }
         ],
-        "can-follow": [
+        "precedes": [
           {
             "id": "land"
           }
         ],
-        "precedes": [
+        "can-follow": [
           {
             "id": "land"
+          }
+        ]
+      }
+    },
+    "record-gate": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "title": "Record gate",
+      "status": "v0.1.0 \u2014 2026-06-19",
+      "edges": {
+        "references": [
+          {
+            "id": "work-item-schema",
+            "load": "import"
+          },
+          {
+            "id": "carrier-interface",
+            "load": "on-demand"
+          },
+          {
+            "id": "product-dashboard-conventions",
+            "load": "on-demand"
           }
         ]
       }
@@ -951,7 +1001,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Review",
-      "status": "v0.2.0 — 2026-06-04",
+      "status": "v0.2.0 \u2014 2026-06-04",
       "edges": {
         "invokes": [
           {
@@ -1025,7 +1075,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Ship",
-      "status": "v0.3.0 — 2026-06-04",
+      "status": "v0.3.0 \u2014 2026-06-04",
       "edges": {
         "references": [
           {
@@ -1043,7 +1093,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Simulate users",
-      "status": "v0.2.0 — 2026-06-05",
+      "status": "v0.2.0 \u2014 2026-06-05",
       "edges": {
         "composes-into": [
           {
@@ -1077,7 +1127,7 @@
       "primitive": "agent",
       "mode": "autonomous",
       "title": "Spec-diff",
-      "status": "v0.2.0 — 2026-06-04",
+      "status": "v0.2.0 \u2014 2026-06-04",
       "edges": {
         "references": [
           {
@@ -1091,7 +1141,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Specify",
-      "status": "v0.1.0 — 2026-06-01",
+      "status": "v0.1.0 \u2014 2026-06-01",
       "edges": {
         "invokes": [
           {
@@ -1125,7 +1175,7 @@
       "primitive": "skill",
       "mode": "collaborative          # hand-run character; the body also renders an `unattended` mode",
       "title": "Specify slice",
-      "status": "v0.2.0 — 2026-06-10",
+      "status": "v0.2.0 \u2014 2026-06-10",
       "edges": {
         "invokes": [
           {
@@ -1156,14 +1206,14 @@
             "load": "on-demand"
           }
         ],
-        "can-follow": [
-          {
-            "id": "triage"
-          }
-        ],
         "precedes": [
           {
             "id": "build"
+          }
+        ],
+        "can-follow": [
+          {
+            "id": "triage"
           }
         ],
         "escalates": [
@@ -1177,7 +1227,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Strategy curator",
-      "status": "v0.2.0 — 2026-06-05",
+      "status": "v0.2.0 \u2014 2026-06-05",
       "edges": {
         "invokes": [
           {
@@ -1223,7 +1273,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Triage",
-      "status": "v0.2.0 — 2026-06-10",
+      "status": "v0.2.0 \u2014 2026-06-10",
       "edges": {
         "composes-into": [
           {
@@ -1265,7 +1315,7 @@
       "primitive": "skill",
       "mode": "collaborative",
       "title": "Verify",
-      "status": "v0.1.0 — 2026-06-05",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "edges": {
         "invokes": [
           {
@@ -1305,8 +1355,8 @@
     "working-session": {
       "primitive": "skill",
       "mode": "collaborative",
-      "title": "Working session — the adaptive, goal-oriented front node",
-      "status": "v0.1.0 — 2026-06-18",
+      "title": "Working session \u2014 the adaptive, goal-oriented front node",
+      "status": "v0.1.0 \u2014 2026-06-18",
       "edges": {
         "invokes": [
           {
@@ -1362,8 +1412,8 @@
   "references": {
     "IU-schema": {
       "kind": "reference",
-      "title": "Implementation-Unit schema — the plan↔build field contract (two shapes)",
-      "status": "v0.8.0 — 2026-06-16",
+      "title": "Implementation-Unit schema \u2014 the plan\u2194build field contract (two shapes)",
+      "status": "v0.8.0 \u2014 2026-06-16",
       "consumed_by": [
         "build",
         "loop-runner",
@@ -1372,10 +1422,18 @@
         "triage"
       ]
     },
+    "always-on-floor": {
+      "kind": "reference",
+      "title": "Always-on minimal floor \u2014 the closed, byte-budgeted per-session surface",
+      "status": "v0.1.0 \u2014 2026-06-19",
+      "consumed_by": [
+        "jit-preamble"
+      ]
+    },
     "analytics-vocabulary": {
       "kind": "reference",
-      "title": "Analytics vocabulary — the closed `<sg-*>` tag family the analyzer reads",
-      "status": "v0.2.0 — 2026-06-18",
+      "title": "Analytics vocabulary \u2014 the closed `<sg-*>` tag family the analyzer reads",
+      "status": "v0.2.0 \u2014 2026-06-18",
       "consumed_by": [
         "benchmark",
         "health",
@@ -1385,8 +1443,8 @@
     },
     "architecture-doctrine": {
       "kind": "reference",
-      "title": "Architecture doctrine — deep modules, seams, dependency categories",
-      "status": "v0.1.0 — 2026-06-10",
+      "title": "Architecture doctrine \u2014 deep modules, seams, dependency categories",
+      "status": "v0.1.0 \u2014 2026-06-10",
       "consumed_by": [
         "architecture-review",
         "lens-maintainability",
@@ -1395,8 +1453,8 @@
     },
     "axis-entry-schema": {
       "kind": "reference",
-      "title": "Axis entry — schema (the zone-matrix lens)",
-      "status": "v0.1.0 — 2026-06-05",
+      "title": "Axis entry \u2014 schema (the zone-matrix lens)",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "consumed_by": [
         "explore",
         "strategy-curator"
@@ -1404,19 +1462,20 @@
     },
     "bindings-contract": {
       "kind": "reference",
-      "title": "Bindings contract — the keys a harness supplies, and the surface template",
-      "status": "v0.8.0 — 2026-06-18",
+      "title": "Bindings contract \u2014 the keys a harness supplies, and the surface template",
+      "status": "v0.8.0 \u2014 2026-06-18",
       "consumed_by": [
         "harness-init",
         "harness-update",
+        "jit-preamble",
         "loop-runner",
         "triage"
       ]
     },
     "bmc-schema": {
       "kind": "reference",
-      "title": "Business Model Canvas — schema",
-      "status": "v0.1.0 — 2026-06-01",
+      "title": "Business Model Canvas \u2014 schema",
+      "status": "v0.1.0 \u2014 2026-06-01",
       "consumed_by": [
         "strategy-curator"
       ]
@@ -1424,7 +1483,7 @@
     "bundling-rules": {
       "kind": "reference",
       "title": "Canon PR bundling rules",
-      "status": "v0.1.0 — 2026-05-31",
+      "status": "v0.1.0 \u2014 2026-05-31",
       "consumed_by": [
         "handbook-curator",
         "strategy-curator"
@@ -1432,12 +1491,14 @@
     },
     "carrier-interface": {
       "kind": "reference",
-      "title": "Carrier interface — the field-set a reused node may assume about its carrier",
-      "status": "v0.3.0 — 2026-06-18",
+      "title": "Carrier interface \u2014 the field-set a reused node may assume about its carrier",
+      "status": "v0.3.0 \u2014 2026-06-18",
       "consumed_by": [
         "build",
+        "jit-preamble",
         "land",
         "loop-runner",
+        "record-gate",
         "review",
         "ship",
         "specify-slice"
@@ -1445,8 +1506,8 @@
     },
     "confidence-anchors": {
       "kind": "reference",
-      "title": "Finding contract — confidence anchors",
-      "status": "v0.1.0 — 2026-05-30",
+      "title": "Finding contract \u2014 confidence anchors",
+      "status": "v0.1.0 \u2014 2026-05-30",
       "consumed_by": [
         "design",
         "plan",
@@ -1456,8 +1517,8 @@
     },
     "decisions-store": {
       "kind": "reference",
-      "title": "Decisions store — the durable conclusion-layer contract",
-      "status": "v0.2.0 — 2026-06-04",
+      "title": "Decisions store \u2014 the durable conclusion-layer contract",
+      "status": "v0.2.0 \u2014 2026-06-04",
       "consumed_by": [
         "capture-learnings",
         "log-decision",
@@ -1466,8 +1527,8 @@
     },
     "deploy-config": {
       "kind": "reference",
-      "title": "Deploy-config — the field set deploy validates in preflight, supplied by the harness",
-      "status": "v0.1.0 — 2026-06-04",
+      "title": "Deploy-config \u2014 the field set deploy validates in preflight, supplied by the harness",
+      "status": "v0.1.0 \u2014 2026-06-04",
       "consumed_by": [
         "deploy",
         "loop-runner"
@@ -1475,8 +1536,8 @@
     },
     "experience-contract-schema": {
       "kind": "reference",
-      "title": "Experience contract — schema",
-      "status": "v0.1.0 — 2026-06-01",
+      "title": "Experience contract \u2014 schema",
+      "status": "v0.1.0 \u2014 2026-06-01",
       "consumed_by": [
         "design",
         "simulate-users"
@@ -1484,8 +1545,8 @@
     },
     "findings-schema": {
       "kind": "reference",
-      "title": "Finding contract — schema",
-      "status": "v0.1.0 — 2026-05-30",
+      "title": "Finding contract \u2014 schema",
+      "status": "v0.1.0 \u2014 2026-05-30",
       "consumed_by": [
         "design",
         "plan",
@@ -1497,8 +1558,8 @@
     },
     "four-risks": {
       "kind": "reference",
-      "title": "The four product risks — discovery lens",
-      "status": "v0.2.1 — 2026-06-06",
+      "title": "The four product risks \u2014 discovery lens",
+      "status": "v0.2.1 \u2014 2026-06-06",
       "consumed_by": [
         "product-lens",
         "strategy-curator"
@@ -1506,8 +1567,8 @@
     },
     "handoff-prompt-convention": {
       "kind": "reference",
-      "title": "Handoff-prompt convention — the delta-only field form for cold agent→agent handoffs",
-      "status": "v0.2.0 — 2026-06-12",
+      "title": "Handoff-prompt convention \u2014 the delta-only field form for cold agent\u2192agent handoffs",
+      "status": "v0.2.0 \u2014 2026-06-12",
       "consumed_by": [
         "harness-init",
         "loop-runner"
@@ -1515,30 +1576,30 @@
     },
     "instrumentation-preamble": {
       "kind": "reference",
-      "title": "Instrumentation preamble — RETIRED (analyzer-derived; tombstone)",
-      "status": "v1.0.0 — 2026-06-12 — RETIRED (cluster A, #28, supersedes #21)",
+      "title": "Instrumentation preamble \u2014 RETIRED (analyzer-derived; tombstone)",
+      "status": "v1.0.0 \u2014 2026-06-12 \u2014 RETIRED (cluster A, #28, supersedes #21)",
       "consumed_by": []
     },
     "integrator-checklist": {
       "kind": "reference",
       "title": "Integrator checklist",
-      "status": "v0.1.0 — 2026-06-10",
+      "status": "v0.1.0 \u2014 2026-06-10",
       "consumed_by": [
         "handbook-curator"
       ]
     },
     "iron-law": {
       "kind": "reference",
-      "title": "The Iron Law — no fix without a confirmed root cause",
-      "status": "v0.1.0 — 2026-06-05",
+      "title": "The Iron Law \u2014 no fix without a confirmed root cause",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "consumed_by": [
         "debug"
       ]
     },
     "lens-dispatch": {
       "kind": "reference",
-      "title": "Lens dispatch — fan-out, merge, triage, route",
-      "status": "v0.1.0 — 2026-05-30",
+      "title": "Lens dispatch \u2014 fan-out, merge, triage, route",
+      "status": "v0.1.0 \u2014 2026-05-30",
       "consumed_by": [
         "design",
         "plan",
@@ -1550,7 +1611,7 @@
     "local-node-schema": {
       "kind": "reference",
       "title": "Local node authoring contract",
-      "status": "v0.1.0 — 2026-06-14",
+      "status": "v0.1.0 \u2014 2026-06-14",
       "consumed_by": [
         "local-graph-maintainer"
       ]
@@ -1558,7 +1619,7 @@
     "okr-schema": {
       "kind": "reference",
       "title": "OKR / outcome-layer schema",
-      "status": "v0.3.0 — 2026-06-06",
+      "status": "v0.3.0 \u2014 2026-06-06",
       "consumed_by": [
         "harness-init",
         "product-lens"
@@ -1566,14 +1627,14 @@
     },
     "pm-methodology-provenance": {
       "kind": "reference",
-      "title": "PM pack — methodology provenance",
-      "status": "v0.1.2 — 2026-06-18",
+      "title": "PM pack \u2014 methodology provenance",
+      "status": "v0.1.2 \u2014 2026-06-18",
       "consumed_by": []
     },
     "pr-description-shape": {
       "kind": "reference",
       "title": "Canon PR description shape",
-      "status": "v0.1.0 — 2026-05-31",
+      "status": "v0.1.0 \u2014 2026-05-31",
       "consumed_by": [
         "handbook-curator",
         "pr-author",
@@ -1582,16 +1643,17 @@
     },
     "product-dashboard-conventions": {
       "kind": "reference",
-      "title": "Product-dashboard conventions — how the front authors work-ledger content",
-      "status": "v0.3.0 — 2026-06-18",
+      "title": "Product-dashboard conventions \u2014 how the front authors work-ledger content",
+      "status": "v0.3.0 \u2014 2026-06-18",
       "consumed_by": [
+        "record-gate",
         "working-session"
       ]
     },
     "routing-principles": {
       "kind": "reference",
-      "title": "Routing principles — the coordinator's decision / depth / tool routing",
-      "status": "v0.1.0 — 2026-06-16",
+      "title": "Routing principles \u2014 the coordinator's decision / depth / tool routing",
+      "status": "v0.1.0 \u2014 2026-06-16",
       "consumed_by": [
         "triage",
         "working-session"
@@ -1599,8 +1661,8 @@
     },
     "severity-scale": {
       "kind": "reference",
-      "title": "Finding contract — severity scale",
-      "status": "v0.2.0 — 2026-06-04",
+      "title": "Finding contract \u2014 severity scale",
+      "status": "v0.2.0 \u2014 2026-06-04",
       "consumed_by": [
         "design",
         "plan",
@@ -1610,8 +1672,8 @@
     },
     "test-discipline": {
       "kind": "reference",
-      "title": "Test discipline — the test-quality standard",
-      "status": "v0.1.1 — 2026-06-10",
+      "title": "Test discipline \u2014 the test-quality standard",
+      "status": "v0.1.1 \u2014 2026-06-10",
       "consumed_by": [
         "build",
         "lens-tests"
@@ -1619,8 +1681,8 @@
     },
     "ux-principles": {
       "kind": "reference",
-      "title": "UX principles — the visual-and-interaction standard",
-      "status": "v0.1.0 — 2026-06-05",
+      "title": "UX principles \u2014 the visual-and-interaction standard",
+      "status": "v0.1.0 \u2014 2026-06-05",
       "consumed_by": [
         "design-implement",
         "design-review",
@@ -1629,16 +1691,16 @@
     },
     "vpc-schema": {
       "kind": "reference",
-      "title": "Value Proposition Canvas — schema",
-      "status": "v0.1.0 — 2026-06-01",
+      "title": "Value Proposition Canvas \u2014 schema",
+      "status": "v0.1.0 \u2014 2026-06-01",
       "consumed_by": [
         "strategy-curator"
       ]
     },
     "what-belongs": {
       "kind": "reference",
-      "title": "What belongs in the handbook — the gate principles",
-      "status": "v0.1.0 — 2026-05-31",
+      "title": "What belongs in the canon \u2014 the gate principles",
+      "status": "v0.1.0 \u2014 2026-05-31",
       "consumed_by": [
         "drift-detector",
         "handbook-curator",
@@ -1647,18 +1709,19 @@
     },
     "work-item-schema": {
       "kind": "reference",
-      "title": "Work-item schema — the carrier on the product-dashboard",
-      "status": "v0.5.0 — 2026-06-18",
+      "title": "Work-item schema \u2014 the carrier on the product-dashboard",
+      "status": "v0.5.0 \u2014 2026-06-18",
       "consumed_by": [
         "harness-init",
+        "record-gate",
         "specify-slice",
         "triage"
       ]
     },
     "working-session-record": {
       "kind": "reference",
-      "title": "Working-session record — the per-session design-artefact contract",
-      "status": "v0.1.0 — 2026-06-18",
+      "title": "Working-session record \u2014 the per-session design-artefact contract",
+      "status": "v0.1.0 \u2014 2026-06-18",
       "consumed_by": []
     }
   },
@@ -1758,6 +1821,11 @@
     {
       "from": "build",
       "to": "review",
+      "type": "precedes"
+    },
+    {
+      "from": "build",
+      "to": "review",
       "type": "can-follow"
     },
     {
@@ -1765,11 +1833,6 @@
       "to": "reconcile",
       "type": "can-follow",
       "arc": "dev-sprint"
-    },
-    {
-      "from": "build",
-      "to": "review",
-      "type": "precedes"
     },
     {
       "from": "canary",
@@ -1901,15 +1964,15 @@
     },
     {
       "from": "design-implement",
-      "to": "ux-principles",
-      "type": "references",
-      "load": "on-demand"
-    },
-    {
-      "from": "design-implement",
       "to": "dev-sprint",
       "type": "composes-into",
       "stage": "build"
+    },
+    {
+      "from": "design-implement",
+      "to": "ux-principles",
+      "type": "references",
+      "load": "on-demand"
     },
     {
       "from": "design-implement",
@@ -1930,15 +1993,15 @@
     },
     {
       "from": "design-shotgun",
-      "to": "ux-principles",
-      "type": "references",
-      "load": "on-demand"
-    },
-    {
-      "from": "design-shotgun",
       "to": "dev-sprint",
       "type": "composes-into",
       "stage": "design"
+    },
+    {
+      "from": "design-shotgun",
+      "to": "ux-principles",
+      "type": "references",
+      "load": "on-demand"
     },
     {
       "from": "design-shotgun",
@@ -2084,6 +2147,24 @@
       "external": true
     },
     {
+      "from": "jit-preamble",
+      "to": "always-on-floor",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "jit-preamble",
+      "to": "bindings-contract",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "jit-preamble",
+      "to": "carrier-interface",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
       "from": "land",
       "to": "ship",
       "type": "invokes"
@@ -2096,6 +2177,11 @@
     {
       "from": "land",
       "to": "canary",
+      "type": "invokes"
+    },
+    {
+      "from": "land",
+      "to": "record-gate",
       "type": "invokes"
     },
     {
@@ -2234,6 +2320,11 @@
     },
     {
       "from": "loop-runner",
+      "to": "record-gate",
+      "type": "invokes"
+    },
+    {
+      "from": "loop-runner",
       "to": "IU-schema",
       "type": "references",
       "load": "import"
@@ -2316,12 +2407,12 @@
     {
       "from": "plan",
       "to": "build",
-      "type": "can-follow"
+      "type": "precedes"
     },
     {
       "from": "plan",
       "to": "build",
-      "type": "precedes"
+      "type": "can-follow"
     },
     {
       "from": "pr-author",
@@ -2434,12 +2525,30 @@
     {
       "from": "reconcile",
       "to": "land",
-      "type": "can-follow"
+      "type": "precedes"
     },
     {
       "from": "reconcile",
       "to": "land",
-      "type": "precedes"
+      "type": "can-follow"
+    },
+    {
+      "from": "record-gate",
+      "to": "work-item-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "record-gate",
+      "to": "carrier-interface",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "record-gate",
+      "to": "product-dashboard-conventions",
+      "type": "references",
+      "load": "on-demand"
     },
     {
       "from": "review",
@@ -2646,13 +2755,13 @@
     },
     {
       "from": "specify-slice",
-      "to": "triage",
-      "type": "can-follow"
+      "to": "build",
+      "type": "precedes"
     },
     {
       "from": "specify-slice",
-      "to": "build",
-      "type": "precedes"
+      "to": "triage",
+      "type": "can-follow"
     },
     {
       "from": "specify-slice",

@@ -61,16 +61,19 @@ incremental arc's *own stages*; you never traverse the arc yourself. Concretely:
      `iu/<id>` branch exists, test **`git merge-base --is-ancestor iu/<id> <integration-branch>`**. A
      **hit** (exit 0 — the IU's commit is already an ancestor of the integration branch) means it is
      **already landed**: **drop it from the dispatch set** (do **not** re-dispatch it), and
-     **reconcile its lifecycle** — set `lifecycle_state: landed` and append a retroactive
-     `gate: commit-to-land, decision: reconciled` entry to its `gate_decisions[]` **naming the
-     out-of-band merge** (the integration branch it was found merged into, and that the merge
-     happened outside the loop), so the carrier and the manifest stop reading it as open. This
-     terminal write **honours the IU-schema writer split** — it is still the **single
-     `commit-to-land` gate** writing the terminal transition, only with a `reconciled` decision
-     recording an already-true merge rather than enacting a fresh one (the same legitimacy as the
-     coordinator's attended `dropped`-via-promotion write, Phase 1.3) — not a second lifecycle writer.
-     The **manifest is still coordinator-regenerated** (refresh-index) from the reconciled carrier — you
-     write the carrier reconcile, not the manifest. An IU with **no `iu/<id>` branch**, or a
+     **reconcile its lifecycle through `record-gate`** — invoke the single mechanical writer to
+     advance `lifecycle_state` to `landed` and append a retroactive `commit-to-land` entry with
+     `decision: reconciled` **naming the out-of-band merge** (the integration branch it was found
+     merged into, and that the merge happened outside the loop), so the carrier and the manifest stop
+     reading it as open. You do not write `lifecycle_state`/`gate_decisions` directly — `record-gate`
+     is the only writer. This terminal write **honours the IU-schema writer split** — it is still the
+     **single `commit-to-land` gate** writing the terminal transition, only with a `reconciled`
+     decision recording an already-true merge rather than enacting a fresh one (the same legitimacy as
+     the coordinator's attended `dropped`-via-promotion write, Phase 1.3) — not a second lifecycle
+     writer. `record-gate` admits this as an AFK-classed reconcile from the unattended coordinator
+     (it records an already-established authority, never a fresh product-gate decision). The
+     **manifest is still coordinator-regenerated** (refresh-index) from the reconciled carrier — you
+     drive the carrier reconcile via `record-gate`, not the manifest. An IU with **no `iu/<id>` branch**, or a
      **non-hit** (exit 1), is a genuine open candidate and proceeds to step 2. *(This is the intake
      half of the ancestry gate; Phase 2.3 applies the same pre-check at the land queue so an
      already-merged IU is never double-merged.)*
@@ -276,7 +279,8 @@ unchanged.
    decides.
 3. **Land queue.** Per `built` IU, surface the land decision with the dry-run evidence; on the
    operator's go, **invoke `land`** for that IU. Land fires its own single `commit-to-land` gate
-   (writing the terminal `lifecycle_state` + `gate_decisions` entry) and **owns the real merge** via its
+   (the terminal `lifecycle_state` + `gate_decisions` entry is written via `record-gate`, the single
+   writer land invokes) and **owns the real merge** via its
    ship → deploy sub-arc, per the consuming repo's branch policy. **One merge owner, no double-merge:**
    your Phase 2.2 merge was a discarded dry-run; land's is the real one.
    - **Ancestry pre-check before `land` — never double-merge an already-merged IU.** A `built` IU can
@@ -287,9 +291,11 @@ unchanged.
      (the harness-configured target branch `ship`/`deploy` read — per-repo; **never hardcode**), and
      test **`git merge-base --is-ancestor iu/<id> <integration-branch>`**. A **hit** (exit 0 — already
      an ancestor) means it is **already landed**: **skip `land` for that IU** (do not re-merge), and
-     **reconcile it the same way** as the intake filter — set `lifecycle_state: landed` and append the
-     retroactive `gate: commit-to-land, decision: reconciled` entry naming the out-of-band merge,
-     surfacing it in the batch report as reconciled-not-landed. Only a **non-hit** (exit 1) proceeds to
+     **reconcile it the same way** as the intake filter — invoke `record-gate` (the single mechanical
+     writer) to advance `lifecycle_state` to `landed` and append the retroactive `commit-to-land`
+     entry with `decision: reconciled` naming the out-of-band merge (you do not write the fields
+     directly; an AFK-classed reconcile from the unattended coordinator), surfacing it in the batch
+     report as reconciled-not-landed. Only a **non-hit** (exit 1) proceeds to
      the operator's land decision and `land` invocation. This makes the no-double-merge guarantee hold
      even when the merge state changed **after** intake, not just at it.
 4. **Block-and-emit — before surfacing a blocking question, drop a structured resume artifact.** When a
