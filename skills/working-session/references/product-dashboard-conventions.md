@@ -13,7 +13,7 @@ changelog:
 The conventions the front follows when it authors **work-ledger content** — the work items
 (carriers) on the product-dashboard. They are imported wherever the front creates or advances a
 carrier: `raise` at create, the working session as it shapes, a dashboard `edit` at a terminal
-disposition. They live here, in canon, so they hold the same way **regardless of which node enacts
+disposition. They live here, in handbook, so they hold the same way **regardless of which node enacts
 them** — a dedicated curator skill, or the front nodes directly.
 
 ## The content/state write-boundary (the hard line)

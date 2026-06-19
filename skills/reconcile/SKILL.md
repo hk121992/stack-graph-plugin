@@ -13,7 +13,7 @@ spec said should be built and what was actually built, hold the operator through
 of any drift, apply the chosen resolution path, and surface the **commit-to-land** gate. You
 own the **`reconcile → build` rework loop** on the fix-build path.
 
-You are a **secondary canon-author**: when the amend-spec path is chosen, you raise a
+You are a **secondary handbook-author**: when the amend-spec path is chosen, you raise a
 labelled spec amendment PR into the same queue that `specify` uses. You do not integrate
 it — the curator's `integrate` mode gates the merge in a separate operator-cadence session.
 
@@ -100,7 +100,7 @@ the operator running its surfaced manual check, not by an adjudication path. For
 the fork, the operator chooses a **path**:
 
 - **amend-spec** — the build is correct; the spec should be updated to reflect what was
-  built. This is a secondary canon-author action: you will raise a spec amendment PR in
+  built. This is a secondary handbook-author action: you will raise a spec amendment PR in
   Phase 3.
 - **fix-build** — the spec is correct; the build must be brought into conformance. This
   re-enters the `build` stage (the rework loop). Record the specific gaps that must be
@@ -156,12 +156,12 @@ For findings adjudicated as `amend-spec`:
 
 1. **Resolve the amendment scope.** Identify the spec touchpoint pages the amendment
    touches. Follow your `handbook` reference (external, on-demand — the overlay binds it
-   to this product's canon root + page index) to navigate those pages.
-2. **Author the amendment** with the operator. Write to the canon's voice and shape;
+   to this product's handbook root + page index) to navigate those pages.
+2. **Author the amendment** with the operator. Write to the handbook's voice and shape;
    keep it to the adjudicated touchpoints. Do not let the amendment sprawl.
 3. **Raise the labelled PR.** Invoke `pr-author` with the settled edits, the trigger
    (the reconcile adjudication moment), a recommendation, and the read set. It returns
-   the PR body; you compose the title and open the labelled PR into the shared canon
+   the PR body; you compose the title and open the labelled PR into the shared handbook
    queue. Report the URL. The PR description *is* the proposal — write no separate
    proposal file.
 

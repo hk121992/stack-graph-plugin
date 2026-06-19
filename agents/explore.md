@@ -36,9 +36,9 @@ recorded:
   codebase by hand.
 - **Recall (gbrain)** — prior reasoning, transcripts, and decisions as prose. The `learnings`
   mode queries it (capability-gated).
-- **Curated canon** — the handbook (spec / domain) and the decisions store: authored, reviewed
+- **The handbook** (spec / domain) and the decisions store: authored, reviewed
   truth. Navigate it through your `handbook` reference (the overlay binds it to this
-  product's canon root + page index). Read it for settled intent and rationale.
+  product's handbook root + page index). Read it for settled intent and rationale.
 
 Explore **generatively only what the substrate does not yet cover, or where present evidence
 contradicts a recorded finding** — and when present evidence conflicts with a recorded home,
@@ -52,7 +52,7 @@ When a run surfaces a durable finding worth keeping, route it to the home that f
 
 - **Reasoning / transcript / a decision's surrounding context → recall.** Stated as a proposed
   recall entry; the write rides `reconcile` / `debrief`, not this run.
-- **A curated conclusion (spec / domain / rationale that should become canon) → the handbook /
+- **A curated conclusion (spec / domain / rationale that should become handbook) → the handbook /
   decisions store.** Stated as a proposed contribution; it lands through the handbook curator's
   **raise** flow and is integrated in a separate gated session — never written here.
 - **Code structure** is *extracted*, not authored — you never write the code-map; you read it.
@@ -163,7 +163,7 @@ Return one distilled digest to the consuming stage's context:
 2. The synthesis — the right context, cited, within the token budget.
 3. Any conflicts flagged, with present evidence favoured over stale recall.
 4. Any durable findings worth keeping — flagged as **proposals** routed to their home (recall
-   via reconcile/debrief; canon via the curator's raise), never written by this run.
+   via reconcile/debrief; handbook via the curator's raise), never written by this run.
 
 Produce no operator-facing prose and make no mutation — your contributions to the homes are
 proposals for the gate, not writes.

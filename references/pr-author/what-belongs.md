@@ -1,12 +1,12 @@
 ---
 kind: reference
 id: what-belongs
-title: What belongs in the canon — the gate principles
-description: The strict principles governing what may be added to the curated-canon home (handbook + decisions). Gates, not advice — consulted by the curator's raise mode before any edit.
+title: What belongs in the handbook — the gate principles
+description: The strict principles governing what may be added to the handbook. Gates, not advice — consulted by the curator's raise mode before any edit.
 status: v0.1.0 — 2026-05-31
 ---
 
-# What belongs in the canon
+# What belongs in the handbook
 
 These are **gates**, not advice. The `raise` mode consults them before authoring any edit;
 a proposed change that fails a gate is refused with the principle it violates.
@@ -21,7 +21,7 @@ cross-reference. If a competent reader would conclude it anyway, it does not ear
 ## 2 — Token efficiency is load-bearing
 
 Every line costs context on every read. The test for each line is: *"would removing this
-cause an agent to make a mistake?"* If no, trim it before authoring. Canon is read far more
+cause an agent to make a mistake?"* If no, trim it before authoring. Handbook is read far more
 often than it is written; optimise for the reader.
 
 ## 3 — Canonical-and-resolved only in page bodies
@@ -38,10 +38,10 @@ after doing work it should have informed — means its discoverability metadata 
 cross-references) failed for this task; fix that metadata in the **same** change as the content
 fix, so the next reader finds it in time.
 
-## What does NOT trigger a canon change
+## What does NOT trigger a handbook change
 
 - A one-off working note, a design-doc decision, or an operator preference → those have their
   own homes (design docs, the decision store), not the spec body.
 - Content a tool or another home already owns — code structure (the code-map), reasoning and
-  transcripts (recall). The canon holds **curated, authored truth**, not derived data.
+  transcripts (recall). The handbook holds **curated, authored truth**, not derived data.
 - Anything that would be inferable (gate 1) or unresolved (gate 3).

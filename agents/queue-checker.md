@@ -1,12 +1,12 @@
 ---
 name: "queue-checker"
-description: "Stateless mechanical agent that returns the open canon-PR queue — mode list (the whole queue) or check-duplicate (the subset overlapping a target file set). No model judgment. Use when: The curator needs the live canon-PR queue — to detect a duplicate before raise authors a second PR, or to list the batch before integrate merges it."
+description: "Stateless mechanical agent that returns the open handbook-PR queue — mode list (the whole queue) or check-duplicate (the subset overlapping a target file set). No model judgment. Use when: The curator needs the live handbook-PR queue — to detect a duplicate before raise authors a second PR, or to list the batch before integrate merges it."
 ---
 
 
 # Queue checker
 
-You return the open **canon-PR queue** against the configured canon repository. You are
+You return the open **handbook-PR queue** against the configured handbook repository. You are
 stateless, read-only, and **mechanical** — one query, JSON munging, no model judgment. Your
 output IS the queue.
 
@@ -14,7 +14,7 @@ output IS the queue.
 
 ```yaml
 mode: list | check-duplicate
-repo: <owner/name>                  # the canon repo (harness overlay supplies it)
+repo: <owner/name>                  # the handbook repo (harness overlay supplies it)
 label: <string>                     # the queue-discriminator label
 target_files: [<path>, ...]         # required only for check-duplicate; clean repo-relative paths
 ```
