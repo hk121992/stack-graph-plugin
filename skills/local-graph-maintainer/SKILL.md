@@ -35,16 +35,21 @@ it from the runtime file) if they want certainty.
 
 ## What you read, and where you write
 
-- **The vendored graph record — read-only, read-authentic.** Read it from the **user-scope plugin
-  install** at `~/.claude/plugins/stack-graph/workspace/graph/graph-record.json` to resolve overlay
-  / `extends` targets and to check id non-collision. Never from a harness-supplied path. **If it is
-  unreadable, hard-refuse to author an overlay edge** — do not silently skip the check.
+- **The vendored graph record — read-only, read-authentic.** Resolve it from the **plugin install
+  root** via the `${CLAUDE_PLUGIN_ROOT}` convention (Claude Code substitutes it inline in this
+  skill's content at load time): `${CLAUDE_PLUGIN_ROOT}/workspace/graph/graph-record.json` — the
+  record the factory ships with the plugin. This is read-authentic and install-location-agnostic
+  (user- or project-scope), and **not a harness binding** — a binding could be redirected to a
+  consumer-writable copy. Use it to resolve overlay / `extends` targets and to check id
+  non-collision. **If it is unreadable, hard-refuse to author an overlay edge** — do not silently
+  skip the check.
 - **The harness bindings** — `<org-root>/.claude/bindings.yaml`, read on demand (a convention read,
   not a `references` edge). You navigate from a value when you need one (e.g. a local-handbook root).
 - **Write boundary (enforce on every write).** Canonicalise the absolute target and **refuse the
   write unless it is within `<org-root>/.claude/` or `<org-root>/.stack-graph/`** (or a bound
-  local-handbook root). **Refuse any path under `~/.claude/plugins/`** — that is the read-only
-  vendored install. This guards node files, `.bak`, sidecars, manifest stubs, and the local record.
+  local-handbook root). **Refuse any path under the plugin install root** (`${CLAUDE_PLUGIN_ROOT}`,
+  e.g. `~/.claude/plugins/stack-graph/`) — that is the read-only vendored install. This guards node
+  files, `.bak`, sidecars, manifest stubs, and the local record.
 - **Where things land.** Node file → `.claude/skills/<id>/SKILL.md` or `.claude/agents/<id>.md`.
   Durable `research-report.md` → committed beside the node (or under `.stack-graph/local-authoring/<id>/`
   if inert-sidecar load is unverified). `source-material/` and the local graph record →
@@ -156,7 +161,7 @@ scaffold. **Do not populate or grow the manifest** — the running node does tha
 
 - **Synthesise from the research-report, never from source-material directly** — the isolated
   research agent is the firewall; you never hold source-material in context during synthesis.
-- **Never write a vendored file** — enforce the write boundary on every write; refuse `~/.claude/plugins/`.
+- **Never write a vendored file** — enforce the write boundary on every write; refuse the plugin install root (`${CLAUDE_PLUGIN_ROOT}`).
 - **Never shadow a vendored node** — namespace apart; extend-only is hard at author time.
 - **Bindings over hardcoding** — a local node reads workspace paths via its binding; flag hardcoded paths.
 - **`.bak` before every overwrite**; leave it (operator cleans up).

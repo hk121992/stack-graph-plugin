@@ -58,10 +58,12 @@ status: vX.Y.Z — YYYY-MM-DD
 - A local id **MUST NOT** be `stack-graph:*` and **MUST NOT** collide with any id in the vendored
   graph record. Default to a **non-empty harness prefix** (e.g. `bc-…`, `<harness>:…`); unprefixed-
   local is allowed only when the hard collision check passes.
-- The vendored record is read **read-only and read-authentic from the user-scope plugin install**
-  (`~/.claude/plugins/stack-graph/workspace/graph/graph-record.json`) — never a harness-supplied
-  path. If it cannot be read, the maintainer **hard-refuses to author an overlay edge** rather
-  than skip the check.
+- The vendored record is read **read-only and read-authentic from the plugin install root** via the
+  `${CLAUDE_PLUGIN_ROOT}` convention (substituted inline in skill content at load time):
+  `${CLAUDE_PLUGIN_ROOT}/workspace/graph/graph-record.json` — the record the factory ships with the
+  plugin. Install-location-agnostic and **never a harness-supplied binding** (a binding could be
+  redirected to a consumer-writable copy). If it cannot be read, the maintainer **hard-refuses to
+  author an overlay edge** rather than skip the check.
 
 ## 3. Overlay edges & extend-only
 
