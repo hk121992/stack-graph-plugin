@@ -72,7 +72,7 @@ repeated turns.
 ## The vend seam
 
 The script is vended into the plugin through the **generic non-text-primitive vend extension point** in
-`build/vendor.ts` (a declarative `{ srcRel, destRel }` registry, self-cleaning, with its own `--check`
+`build/vendor.ts` (a declarative `{ src, rel, tree }` registry, self-cleaning, with its own `--check`
 drift list). The seam is generic by design — a future hook/script primitive (WB-4) registers in the
 same list and inherits the copy + idempotency + drift-check; the preamble is not special-cased. The
 `vendor:check` freshness gate proves the seam round-trips byte-identically.
