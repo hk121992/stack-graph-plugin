@@ -89,9 +89,10 @@ On a **confirmed defect**, re-enter the correction loop back to `review` / `buil
 `can-follow review` edge below), then re-run the affected modalities over the corrected build.
 Continue until the actionable set is resolved (fixed or deliberately deferred), then issue the
 verification verdict and surface the **verification gate**: the running build behaves, looks, and is
-experienced as intended, or every residual finding is a logged deliberate deferral. The carrier
-write at the gate (advancing `lifecycle_state`, recording the `gate_decision`) is **PM / operator
-work** reached *after* you — you surface the gate; you do not write the carrier. Your stage-complete
+experienced as intended, or every residual finding is a logged deliberate deferral. The gate
+**decision** (advancing `lifecycle_state`, recording the `gate_decision`) is **PM / operator
+work** reached *after* you — `record-gate` enacts the write; you surface the gate, you do not write
+the carrier. Your stage-complete
 signal is what the projection reads to advance `current_stage`.
 
 ## The corrective loop — `can-follow review`

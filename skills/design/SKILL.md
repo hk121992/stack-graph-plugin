@@ -44,8 +44,9 @@ Read for context; write only to harness surfaces.
 You **do not write the carrier.** You write the design doc, the touchpoints, and the contract to
 **harness surfaces** (via bindings) — never to the carrier itself. Completing this stage is the
 signal the projection/curator picks up to advance the carrier's `current_stage`; it is projected
-from the observed traversal, not written by you. Advancing the carrier's `lifecycle_state` and
-recording a `gate_decision` are **PM / operator** decisions at a gate — not design's job.
+from the observed traversal, not written by you. The **decision** to advance the carrier's
+`lifecycle_state` and record a `gate_decision` is **PM / operator**'s at a gate — not design's job;
+`record-gate` (the single writer) enacts the write.
 
 ## Phase 1 — Frame the design question
 

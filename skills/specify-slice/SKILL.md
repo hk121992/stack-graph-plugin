@@ -55,7 +55,7 @@ Read for context; write the standalone IU's **content** fields only.
 
 You **do not write** `lifecycle_state` or `gate_decisions`. Per the IU-schema three-writers split:
 `triage` authored `proposed`; the **build-enter event** sets `in-delivery`; the terminal
-`landed`/`parked`/`dropped` transition is the **single `commit-to-land` gate's** at `land`. You
+`landed`/`parked`/`dropped` transition is **`record-gate`'s** (the single writer the **`commit-to-land` gate** invokes) at `land`. You
 write only the slice's content. Completing this stage is the signal the projection picks up to
 advance `current_stage`; it is projected from the observed traversal, not written by you.
 

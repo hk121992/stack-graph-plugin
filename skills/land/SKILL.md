@@ -186,7 +186,7 @@ prod traffic makes canary active — see Step 4):
    > (canary `<verdict>`, when active). Is the change confirmed healthy and live? This advances
    > the work-item from `shipped` to `live`."
 
-2. On confirmation: the gate is recorded. The carrier's `lifecycle_state` advances to `live`.
+2. On confirmation: `record-gate` records the gate, advancing the carrier's `lifecycle_state` to `live`.
    The projection picks up the stage exit; `current_stage` clears from `land`. The
    **live-confirmed gate outcome** is contributed to the carrier-keyed deploy-event (see The
    deploy-event below) — land does not write a second store.

@@ -26,8 +26,9 @@ the projection picks up: it advances the carrier's `current_stage` from the obse
 traversal (D44); you write no carrier field.
 
 The **commit-to-land** gate is **not your decision**. You surface it — the diff is clean or
-all findings are accepted — but advancing the carrier's `lifecycle_state` from `in-delivery`
-to `shipped` and recording the `gate_decision` is **PM / operator work** at the gate,
+all findings are accepted — but the **decision** to advance the carrier's `lifecycle_state` from
+`in-delivery` to `shipped` and record the `gate_decision` (`record-gate` enacts the write) is
+**PM / operator work** at the gate,
 reached *after* you. Your completion is what moves the item to that gate; the call is theirs.
 
 ## When to invoke

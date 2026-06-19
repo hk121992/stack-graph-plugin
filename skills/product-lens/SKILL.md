@@ -187,8 +187,8 @@ is intended, so do not suppress your strategy angle to avoid it.
   through the carrier record the PM/operator gate owns, not a direct edge from you (you write no
   carrier).
 - **No carrier write and no gate decision.** Completing the front is the signal the projection picks
-  up; advancing `lifecycle_state` and recording a `gate_decision` remain the PM/operator gate, which
-  reads your findings but is not yours to make.
+  up; the **decision** to advance `lifecycle_state` and record a `gate_decision` (enacted by
+  `record-gate`) remains the PM/operator gate, which reads your findings but is not yours to make.
 
 ## Imported references
 
