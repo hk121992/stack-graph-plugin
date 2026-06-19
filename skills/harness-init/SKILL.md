@@ -83,17 +83,21 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    prompt: follow the handoff-prompt convention (the stack-graph plugin's `handoff-prompt-convention`
    reference, shipped with harness-init) — delta only, policy by pointer not by copy."* Name the
    convention and where it ships rather than a brittle filesystem path (the reference travels inside
-   the vendored plugin, not at a bound surface). **Keep the always-on cost to the closed minimal
-   floor:** the ambient pointers above plus a one-line pointer to the `always-on-floor` surface (the
-   closed, enumerated, byte-budgeted floor — navigation + substrate-consult-first + safety + the
-   one-line `<sg-*>` vocab pointer; shipped with the plugin). Do **not** inline operating instructions
-   into `CLAUDE.md` — the fat always-on operating-instructions reference is retired (M-1); the floor is
-   the standing surface and the live per-turn state is loaded just-in-time by the `jit-preamble`.
+   the vendored plugin, not at a bound surface). **Vend the root instructions by `@`-ref:** copy your
+   bundled `sg-root-instructions` reference to the harness-local `<org-root>/.claude/sg-root-instructions.md`
+   and have the `CLAUDE.md` template carry `@.claude/sg-root-instructions.md`, so the closed,
+   byte-budgeted root set (navigation + substrate-consult-first + safety + the one-line `<sg-*>` vocab
+   pointer) is reliably **inlined every session** — a static `@`-ref, not a pointer the agent must
+   choose to follow, and not the dynamic plugin path a `CLAUDE.md` cannot resolve. Do **not** inline a
+   *fat* operating-instructions block — that reference is retired (M-1); the tiny root set is cheap
+   enough to `@`-ref, and the live per-turn state is loaded just-in-time by the `jit-preamble`.
    Structure only; **idempotent** — never clobber an existing authored `CLAUDE.md`; if one exists,
-   confirm it carries the ambient pointers and warn on anything missing rather than overwriting. (The
+   confirm it carries the ambient pointers + the `@.claude/sg-root-instructions.md` `@`-ref and re-vend
+   a stale root-instructions copy, warning on anything missing rather than overwriting. (The
    per-session runtime state load is the **`jit-preamble`** — the deterministic JIT preamble loads the
-   live carrier state from the derived projection and emits it for turn 1; you scaffold the file and
-   name the floor + preamble surfaces, you do not hand-author a session-start procedure into the body.)
+   live carrier state from the derived projection and emits it for turn 1; you scaffold the file,
+   `@`-ref the root instructions, and name the preamble surface — you do not hand-author a session-start
+   procedure into the body.)
 5. **Scaffold the surface skeleton** under `surface-root` per the template: `strategy.md` (vision ·
    guiding policy · JTBD · open questions — empty headings), `objectives.md` (per `okr-schema` —
    empty objective/north-star headings), `items/` with an **empty** `manifest.json` (`[]`),
@@ -155,9 +159,10 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
 2. **Every required key resolves** (per `bindings-contract`) to a real path/target; optional keys
    either resolve or are explicitly marked not-yet. Report each missing/dangling key by name.
 3. **The org-root `CLAUDE.md` is present and wired** — it exists at the org root, reaches the
-   bindings reference, and carries the `handbook-index` ambient pointer. This is the runtime
-   pre-flight: a harness whose ambient surface does not load the bindings + handbook index will not
-   orient on the next session.
+   bindings reference, carries the `handbook-index` ambient pointer, and `@`-refs the vended root
+   instructions (`@.claude/sg-root-instructions.md`, with that file present + non-empty). This is the
+   runtime pre-flight: a harness whose ambient surface does not load the bindings + handbook index +
+   the root instructions will not orient on the next session.
 4. **The surface exists**: `surface-root`, `items-root` + a parseable `manifest.json`,
    `objectives-doc`, `strategy-doc`, `sprints-root`, `improvements-root` + a parseable
    `improvements-manifest`, `learnings-archive` (the committed archive
@@ -189,11 +194,11 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
 - **Structure only — never content.** You scaffold the bound, empty surface; you never author work
   items (the front's `raise`, per `product-dashboard-conventions`), the strategy canvas
   (`strategy-curator`), or OKR values. You leave valid empty templates.
-- **Harness-local writes only.** You write `bindings.yaml`, the org-root `CLAUDE.md`, the
-  surface skeleton under `surface-root`, and the org-root `.claude/settings.json` **env block** (the
-  analytics env) — nothing else, and **never** the vendored graph, and **never** a crontab / system
-  scheduler (you *emit* the analyzer-task runbook for the operator to install). Instantiation is an
-  additive overlay.
+- **Harness-local writes only.** You write `bindings.yaml`, the org-root `CLAUDE.md`, the vended
+  `<org-root>/.claude/sg-root-instructions.md` (the `@`-ref'd root set), the surface skeleton under
+  `surface-root`, and the org-root `.claude/settings.json` **env block** (the analytics env) — nothing
+  else, and **never** the vendored graph, and **never** a crontab / system scheduler (you *emit* the
+  analyzer-task runbook for the operator to install). Instantiation is an additive overlay.
 - **Idempotent.** Re-running `scaffold` fills only what is missing and warns on what exists; it
   never clobbers authored content, an existing `bindings.yaml`, or an existing `CLAUDE.md` (re-pointing
   bindings is `bind`'s job, with confirmation). A partial harness is *repaired*, never overwritten.
@@ -215,5 +220,6 @@ Read these at the step of need (single-sourced into this primitive's bundle):
 
 - `references/handoff-prompt-convention.md` — `handoff-prompt-convention`
 - `references/okr-schema.md` — `okr-schema`
+- `references/sg-root-instructions.md` — `sg-root-instructions`
 - `references/work-item-schema.md` — `work-item-schema`
 

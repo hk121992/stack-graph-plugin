@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-19T14:34:48Z",
+  "generated": "2026-06-19T15:51:40Z",
   "node_count": 49,
   "reference_count": 33,
   "handbook_reference_count": 0,
@@ -457,6 +457,10 @@
             "load": "import"
           },
           {
+            "id": "sg-root-instructions",
+            "load": "on-demand"
+          },
+          {
             "id": "okr-schema",
             "load": "on-demand"
           },
@@ -520,10 +524,6 @@
       "status": "v0.1.0 \u2014 2026-06-19",
       "edges": {
         "references": [
-          {
-            "id": "always-on-floor",
-            "load": "on-demand"
-          },
           {
             "id": "bindings-contract",
             "load": "on-demand"
@@ -1422,14 +1422,6 @@
         "triage"
       ]
     },
-    "always-on-floor": {
-      "kind": "reference",
-      "title": "Always-on minimal floor \u2014 the closed, byte-budgeted per-session surface",
-      "status": "v0.1.0 \u2014 2026-06-19",
-      "consumed_by": [
-        "jit-preamble"
-      ]
-    },
     "analytics-vocabulary": {
       "kind": "reference",
       "title": "Analytics vocabulary \u2014 the closed `<sg-*>` tag family the analyzer reads",
@@ -1668,6 +1660,14 @@
         "plan",
         "review",
         "spec-diff"
+      ]
+    },
+    "sg-root-instructions": {
+      "kind": "reference",
+      "title": "Stack-graph root instructions \u2014 the closed, byte-budgeted set @-ref'd into the session CLAUDE.md",
+      "status": "v0.2.0 \u2014 2026-06-19",
+      "consumed_by": [
+        "harness-init"
       ]
     },
     "test-discipline": {
@@ -2147,8 +2147,8 @@
       "external": true
     },
     {
-      "from": "jit-preamble",
-      "to": "always-on-floor",
+      "from": "harness-init",
+      "to": "sg-root-instructions",
       "type": "references",
       "load": "on-demand"
     },

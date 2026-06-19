@@ -102,8 +102,6 @@ PREAMBLE_JIT_GUIDANCE: |
     carrier file. Read the DERIVED projection (the portal-projection snapshot, the
     carrier's current_stage) to learn the real in-flight stage; if it is missing
     or stale, treat the stage as unknown and confirm before acting on it.
-  - ALWAYS_ON_FLOOR: follow the always-on minimal floor (navigation,
-    substrate-consult-first, safety, the <sg-*> vocab pointer) regardless.
   - In short: behave as if the carrier state is unknown, never as if a stale
     field is true, and confirm the stage from the projection when it matters."""
 
@@ -314,28 +312,6 @@ def _unquote(v: str) -> str:
 
 
 # ============================================================================
-# The always-on minimal floor pointer
-# ============================================================================
-
-def emit_floor_pointer(floor_path: Path | None) -> None:
-    """Emit a POINTER to the always-on minimal floor surface (the closed,
-    enumerated, byte-budgeted floor) — not its contents. The floor is small and
-    always present; the preamble just names where it lives so the agent loads it.
-    Absent/unreadable floor is non-fatal (the floor is shipped with the plugin)."""
-    if floor_path is None:
-        print("ALWAYS_ON_FLOOR: bundled")
-        return
-    try:
-        present = floor_path.is_file()
-    except OSError:
-        present = False
-    if present:
-        print(f"ALWAYS_ON_FLOOR: {floor_path}")
-    else:
-        print("ALWAYS_ON_FLOOR: bundled")
-
-
-# ============================================================================
 # Orchestration
 # ============================================================================
 
@@ -367,8 +343,6 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument("--required-state", dest="required_state", default=None, metavar="LIST",
                         help="comma-separated C2-resolved required-state list the entered node "
                              "declared (the general emitter input)")
-    parser.add_argument("--floor", dest="floor", default=None, metavar="PATH",
-                        help="path to the always-on minimal floor surface (pointer-emitted)")
     # Hidden: deterministically raise BEFORE any emit, to prove the top-level
     # catch-all degrades to a clean JIT_FALLBACK floor (the hard fail-closed path).
     parser.add_argument("--selftest-crash", dest="selftest_crash", action="store_true",
@@ -406,9 +380,6 @@ def main(argv: list[str] | None = None) -> int:
         emit_carrier_untrusted(Path(args.carrier))
     else:
         print("CARRIER: not_provided")
-
-    # 3. The always-on minimal floor pointer.
-    emit_floor_pointer(Path(args.floor) if args.floor else None)
 
     return 0
 
