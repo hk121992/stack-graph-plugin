@@ -3,8 +3,9 @@ kind: reference
 id: bindings-contract
 title: Bindings contract — the keys a harness supplies, and the surface template
 description: The factory contract the plugin ships so a consuming workspace can instantiate a harness — the complete set of binding keys the vendored graph may require, the bindings.yaml file format, the org-root CLAUDE.md ambient-surface template, and the dashboard + improvements surface-structure templates harness-init scaffolds. The plugin carries this contract; the harness supplies the values. No product data.
-status: v0.9.0 — 2026-06-19
+status: v0.10.0 — 2026-06-20
 changelog:
+  - v0.10.0 (2026-06-20): git-policy binding (wi-git-policy-binding IU-1) — add the **optional** harness-local `git-policy` block to §2 (the `{default, pr-gated}` dial that maps a logical write-surface to pr-gated-vs-direct) + a new §7 documenting its shape and the canon-fail-closed-on-absence semantics (a **present** block is authoritative; an **absent** block ⇒ a canon-surface node defaults to `pr-gated`, a non-canon node to `direct`). The block is a small-scalar dial, harness-local, **never vendored** — adds per-harness with no plugin change. The resolution rule + surface enum live in the new `git-policy` reference (single source); this contract fixes only the block's shape. **Contract drift:** a canon-bearing harness must declare its canon surfaces in `pr-gated` — `harness-update`'s contract-drift re-bind emits the block (the absent-default already protects canon if skipped).
   - v0.9.0 (2026-06-19): analytics lifecycle review (wi-analytics-lifecycle-review IU-A2b) — §6 extended with the `harness_id` attribution-key field + the per-harness-local-derive / central-merge seam (the locality-honouring fleet model): each harness derives its own log LOCALLY; only the already-sanitised per-harness rows combine, in a central merge keyed on `harness_id` (no loss / no double-count). No new binding key — `harness_id` rides the META envelope the analyzer already parses (the earns-a-binding test: no node resolves it). The cron-path home named in §6 is the shared workspace's `workspace/renderer/analyzer/`, matching the harness-init runbook correction.
   - v0.8.0 (2026-06-18): renderer-vestige removal (RESTRUCTURE-PLAN D1) — local-portal rendering retired; the renderer moved out of the installed plugin to the shared mm-workspace. Removed the `renderer` key from §2 (the vendored workspace-render overlay no longer ships in the plugin); dropped "the renderer" from the §intro surfaces list; §6 `SG_PRICING` consumer retitled "renderer Cost block" → "analytics Cost block". **Key removed** — consumers drop `renderer` from `bindings.yaml` on the contract-drift re-bind (harness-update §Contract-drift). The analyzer/event-log substrate (`workspace/renderer/analyzer/…`, §6) is owned by `wi-analytics-lifecycle-review` and is untouched here.
   - v0.7.1 (2026-06-18): dead-reference scrub (curator removal, wi-unified-front-workflow IU-7) — §3 surface-structure template: the two "content is added later via [the removed curator]" / "added by [the removed curator], not scaffolded" notes now read "added later via the front's `raise`" / "added via the front's `raise`, not scaffolded". No key change; the surface shape is unchanged.
@@ -61,6 +62,7 @@ target does not resolve.
 | `terminal-recorder` | who freezes the timeline at a terminal state | the recorder binding (`work-item-schema` §frozen) |
 | `maturity` | the maturity-dial setting | `pre-launch | first-users | scale` (D45) — default gate rigour |
 | `stale-projection-policy` | degraded-mode policy | how surfaces render when the projection is absent/stale |
+| `git-policy` | the per-surface git-write policy dial | **optional** — a small **block** (not a path): `{default, pr-gated}` mapping a logical write-surface to **pr-gated-vs-direct** (§7). The resolution rule + the closed surface enum live in the `git-policy` reference (the single source); this contract fixes only the block's shape. **Absent** ⇒ canon surfaces default `pr-gated`, non-canon `direct` (canon-fail-closed, §7) |
 | `improvements-root` | the standalone-IU surface dir | **sibling of `surface-root`** (not under it); holds `<id>.md` + the manifest — the incremental loop's own surface, off the work-ledger (§3) |
 | `improvements-manifest` | the standalone-IU manifest | committed derived index: `[{id, file, improves, slice_type, lifecycle_state}]` |
 | `triage-source` | where improvements are raised from | **optional** — the handbook-curator drift queue / a `learn` store / an operator note. **Input-gated (Fork D):** bind it now; the auto-feed turns on only once those queues carry findings. `triage` still applies the route rule and the operator confirms before a standalone IU is created |
@@ -187,3 +189,46 @@ silently mis-attributed (the load-bearing cross-fleet honest-degradation propert
 envelope the analyzer parses, the same way `carrier`/`kind`/`arc`/`iu` do. The merged output is
 **order-independent and byte-stable** (the canonical analyzer ordering), so a fleet roll-up is the same
 regardless of the order the per-harness logs are supplied.
+
+## 7. The `git-policy` block (the per-surface git-write dial)
+
+Whether a git-writing node **graduates a change via a labelled PR** or **pushes direct** is a
+**per-surface dial the harness owns** — an **optional** harness-local block in `bindings.yaml`. Like
+the other dial keys it is a **small scalar block, not a path**; it is **harness-local and never
+vendored**, so it adds per-harness with no plugin change (the nodes that *consult* it are vendored).
+This contract fixes only the block's **shape**; the **resolution rule** and the **closed surface
+enum** live in the `git-policy` reference (the single source every git-writing node consults).
+
+The block has exactly two keys:
+
+```yaml
+# bindings.yaml (harness-local, never vendored)
+git-policy:
+  default: direct                                  # governs surfaces not in pr-gated
+  pr-gated: [handbook, strategy, objectives, spec] # logical write-surfaces graduating via a labelled PR
+```
+
+- **`default`** (`direct | pr-gated`) — the write mode for any logical surface **not** in `pr-gated`.
+- **`pr-gated`** (a list of logical surfaces) — the surfaces that graduate via a **labelled PR**. The
+  values are drawn from the **closed surface enum** (`work-ledger`, `decisions`, `handbook`,
+  `strategy`, `objectives`, `spec`) the `git-policy` reference defines; `harness-init validate`
+  checks each listed value resolves to that enum.
+
+A node resolves the mode for its own surface as
+`mode = (surface ∈ git-policy.pr-gated) ? "pr-gated" : git-policy.default` (the rule's full
+semantics, incl. `record-gate` riding the `work-ledger` surface, are in the `git-policy` reference).
+
+**Absent-block — present is authoritative; absence fails closed for canon.** When the block is
+**present**, the operator's list is law (an unlisted **canon** surface — one of
+`{handbook, strategy, objectives, spec}` — honours `default`). When the block is **entirely absent**
+(a fresh clone, dropped/corrupted bindings, a botched `harness-init`), a **canon-surface** node
+defaults to **`pr-gated`** (fail-closed, root-instruction #3) and a **non-canon** node defaults to
+**`direct`** — so a missing block can never silently strip canon review, while the work-ledger keeps
+its low-ceremony default.
+
+**Contract drift.** A **canon-bearing** harness must **declare its canon surfaces** in `pr-gated`. On
+this contract bump, `harness-update`'s contract-drift step **re-binds** (emits the block); the
+absent-default already protects canon if a consumer skips the update. `harness-init scaffold` emits
+the block per the maturity dial; `harness-init validate` checks the listed surfaces resolve to the
+closed enum and that a canon-bearing harness lists its canon surfaces (those are the consult/scaffold/
+validate IUs — this contract documents only the shape they enforce against).
