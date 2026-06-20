@@ -10,7 +10,7 @@ description: >-
   session; it replaces the rejected fat operating-instructions reference. The per-turn live carrier
   state is loaded just-in-time by the JIT preamble, not carried here. Use when authoring or reconciling
   the harness's root-instruction surface, or to confirm it stays within its byte budget.
-status: v0.2.0 — 2026-06-19
+status: v0.3.0 — 2026-06-20
 ---
 
 # Stack-graph root instructions
@@ -41,3 +41,8 @@ The root instructions are exactly these four items, nothing more:
 4. **`<sg-*>` vocabulary — pointer only.** To emit a verdict, a trend number, or an operator-action
    obligation, follow the on-demand `analytics-vocabulary` reference (the closed `<sg-*>` family). The
    conventions are **not** inlined here — read that reference at the step of need.
+
+> **Transitional directive — temporary, not part of the closed set above.** Until the build-sprint is
+> deconstructed, route build work through the **`loop-runner`**, not the build-sprint backbone — those
+> nodes stay in the graph but are not the default delivery path. Exception: minor fixes the operator
+> requests directly. Remove this block when the deconstruction lands.
