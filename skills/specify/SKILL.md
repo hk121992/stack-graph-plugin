@@ -94,7 +94,11 @@ operator confirms what it should say.
 
 ## Phase 4 — Graduate the amendment (spec-layout / amend-existing)
 
-Raise the amendment as a **labelled PR into the shared handbook queue**:
+**Graduate per `git-policy` for the `handbook` surface.** In `spec-layout` / `amend-existing` the
+amendment writes a **handbook page**, so its graduation rides the **`handbook`** surface — resolve
+the mode against `git-policy` for `handbook` (the surface enum + resolution rule + canon-fail-closed
+live in `git-policy`; do not restate them), **not** hardcoded here. When the resolved mode is
+**`pr-gated`**, raise the amendment as a **labelled PR into the shared handbook queue**:
 
 1. **Decide the bundle.** Group touchpoint edits that belong to one operator-decision frame into
    one PR; split edits that span more than one frame.
@@ -133,23 +137,37 @@ then signal stage-complete. This is the primary-handbook-author behaviour.
 
 ### null (no spec layout)
 
-The product has no spec layout, so there is **no handbook to amend**. Skip the drift scan and the PR
-(Phases 2–4). Instead, **record the touchpoints and decisions inline** — into the design doc and
-the carrier context surface the projection reads — so the settled decisions are durable for plan
-and build. Advance the work and signal stage-complete. **No amendment PR.**
+The product has no spec layout, so there is **no handbook page to amend**. The spec write here is the
+**`spec`** logical surface — the inline-spec write **into the carrier** — **not** the `handbook`
+surface (there is no handbook page in this mode). Skip the drift scan and the handbook PR (Phases 2–4
+are the `handbook`-surface path). **Graduate per `git-policy` for the `spec` surface** (resolve the
+mode against `git-policy` for `spec`; do not restate the rule): **record the touchpoints and decisions
+inline** — into the design doc and the carrier context surface the projection reads — directly when
+the mode resolves **`direct`** (no PR ceremony), or via a labelled PR over the inline-spec change when
+it resolves **`pr-gated`**, so the settled decisions are durable for plan and build. Advance the work
+and signal stage-complete.
 
 ### amend-existing
 
 Revise an **existing** handbook section rather than adding a new one. Same path as `spec-layout`, but
 narrow the `drift-detector` `read_set` to the section under revision (so the scan focuses there)
-and edit that section in place. Raise the labelled PR the same way.
+and edit that section in place. Graduate the same way — per `git-policy` for the `handbook` surface
+(Phase 4).
 
 ## Output
 
 - **spec-layout / amend-existing:** the authored spec amendment, raised as a **labelled PR into
   the shared handbook queue** (body composed by `pr-author`, after a `drift-detector`
   collision/drift pass), reported by URL — queued for the curator's `integrate` gate.
-- **null:** the touchpoints and decisions **recorded inline** (design doc + carrier context), the
-  work advanced; **no amendment PR**.
+- **null:** the touchpoints and decisions **recorded inline** (design doc + carrier context) — the
+  `spec` surface — graduated per `git-policy` for `spec` (direct when the dial resolves `direct`; a
+  labelled PR over the inline-spec change when it resolves `pr-gated`), the work advanced.
 - **All modes:** a **stage-complete signal** — the projection advances `current_stage`. You write
   no carrier field and record no gate decision; the item now sits at gate-2 for the PM/operator.
+
+## On-demand references
+
+Read these at the step of need (single-sourced into this primitive's bundle):
+
+- `references/git-policy.md` — `git-policy`
+

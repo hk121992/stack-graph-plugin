@@ -130,10 +130,13 @@ changed slugs (or, when called from `raise`, surface only the count — the diff
 
 ## Hard constraints
 
-- Handbook changes land via a **labelled PR**, never a direct push — with one exception: the
-  regenerated page index `integrate` commits to the main line after a batch (a generated
-  artifact, not authored handbook). Every `raise` PR carries the queue label — without it the PR
-  drops out of the operator's triage.
+- **Graduate per `git-policy` for the `handbook` surface.** How an authored handbook change
+  graduates — via a labelled PR or a direct push — is **not hardcoded here**: resolve it against
+  `git-policy` for the `handbook` surface (the surface enum + the resolution rule + canon-fail-closed
+  live in `git-policy`; do not restate them). When the resolved mode is **`pr-gated`**, every `raise`
+  PR carries the queue label — without it the PR drops out of the operator's triage. **Exception,
+  unchanged:** the regenerated page index `integrate` commits to the main line after a batch (a
+  generated artifact, not authored handbook) — that index write is not governed by the dial.
 - The **PR description is the proposal**. Write no separate proposal file and no audit file — PRs
   and history are the durable record.
 - **Never bundle a structural/index change with content edits** (`bundling-rules`).
@@ -145,6 +148,7 @@ changed slugs (or, when called from `raise`, surface only the count — the diff
 Read these at the step of need (single-sourced into this primitive's bundle):
 
 - `references/bundling-rules.md` — `bundling-rules`
+- `references/git-policy.md` — `git-policy`
 - `references/integrator-checklist.md` — `integrator-checklist`
 - `references/pr-description-shape.md` — `pr-description-shape`
 - `references/what-belongs.md` — `what-belongs`

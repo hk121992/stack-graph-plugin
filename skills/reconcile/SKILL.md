@@ -153,18 +153,22 @@ Execute each adjudicated path:
 
 ### Amend-spec path
 
-For findings adjudicated as `amend-spec`:
+For findings adjudicated as `amend-spec` (the amendment writes a **handbook page**, so its
+graduation rides the **`handbook`** surface):
 
 1. **Resolve the amendment scope.** Identify the spec touchpoint pages the amendment
    touches. Follow your `handbook` reference (external, on-demand — the overlay binds it
    to this product's handbook root + page index) to navigate those pages.
 2. **Author the amendment** with the operator. Write to the handbook's voice and shape;
    keep it to the adjudicated touchpoints. Do not let the amendment sprawl.
-3. **Raise the labelled PR.** Invoke `pr-author` with the settled edits, the trigger
-   (the reconcile adjudication moment), a recommendation, and the read set. It returns
-   the PR body; you compose the title and open the labelled PR into the shared handbook
-   queue. Report the URL. The PR description *is* the proposal — write no separate
-   proposal file.
+3. **Graduate per `git-policy` for the `handbook` surface.** How the amendment graduates is
+   **not hardcoded here** — resolve the mode against `git-policy` for the `handbook` surface
+   (the surface enum + resolution rule + canon-fail-closed live in `git-policy`; do not restate
+   them). When the resolved mode is **`pr-gated`**: invoke `pr-author` with the settled edits, the
+   trigger (the reconcile adjudication moment), a recommendation, and the read set; it returns the
+   PR body; you compose the title and open the labelled PR into the shared handbook queue. Report
+   the URL. The PR description *is* the proposal — write no separate proposal file. When it resolves
+   **`direct`**: apply the amendment to the handbook's main line and push directly, no PR ceremony.
 
 The amendment is now **queued for the curator's `integrate` gate**. You do not invoke
 integrate and you do not merge — that is a separate session, on the operator's cadence.
@@ -248,4 +252,10 @@ declared on the appropriate node's frontmatter.
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
 @references/decisions-store.md
+
+## On-demand references
+
+Read these at the step of need (single-sourced into this primitive's bundle):
+
+- `references/git-policy.md` — `git-policy`
 

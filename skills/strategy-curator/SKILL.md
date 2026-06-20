@@ -46,7 +46,8 @@ arc (separate nodes); the outcome layer (OKRs / north-star) is set alongside you
 Strategy is held honest by a test-and-learn cycle: **`hypothesise`** frames testable claims about
 the market, users, jobs, value, and model; **`gather-evidence`** runs evidence against them;
 **`assess`** records the findings and moves each affected item along its lifecycle, graduating the
-change as a labelled PR; **`refresh-canvas`** regenerates the readable view from its sources. The
+change per `git-policy` for the `strategy` surface; **`refresh-canvas`** regenerates the readable
+view from its sources. The
 loop closes from outside, too — when a downstream debrief reports a real outcome, it arrives here
 to **confirm** or **kill** the strategy hypothesis it bears on. There is no other write path to the
 canvas surface.
@@ -64,9 +65,9 @@ Two invariants ride the whole loop, both from your `four-risks` lens (imported, 
 ## Preflight (before any mutating mode)
 
 Confirm the canvas home is reachable through its overlay binding. Read the product's **maturity
-stage** — it sets the evidence bar for `assess`. For `assess` (which graduates a PR), confirm PR
-tooling is authenticated (abort and surface the auth error otherwise) and the working tree is clean
-before branching.
+stage** — it sets the evidence bar for `assess`. For `assess`, resolve graduation per `git-policy`
+for the `strategy` surface; **only when it resolves `pr-gated`** confirm PR tooling is authenticated
+(abort and surface the auth error otherwise) and the working tree is clean before branching.
 
 ## Modes
 
@@ -119,10 +120,13 @@ before branching.
 4. **Duplicate-check before opening.** Invoke **queue-checker** in `check-duplicate` mode over the
    target canvas files. If an open PR already touches them, **do not open a second** — surface the
    overlapping PR(s) and stop, recommending the operator extend or close the existing one.
-5. **Graduate the change.** Invoke **pr-author** to compose the PR body for the settled canvas
-   edits. Branch off the canvas home's main line, apply the edits, open the PR with the overlay's
-   queue **label**, and report the URL. The PR description *is* the proposal — write no separate
-   proposal file.
+5. **Graduate per `git-policy` for the `strategy` surface.** Resolve the mode against `git-policy`
+   for the `strategy` surface (do not restate the rule). When it resolves **`pr-gated`**: invoke
+   **pr-author** to compose the PR body for the settled canvas edits, branch off the canvas home's
+   main line, apply the edits, open the PR with the overlay's queue **label**, and report the URL
+   (the PR description *is* the proposal — write no separate proposal file). When it resolves
+   **`direct`**: branch is unnecessary — apply the edits to the canvas home's main line and push
+   directly, no PR ceremony.
 
 ### `refresh-canvas` — regenerate the readable view (idempotent)
 
@@ -154,9 +158,12 @@ preserved as the source records them, never upgraded by the transform.
   confirmed; an item is promoted only on a finding, at the maturity-scaled bar.
 - **Address the riskiest value/viability assumption first.** Confidence on three risks and a blind
   spot on the fourth is not a green light.
-- **Canvas changes land via a labelled PR, never a direct push.** Every graduated PR carries the
+- **Graduate per `git-policy` for the `strategy` surface.** How a canvas change graduates — via a
+  labelled PR or a direct push — is **not hardcoded here**: resolve it against `git-policy` for the
+  `strategy` surface (the surface enum + the resolution rule + canon-fail-closed live in `git-policy`;
+  do not restate them). When the resolved mode is **`pr-gated`**, every graduated PR carries the
   overlay's queue label — without it the PR drops out of the operator's triage. The curator is the
-  single write path to the canvas surface.
+  single write path to the canvas surface, whichever mode the dial resolves to.
 - **Never bundle a structural canvas change with content edits** (`bundling-rules`).
 - **The PR description is the proposal** — write no separate proposal file and no audit file; PRs and
   history are the durable record.
@@ -177,5 +184,6 @@ Read these at the step of need (single-sourced into this primitive's bundle):
 - `references/axis-entry-schema.md` — `axis-entry-schema`
 - `references/bmc-schema.md` — `bmc-schema`
 - `references/bundling-rules.md` — `bundling-rules`
+- `references/git-policy.md` — `git-policy`
 - `references/vpc-schema.md` — `vpc-schema`
 

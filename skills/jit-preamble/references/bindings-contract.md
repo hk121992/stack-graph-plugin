@@ -3,8 +3,9 @@ kind: reference
 id: bindings-contract
 title: Bindings contract — the keys a harness supplies, and the surface template
 description: The factory contract the plugin ships so a consuming workspace can instantiate a harness — the complete set of binding keys the vendored graph may require, the bindings.yaml file format, the org-root CLAUDE.md ambient-surface template, and the dashboard + improvements surface-structure templates harness-init scaffolds. The plugin carries this contract; the harness supplies the values. No product data.
-status: v0.10.0 — 2026-06-20
+status: v0.11.0 — 2026-06-20
 changelog:
+  - v0.11.0 (2026-06-20): canon-surfaces-required (wi-git-policy-binding IU-3) — now that the canon-writing nodes consult `git-policy`, §7 makes listing the canon surfaces `{handbook, strategy, objectives, spec}` in `git-policy.pr-gated` a **hard requirement** for a canon-bearing harness. Enforced on the **per-harness update**, not at factory land: this contract-version bump drives `harness-update`'s re-bind; `harness-init validate` fails a canon-bearing harness omitting a canon surface; the absent-block canon-fail-closed default still protects review if a consumer skips the update. **No key or shape change from v0.10.0** — the `{default, pr-gated}` block is unchanged; this bump fixes only the requirement.
   - v0.10.0 (2026-06-20): git-policy binding (wi-git-policy-binding IU-1) — add the **optional** harness-local `git-policy` block to §2 (the `{default, pr-gated}` dial that maps a logical write-surface to pr-gated-vs-direct) + a new §7 documenting its shape and the canon-fail-closed-on-absence semantics (a **present** block is authoritative; an **absent** block ⇒ a canon-surface node defaults to `pr-gated`, a non-canon node to `direct`). The block is a small-scalar dial, harness-local, **never vendored** — adds per-harness with no plugin change. The resolution rule + surface enum live in the new `git-policy` reference (single source); this contract fixes only the block's shape. **Contract drift:** a canon-bearing harness must declare its canon surfaces in `pr-gated` — `harness-update`'s contract-drift re-bind emits the block (the absent-default already protects canon if skipped).
   - v0.9.0 (2026-06-19): analytics lifecycle review (wi-analytics-lifecycle-review IU-A2b) — §6 extended with the `harness_id` attribution-key field + the per-harness-local-derive / central-merge seam (the locality-honouring fleet model): each harness derives its own log LOCALLY; only the already-sanitised per-harness rows combine, in a central merge keyed on `harness_id` (no loss / no double-count). No new binding key — `harness_id` rides the META envelope the analyzer already parses (the earns-a-binding test: no node resolves it). The cron-path home named in §6 is the shared workspace's `workspace/renderer/analyzer/`, matching the harness-init runbook correction.
   - v0.8.0 (2026-06-18): renderer-vestige removal (RESTRUCTURE-PLAN D1) — local-portal rendering retired; the renderer moved out of the installed plugin to the shared mm-workspace. Removed the `renderer` key from §2 (the vendored workspace-render overlay no longer ships in the plugin); dropped "the renderer" from the §intro surfaces list; §6 `SG_PRICING` consumer retitled "renderer Cost block" → "analytics Cost block". **Key removed** — consumers drop `renderer` from `bindings.yaml` on the contract-drift re-bind (harness-update §Contract-drift). The analyzer/event-log substrate (`workspace/renderer/analyzer/…`, §6) is owned by `wi-analytics-lifecycle-review` and is untouched here.
@@ -226,9 +227,20 @@ defaults to **`pr-gated`** (fail-closed, root-instruction #3) and a **non-canon*
 **`direct`** — so a missing block can never silently strip canon review, while the work-ledger keeps
 its low-ceremony default.
 
-**Contract drift.** A **canon-bearing** harness must **declare its canon surfaces** in `pr-gated`. On
-this contract bump, `harness-update`'s contract-drift step **re-binds** (emits the block); the
-absent-default already protects canon if a consumer skips the update. `harness-init scaffold` emits
-the block per the maturity dial; `harness-init validate` checks the listed surfaces resolve to the
-closed enum and that a canon-bearing harness lists its canon surfaces (those are the consult/scaffold/
-validate IUs — this contract documents only the shape they enforce against).
+**Canon-surfaces requirement (v0.11.0 — hard).** A **canon-bearing** harness — one whose vendored
+canon-writing nodes (`handbook-curator`, `strategy-curator`, `specify`, `reconcile`, `pr-author`) now
+consult this dial — **MUST** list its canon surfaces `{handbook, strategy, objectives, spec}` in
+`git-policy.pr-gated`. This is the requirement the consult nodes enforce against: a canon-bearing
+harness that omits a canon surface from `pr-gated` would silently graduate that surface per `default`
+(typically `direct`), stripping its review.
+
+**Contract drift — the migration is the update path, not a factory-land gate.** The canon-surfaces
+requirement is enforced **when a consumer updates** to a plugin carrying the consult nodes — **not** at
+factory land. On this **contract-version bump (v0.10.0 → v0.11.0)**, `harness-update`'s contract-drift
+step **re-binds** (emits/completes the `git-policy` block so the canon surfaces are listed); the
+absent-block canon-fail-closed default already protects canon review if a consumer skips the update.
+`harness-init scaffold` emits the block per the maturity dial; `harness-init validate` checks the
+listed surfaces resolve to the closed enum **and that a canon-bearing harness lists its canon
+surfaces** (the maturity-dial assertion, not just referential integrity). Those are the consult /
+scaffold / validate IUs — this contract documents only the requirement and the shape they enforce
+against.
