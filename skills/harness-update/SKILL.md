@@ -123,9 +123,8 @@ Print:
   mutated. Detect refreshes the cache before comparing so the no-op is honest, not a stale-cache
   false-positive.
 - **Re-bind only on contract change.** `harness-init bind` runs **only** when the bindings-contract
-  `status:` version moved — never on an unchanged contract. The read-only `harness-init validate` of
-  the ambient-surface sync (Step 3b) runs **every** update; what stays contract-gated is the *bind*,
-  not the validate.
+  `status:` version moved — never on an unchanged contract. (The ambient-surface `validate` of Step 3b
+  is separate and runs every update — see 3b.)
 - **Always surface restart + what landed.** Every non-no-op run ends with the version + `gitCommitSha`
   it landed on and the restart-required reminder; the operator is never left unsure whether the new
   skill set is live.

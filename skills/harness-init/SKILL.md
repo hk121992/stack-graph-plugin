@@ -57,8 +57,9 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    `@.claude/sg-root-instructions.md` `@`-ref — or that vended file absent — is the same class of
    partial state (an ambient-surface drift: a harness scaffolded before the `@`-ref existed, or a
    plugin update that added the root set), repairable in place by Step 4.** On a partial state, **do not error and do not overwrite** —
-   switch to **targeted repair**: keep what exists (confirm it with the operator), create only the
-   missing artefacts via the steps below (idempotently), then `validate`. A fully-absent harness is a
+   switch to **targeted repair**: keep what exists (confirm *kept* artefacts with the operator), create
+   only the missing artefacts via the steps below (idempotently — the ambient-surface `@`-line repair of
+   Step 4 is **non-interactive** and does not prompt), then `validate`. A fully-absent harness is a
    clean greenfield run; a fully-present, consistent one — including the `@`-ref present and the vended
    file non-empty — routes to `bind` / `validate`.
 1. **Locate the org root** and confirm it with the operator (this anchors every relative binding).
@@ -98,7 +99,9 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    Structure only; **idempotent** — never clobber an existing authored `CLAUDE.md`; if one exists,
    confirm it carries the ambient pointers + the `@.claude/sg-root-instructions.md` `@`-ref and re-vend
    a stale **or absent** root-instructions copy. **If the `@`-ref line itself is missing, insert it** —
-   a single `@.claude/sg-root-instructions.md` line appended to the ambient pointers, a surgical
+   a single `@.claude/sg-root-instructions.md` line appended to the ambient pointers — or, where the
+   CLAUDE.md carries no recognisable ambient-pointers block (a body authored before the `@`-ref), at
+   end-of-file — a surgical
    one-line patch that never rewrites or reorders the authored body; warn only on a missing *ambient
    pointer* (handbook-index / bindings) you cannot safely place. This repair is **non-interactive** —
    it re-vends the file and inserts the `@`-line without re-running the Step 2 binding confirmation. (The
