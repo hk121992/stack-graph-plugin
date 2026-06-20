@@ -78,7 +78,28 @@ against the version the harness **last bound against**.
 - If it **moved** → invoke **`harness-init bind`** then **`harness-init validate`**, so new or changed
   binding keys are reconciled and the harness re-passes its gate. (This is exactly the
   0.4.1 → 0.5.0 case, where the contract added optional `architecture-reviews-root`.)
-- If it is **unchanged** → say so and **skip** the re-bind — do not re-bind or re-validate needlessly.
+- If it is **unchanged** → say so and **skip** the re-bind — do not re-bind needlessly. (The read-only
+  ambient-surface `validate` of Step 3b still runs every update — what is contract-gated is the *bind*,
+  not the validate.)
+
+### 3b. Ambient-surface sync (every run, state-based)
+
+Independently of the contract check, **always** reconcile the harness's **ambient surface** — the
+`@`-ref'd root instructions (`@.claude/sg-root-instructions.md`) that load every session. The `@`-ref
+was added to the scaffold standard *after* early harnesses were stood up, and it is **not** a binding
+key, so the Contract-drift check above never sees it; without this step a harness scaffolded before the
+`@`-ref never picks it up on update.
+
+- **Run `harness-init validate`** (read-only — it already asserts that `CLAUDE.md` `@`-refs the vended
+  `@.claude/sg-root-instructions.md` and that the file is present + non-empty) on **every** update, not
+  only on a contract move.
+- **On a flagged ambient-surface gap** (the `@`-ref line missing, or the vended file absent / stale),
+  invoke **`harness-init scaffold`** in its idempotent repair posture — it re-vends the file and
+  **inserts** the missing `@`-line in place (its Step 0 detection + Step 4 insert), non-interactively
+  and without clobbering the authored `CLAUDE.md`. Then **re-validate** to confirm the gap closed.
+- **State-based, not version-gated.** The trigger is the validate result — does the `@`-ref actually
+  resolve? — never a version counter, so it self-heals a harness however it drifted (never-wired,
+  hand-edited, half-scaffolded) and is a clean **no-op** when the surface is already current.
 
 ### 4. Hand off
 
@@ -101,8 +122,10 @@ Print:
 - **Idempotent.** Re-running when already current is a clean no-op — "up to date at vX.Y.Z", nothing
   mutated. Detect refreshes the cache before comparing so the no-op is honest, not a stale-cache
   false-positive.
-- **Re-bind only on contract change.** `harness-init bind` + `validate` run **only** when the
-  bindings-contract `status:` version moved — never on an unchanged contract.
+- **Re-bind only on contract change.** `harness-init bind` runs **only** when the bindings-contract
+  `status:` version moved — never on an unchanged contract. The read-only `harness-init validate` of
+  the ambient-surface sync (Step 3b) runs **every** update; what stays contract-gated is the *bind*,
+  not the validate.
 - **Always surface restart + what landed.** Every non-no-op run ends with the version + `gitCommitSha`
   it landed on and the restart-required reminder; the operator is never left unsure whether the new
   skill set is live.

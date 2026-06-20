@@ -53,10 +53,14 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    exists: the org-root `bindings.yaml`, the org-root `CLAUDE.md`, and the surface skeleton. A prior
    run interrupted *between* these writes leaves a **half-written** harness — the crash windows:
    bindings written but the surface not yet scaffolded; the surface present but bindings absent; the
-   `CLAUDE.md` written but bindings not. On a partial state, **do not error and do not overwrite** —
+   `CLAUDE.md` written but bindings not. **A `CLAUDE.md` present but missing its
+   `@.claude/sg-root-instructions.md` `@`-ref — or that vended file absent — is the same class of
+   partial state (an ambient-surface drift: a harness scaffolded before the `@`-ref existed, or a
+   plugin update that added the root set), repairable in place by Step 4.** On a partial state, **do not error and do not overwrite** —
    switch to **targeted repair**: keep what exists (confirm it with the operator), create only the
    missing artefacts via the steps below (idempotently), then `validate`. A fully-absent harness is a
-   clean greenfield run; a fully-present, consistent one routes to `bind` / `validate`.
+   clean greenfield run; a fully-present, consistent one — including the `@`-ref present and the vended
+   file non-empty — routes to `bind` / `validate`.
 1. **Locate the org root** and confirm it with the operator (this anchors every relative binding).
 2. **Resolve each binding key** from `bindings-contract`. Infer where you can and **propose the
    value** for the operator to confirm or correct: the `surface-root` (where the work ledger should
@@ -93,7 +97,11 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    enough to `@`-ref, and the live per-turn state is loaded just-in-time by the `jit-preamble`.
    Structure only; **idempotent** — never clobber an existing authored `CLAUDE.md`; if one exists,
    confirm it carries the ambient pointers + the `@.claude/sg-root-instructions.md` `@`-ref and re-vend
-   a stale root-instructions copy, warning on anything missing rather than overwriting. (The
+   a stale **or absent** root-instructions copy. **If the `@`-ref line itself is missing, insert it** —
+   a single `@.claude/sg-root-instructions.md` line appended to the ambient pointers, a surgical
+   one-line patch that never rewrites or reorders the authored body; warn only on a missing *ambient
+   pointer* (handbook-index / bindings) you cannot safely place. This repair is **non-interactive** —
+   it re-vends the file and inserts the `@`-line without re-running the Step 2 binding confirmation. (The
    per-session runtime state load is the **`jit-preamble`** — the deterministic JIT preamble loads the
    live carrier state from the derived projection and emits it for turn 1; you scaffold the file,
    `@`-ref the root instructions, and name the preamble surface — you do not hand-author a session-start
