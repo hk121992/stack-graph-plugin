@@ -24,7 +24,9 @@ values from the workspace and **confirm with the operator** — you never assume
 You create the **bound, empty structure**; the front fills the **content** (work items via `raise`,
 per `product-dashboard-conventions`; strategy/objectives via `strategy-curator`):
 
-- **You write** `<org-root>/.claude/bindings.yaml` (the binding values), the org-root **`CLAUDE.md`**
+- **You write** `<org-root>/.claude/bindings.yaml` (the binding values — including the maturity-dialled
+  **`git-policy`** block, the per-surface git-write dial; `bindings-contract` §7, semantics in the
+  `git-policy` reference), the org-root **`CLAUDE.md`**
   (the harness's **ambient surface** — the handbook-index pointer + the bindings-reference pointer +
   the how-to-use-the-graph navigation), the **surface skeleton** under `surface-root` (the
   `strategy.md` / `objectives.md` templates, `items/` + an empty `manifest.json`, `sprints/`), the
@@ -80,6 +82,33 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    such as `learnings-archive`), **add the missing required keys** — infer + confirm each — before
    `validate`; never leave a stale key set that `validate` will then reject. This is how an existing
    harness adopts a plugin that introduced a new required binding (the plugin-update migration path).
+3b. **Emit the `git-policy` block, dialled by `maturity`** (`bindings-contract` §7; semantics in the
+   `git-policy` reference). So a fresh harness is **born** with an explicit, validated per-surface
+   git-write policy rather than leaning on the absent-block fail-closed default. The block is the
+   `{default, pr-gated}` dial; you **emit** it but do **not** restate the surface enum or the
+   resolution rule — both are **single-sourced** from the `git-policy` reference (which fixes the
+   closed surface enum and its **canon subset**; read the actual values there, do not memorise them).
+   Dial the block off the `maturity` value you resolved in step 2:
+   - **`first-users` / `scale` (canon-bearing — the default emission):** emit the **canonical
+     low-ceremony block** — `default: direct` with the **canon subset listed** in `pr-gated`, so the
+     work-ledger pays no ceremony while the durable, review-bearing canon surfaces keep their PR gate.
+     The shape (resolve `pr-gated`'s values from the `git-policy` reference's canon subset at emit
+     time — do **not** copy a literal list from here):
+     ```yaml
+     git-policy:
+       default: direct                                          # surfaces not in pr-gated push direct
+       pr-gated: [<the canon subset — read from the git-policy reference, do not hardcode>]
+     ```
+   - **`pre-launch`:** same canonical block. A pre-launch harness's canon surfaces are empty shells,
+     but listing them costs nothing and means the harness is **already correct** the moment canon
+     content arrives — and `harness-init validate` (the sibling slice) can assert a canon-bearing
+     harness lists its canon surfaces uniformly. (Emission is keyed on `maturity` so a future, stricter
+     maturity posture is a localised change here; today every maturity converges on the canonical
+     block.)
+   The block is **idempotent** like every other key — never clobber an operator-authored `git-policy`
+   block on a re-point/partial-repair; emit it only when absent. It is **optional** by the contract
+   (the absent-block default still protects canon), so a deliberate operator removal is honoured — you
+   emit it on a greenfield scaffold, you do not re-impose it.
 4. **Write the org-root `CLAUDE.md`** from the `bindings-contract` template — the harness's
    **ambient surface**: the `handbook-index` pointer (made ambient so it cascades to every child),
    the pointer to the bindings reference, and the how-to-use-the-graph navigation. Also emit **one
@@ -179,6 +208,34 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    `improvements-manifest`, `learnings-archive` (the committed archive
    file). The `event-log` location is reachable (the `.stack-graph/derived/` parent exists or can be
    created).
+4b. **The `git-policy` block is sound** (`bindings-contract` §7; the rule + the closed surface enum
+   live in the `git-policy` reference — the single source; resolve through the **executable resolver**,
+   do not restate the rule). The block is **optional** (the absent-block fail-closed default still
+   protects canon), so a deliberately-absent block on a *non-consulting* harness is **not** a fail.
+   When the block **is present**, run checks (a)+(b); independently run the convergence check (c). All
+   three resolve the surface enum / canon subset from the `git-policy` reference (do **not** hardcode
+   the enum):
+   - **(a) every `pr-gated` entry resolves to a member of the closed surface enum** (`work-ledger`,
+     `decisions`, `handbook`, `strategy`, `objectives`, `spec`), **and `default` is a legal write
+     mode** (`direct | pr-gated`). A `pr-gated` value outside the enum, or a `default` outside the two
+     legal modes, is a **fail** (either typo silently policies nothing / leaks a garbage mode) —
+     report each bogus key and a bad `default`.
+   - **(b) a canon-bearing harness lists its canon surfaces** — for a harness that **carries canon
+     content** (a maturity-dial assertion, *not* mere referential integrity), the **canon subset**
+     `{handbook, strategy, objectives, spec}` must be **present in `pr-gated`**. A canon surface
+     **missing** from a canon-bearing harness's `pr-gated` is a **fail** (canon would silently resolve
+     `direct` against a *present* block — the operator's list is authoritative, so an unlisted canon
+     surface honours `default` and is NOT caught by the absent-block default). Report each missing
+     canon surface.
+   - **(c) flag the convergence gap** — a harness where a **vendored consult exists** (a node already
+     consults the dial) but the block is **absent on a canon surface** is the half-migrated Phase-A→B
+     mixed state: its canon writes ride the absent-block fail-closed default rather than an explicit,
+     validated policy. **Flag** it (the convergence forcing-function — bounds the cross-harness mixed
+     state) and point the operator at `harness-init scaffold`'s `git-policy` emission to converge.
+   This check is **mechanical, not by assertion** — it runs the `git-policy` **executable resolver +
+   block-validator** (the rule's one executable source of truth, shipped with this slice), so validate
+   never drifts from the rule the consulting nodes resolve through. **Validate FAILS** on a bogus
+   surface key (a) AND on a canon-bearing harness missing a canon surface (b).
 5. **Analytics is wired (scheduled task registered + analyzer dry-run probe).** This is the
    capture gate the analytics evidentiary layer depends on; verify it end-to-end, not by assertion:
    - **Analytics env present.** `SG_TRANSCRIPT_ROOT` (the analyzer's input root) and `SG_EVENT_LOG`
@@ -197,8 +254,10 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    ever relies on it.
 6. **Report pass/fail with the specific gaps.** A fail means the loop must not run yet — surface
    exactly what to fix (a missing binding, a dangling path, an absent surface dir, an unwired
-   `CLAUDE.md`, an unregistered analyzer task, or an analyzer dry-run probe that never derived a row).
-   This is the gate the first traversal depends on.
+   `CLAUDE.md`, a **bogus `git-policy` surface key or a canon-bearing harness missing a canon
+   surface** (step 4b), an unregistered analyzer task, or an analyzer dry-run probe that never derived
+   a row). The **convergence flag** (4b·c) is reported alongside, with the converge step. This is the
+   gate the first traversal depends on.
 
 ## Hard constraints
 
@@ -229,6 +288,7 @@ The following references are single-sourced into this primitive's bundle and spl
 
 Read these at the step of need (single-sourced into this primitive's bundle):
 
+- `references/git-policy.md` — `git-policy`
 - `references/handoff-prompt-convention.md` — `handoff-prompt-convention`
 - `references/okr-schema.md` — `okr-schema`
 - `references/sg-root-instructions.md` — `sg-root-instructions`
