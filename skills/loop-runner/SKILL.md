@@ -42,7 +42,7 @@ incremental arc's *own stages*; you never traverse the arc yourself. Concretely:
 - **Not a retry loop.** Route-outs (`escalated` / `review-flagged` / `hitl-parked` / `blocked`) park
   with a reason and a resume pointer; you never re-dispatch a routed-out IU within the batch.
 - **Not a lifecycle or shared-surface writer during the span.** Dispatched sessions write their own
-  worktree(s) and **own carrier file only**. The manifest is **coordinator-regenerated** (refresh-index)
+  worktree(s) and **own carrier file only**. The manifest is **coordinator-regenerated** (refresh-manifest)
   after outcomes return; sessions never write it or any shared committed surface.
 
 ## Phase 0 — Intake (collaborative; the operator is present throughout)
@@ -72,7 +72,7 @@ incremental arc's *own stages*; you never traverse the arc yourself. Concretely:
      the coordinator's attended `dropped`-via-promotion write, Phase 1.3) — not a second lifecycle
      writer. `record-gate` admits this as an AFK-classed reconcile from the unattended coordinator
      (it records an already-established authority, never a fresh product-gate decision). The
-     **manifest is still coordinator-regenerated** (refresh-index) from the reconciled carrier — you
+     **manifest is still coordinator-regenerated** (refresh-manifest) from the reconciled carrier — you
      drive the carrier reconcile via `record-gate`, not the manifest. An IU with **no `iu/<id>` branch**, or a
      **non-hit** (exit 1), is a genuine open candidate and proceeds to step 2. *(This is the intake
      half of the ancestry gate; Phase 2.3 applies the same pre-check at the land queue so an
@@ -269,7 +269,7 @@ unchanged.
 ## Phase 2 — Integration dry-run + land queue (collaborative)
 
 1. **Batch report.** Per-IU outcomes with evidence, the five buckets named; escalations enacted
-   attended (per Phase 1.3); the manifest regenerated (refresh-index) from the carrier files.
+   attended (per Phase 1.3); the manifest regenerated (refresh-manifest) from the carrier files.
 2. **Integration dry-run per repo.** In a **scratch worktree**, merge the `built` branches onto the
    frozen base-ref *plus current target-branch state* in dependency order, and **re-run each slice's
    `acceptance_check` on the merged tree** — cross-slice and mid-batch-drift conflicts surface here, not
