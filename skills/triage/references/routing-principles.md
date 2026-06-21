@@ -69,6 +69,43 @@ a **defined, improvable node**, not per-session free judgment.
   on a *borderline* signal **lean toward running the specialist**, and **surface which specialists
   were skipped, and why, at the gate**.
 
+## 4 · AFK/HITL slice classifier (pointed to, never restated)
+
+Output: **`slice_type: AFK | HITL`** + (HITL) **`hitl_point: {stage, decision}`** (`IU-schema` shape).
+**Core test:** AFK iff the loop can build→review→land **unattended** — criterion is *a required human
+halt*, **not size/risk**. HITL is **attended-whole** today (`loop-runner` Phase 0.4); `hitl_point` records
+*where* the human point falls.
+
+**Precedence — checked in order, first match wins:**
+| # | Trigger | Result · hitl_point |
+|---|---|---|
+| 1 | Challenge / safety / feasibility | **back to front** (never a loop tag) |
+| 2 | Irreducible mid-build fork (non-challenge) | `HITL` · `{build, <fork>}` |
+| 3 | Taste / quality / brand bar can't self-certify | `HITL` · `{review, <bar>}` |
+| 4 | Customer-facing copy | `HITL` · `{review, voice}` |
+| 5a | Visual/UI — **converged** (clear brief) | `AFK`/`HITL` · `{review, fidelity}` if any |
+| 5b | Visual/UI — **unconverged** | front → still unconverged post-front ⇒ **`defer`** (no self-loop) |
+| 6 | Experience-bearing (`simulate-users` front-wired) | `HITL` · `{review, experience}` |
+| — | **none fire** | **`AFK`** (omit `hitl_point`) |
+
+**Emit + trace:** write `slice_type` (+ `hitl_point`) and a one-line trace naming the fired trigger; the
+unit of HITL is the **stage**.
+
+**Fixtures (regression oracle — `slice → slice_type, hitl_point, #`):**
+| slice | → | # |
+|---|---|---|
+| challenge operator's premise | →front | 1 |
+| fork only resolvable mid-build | HITL `{build}` | 2 |
+| brand bar can't self-certify | HITL `{review}` | 3 |
+| headline/byline copy | HITL `{review, voice}` | 4 |
+| UI against converged brief | AFK | 5a |
+| look-and-feel iterating post-front | defer | 5b |
+| user experience at stake | HITL `{review, experience}` | 6 |
+| `afk-hitl-classifier` (ref vs spec) | AFK | none |
+| `front-single-path` (specified edit) | AFK | none |
+| `specify-slice-reframe` (doc edit) | AFK | none |
+| `front-single-path-handbook` (canon prose) | HITL `{review}` | 3 |
+
 ## Engineering auto-decide principles
 
 Scoped to the engineering side only (mechanical / taste; never the product side): **completeness ·

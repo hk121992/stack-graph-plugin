@@ -8,34 +8,37 @@ description: "Capture and decide when the operator says \"raise an IU\" — rout
 
 You are the **entry** of the incremental-improvement arc (`incremental`) — the lighter loop beside
 the dev-sprint — and the **raise-time capture-and-decide** node. The operator says **"raise an IU"**
-when something comes up mid-session; you **assess how ready the work is** — and actively raise that
-readiness — then route it, and on the loop branch **capture the full definition on the spot** so the
-carrier is decision-complete from raise time. **All operator questions happen here.** You own the
-route decision, the instance scaffold, and the carrier's **definition body** — you do **not** write
-the IU's content fields (`goal`, `files`, `acceptance`, `acceptance_check`, `size`, `slice_type`,
-`verification` — those are `specify-slice`'s, which you precede), and you do **not** run the front
-yourself (you escalate to it).
+when something comes up mid-session; you run **ONE path**: **capture → drive to decision-complete →
+classify**. You **capture the full definition on the spot** so the carrier is decision-complete from
+raise time. **All operator questions happen here.** You own the instance scaffold, the carrier's
+**definition body**, and the **AFK/HITL classification** — you do **not** write the IU's content
+fields (`goal`, `files`, `acceptance`, `acceptance_check`, `size`, `slice_type`, `verification` —
+those are `specify-slice`'s, which you precede), you do **not** do depth/tool routing (that is
+`working-session`'s, reached when the work needs depth), and you do **not** run the front yourself
+(you continue into it).
 
-You assess **readiness, not shape**. Route on the depth gradient of `routing-principles` (§2) — three
-outcomes:
+**The single path — capture → dec-complete → classify.** You do **not** take a route decision at
+raise. You capture, then drive the work to decision-complete: a small one you **finish in place** (ask
+the genuine remaining decisions and settle them with the operator, who is with you); a deeper one you
+**continue into `working-session`** (the one router for depth/tool) to get there. Either way the path
+terminates in the same first-class output: a **decision-complete IU classified AFK/HITL**. Run the
+classifier (`routing-principles` §4) and **emit its one-line trace** — so a mis-classification is
+observable and the rule sharpens.
 
-- **Decision-complete now → the loop directly.** Every relevant decision is already made (one
-  understood vertical slice, or N already-complete slices from a complete WI). Scaffold a standalone-IU
-  carrier-lite at `improvements-root`, **write its definition body** (Context + Decisions), and hand
-  it to `specify-slice`. You write the **carrier only** — the manifest is a coordinator-regenerated
-  derived index (`refresh-manifest`), not yours to hand-write.
-- **A small gap (1–2 questions) → decide here, then the loop.** A residual decision or two stands
-  between the work and decision-completeness, and you can settle it on the spot with the operator (you
-  are with them at raise). **Raise the readiness yourself** — ask, settle, capture — then take the
-  loop branch above. Do not escalate a gap you can close.
-- **Needs worked design → escalate to `working-session`.** The work carries unresolved product/design
-  forks, decomposes into work that must be planned together, or belongs on the strategic surface — it
-  needs a worked design pass. **Escalate** to the unified-front orchestrator (`working-session`).
-  Create **no** standalone IU.
+- **Finish small ones in place → the loop.** When the work is decision-complete (or one or two
+  closeable questions short, settled on the spot), scaffold a standalone-IU carrier-lite at
+  `improvements-root`, **write its definition body** (Context + Decisions), **classify** it (AFK/HITL
+  + trace), and hand it to `specify-slice`. You write the **carrier only** — the manifest is a
+  coordinator-regenerated derived index (`refresh-manifest`), not yours to hand-write. Do not continue
+  to the front for a gap you can close.
+- **Continue deeper ones into the front.** When the work carries unresolved product/design forks,
+  decomposes into work that must be planned together, or belongs on the strategic surface — it needs a
+  worked design pass to reach dec-complete. **Continue** into the unified-front orchestrator
+  (`working-session`), which owns the depth/tool routing and applies the same classifier at its raise
+  terminus. Create **no** standalone IU here — the continuation produces it.
 
-Dispatch the routing call to `routing-principles` — the depth gradient, the conservative
-fork-detection (assume a fork is present until fork-absence is shown), and the who-resolves altitude
-line. Do not re-author that scheme here; you apply it.
+You **consult** the classifier (`routing-principles` §4, AFK/HITL slice classifier) and the
+who-resolves altitude line; you do **not** restate either rule here — you apply them.
 
 **Why the capture matters.** An incremental IU runs in the loop **only when every relevant decision
 is already made.** `specify-slice` now runs as a mechanical formalise-and-enforce pass — typically
@@ -47,7 +50,7 @@ below). Capture is your job; formalisation is `specify-slice`'s.
 **Propose, don't interrogate.** The raising session already holds the context — definition is a
 *capture*, not an interview. Harvest first, derive what the repo can answer, and ask the operator
 **only the genuine remaining decisions** (typically 0–2). Light by design: the discipline is that the
-route is *decided* and the definition is *complete*, not that the conversation is laborious.
+definition is *complete* and the slice is *classified*, not that the conversation is laborious.
 
 Emit the instrumentation enter/exit events (the imported preamble); these are emitted, not a carrier
 write.
@@ -56,40 +59,43 @@ write.
 
 Invoke when the operator says **"raise an IU"** — an improvement has come up (an operator note
 mid-session, a handbook-curator drift finding, or a `learn`/recall hit) and must be captured and
-routed before any work starts. The trigger is usually mid-session, in the conversation that already
-holds the context — which is exactly why capture (not an interview) is the discipline. The operator
+driven to dec-complete before any work starts. The trigger is usually mid-session, in the conversation
+that already holds the context — which is exactly why capture (not an interview) is the discipline. The operator
 may pass the improvement statement and, optionally, the `triage-source` it was raised from. If the
 candidate came from a `triage-source` queue, **confirm it with the operator first** — a seeded
 candidate is a suggestion, not an instruction to create work (the auto-feed is input-gated; you read
 the binding, you do not auto-spawn).
 
-## The route — assess readiness, then route on the depth gradient
+## The single path — capture, drive to dec-complete, classify
 
-You assess **how ready the work is** — how much shaping still stands between it and a
-decision-complete carrier — and route on the **depth gradient** of `routing-principles` (§2). You do
-not classify the *shape* of the work; you assess *readiness*, and you **actively raise** it where a
-small gap is closeable on the spot. Dispatch the routing call to `routing-principles` — the depth
-gradient, the who-resolves altitude line (product/human-judgment forks are the operator's; mechanical
-detail is `specify-slice`'s), and the **conservative fork-detection** (assume a fork is present until
-the classifier affirmatively shows fork-absence, so a miss fails toward *escalate*, never toward
-*loop*). Do not restate that scheme here; apply it.
+You run **one path**, not a route decision. You capture the work, then **drive it to
+decision-complete** — and **classify** the result AFK/HITL. The only branch is *where* dec-complete is
+reached: **in place** (you finish a small one yourself) or **in the front** (you continue a deeper one
+into `working-session`). You do **not** assess depth-and-tool here — that is the front's, reached only
+when the work deepens. Two dispositions of the drive-to-dec-complete:
 
-The gradient yields three routes:
+- **Finish small ones in place → the loop.** No unresolved or auto-resolved load-bearing decision
+  stands open, or only one or two closeable questions do — settle them with the operator on the spot
+  (you are with them), capture, and a fresh agent could then build and prove the slice (the
+  cold-handoff bar). Scaffold the carrier, capture its definition, **classify it**, and hand to
+  `specify-slice`. Closing a closeable gap is your job; **do not continue to the front for a gap you
+  can close here.**
+- **Continue deeper ones into the front.** Unresolved product/design forks, work that decomposes and
+  must be planned together, or progress that belongs on the strategic surface — it needs a worked
+  design pass to reach dec-complete. **Continue** into `working-session` (below) — the one router for
+  depth/tool, which applies the same classifier at its raise terminus. Create no standalone IU here.
 
-- **Decision-complete now → the loop.** No unresolved or auto-resolved load-bearing decision stands
-  open — a fresh agent could already build and prove the slice (the cold-handoff bar). Take the loop
-  branch: scaffold the carrier and capture its definition.
-- **A small gap (1–2 questions) → raise readiness here, then the loop.** A residual decision or two is
-  all that stands open and you can settle it with the operator on the spot. Ask, settle, capture — then
-  take the loop branch. Closing a closeable gap is your job; do not escalate it.
-- **Needs worked design → escalate.** Unresolved product/design forks, work that decomposes and must be
-  planned together, or progress that belongs on the strategic surface — it needs a worked design pass.
-  Escalate to `working-session` (below). Create no standalone IU.
+If it is genuinely unclear whether the gap is closeable in place after harvesting, that *is* a
+remaining decision — ask the operator one specific question now and let them settle whether you finish
+it here or continue into the front; do not guess and cost a later re-route. Take a position; state
+where you are driving the work and why.
 
-If readiness is genuinely unclear after harvesting, that *is* a remaining decision — ask the operator
-one specific question now and let them settle whether the gap is closeable here or the work needs a
-worked design pass; do not guess a route that costs a later promote. Take a position; state which
-route you chose and why.
+**Classify on the in-place disposition.** Before handing a carrier to `specify-slice`, run the
+classifier (`routing-principles` §4, AFK/HITL slice classifier) over the settled slice and **emit its
+one-line trace** naming the fired trigger — `AFK` when the loop can build → review → land it
+unattended, `HITL` (+ `hitl_point`) when a human decision/review point stands. You **consult** the
+rule; you do not restate it. The continuation disposition carries classification with it: the front
+applies the same classifier at its raise terminus.
 
 ## Incremental branch — scaffold, capture, hand off
 
@@ -116,19 +122,20 @@ route you chose and why.
      fresh session with no access to it. Frame the intent as an **outcome** (what is true after the
      slice), not a task.
    - **`## Decisions`** — every call settled in the raise conversation, **including the AFK/HITL
-     call** (whether the loop can build → review → land it unattended, or it carries a human
-     decision/review point and where) and **any dependency on another open standalone IU** ("depends
-     on `<id>`", or none) — the loop schedules on this record before the field is formalised. You
-     record the *decision*; `specify-slice` formalises it into `slice_type` (and `hitl_point` when
-     HITL) and `dependencies`. Any fork that came up and was resolved is recorded here as a settled
-     decision — not left open in prose.
+     classification** (run the `routing-principles` §4 classifier over the settled slice and record its
+     result — `AFK`, or `HITL` + where the human point falls — **with the one-line trace** naming the
+     fired trigger, so a mis-classification is observable) and **any dependency on another open
+     standalone IU** ("depends on `<id>`", or none) — the loop schedules on this record before the
+     field is formalised. You record the *decision + trace*; `specify-slice` formalises it into
+     `slice_type` (and `hitl_point` when HITL) and `dependencies`. Any fork that came up and was
+     resolved is recorded here as a settled decision — not left open in prose.
 4. **Capture discipline — propose, don't interrogate.** Harvest the conversation first. Derive what
    the **repo** can answer (you may note `explore` for mechanical detail that `specify-slice` will
    resolve in-session). Then ask the operator **only the genuine remaining decisions** — typically
    **0–2 questions**, because the raising session already holds the context. Do not interview the
    operator for what is already on screen or answerable from the code.
 5. **Gate the handoff on the cold-handoff test** (below). A carrier that fails it does not hand off —
-   settle the gap now, escalate, or do not raise the IU.
+   settle the gap now, continue into the front, or do not raise the IU.
 6. **Hand to `specify-slice`.** A **decision-complete carrier is loop-eligible** — that is what lets
    `specify-slice` run **unattended** in a `loop-runner`-dispatched session. It **formalises** your
    captured definition into the content fields (`goal`, `files`, `acceptance`, `acceptance_check`,
@@ -161,18 +168,19 @@ body is a valid intra-conversation state but is **never loop-eligible**. Checkli
 - **Dependencies named or none** — any dependency on another open standalone IU is recorded in
   `## Decisions` (the loop's scheduler reads it at intake, before `dependencies` is formalised).
 - **No unresolved decision left in prose** — every fork is either settled now (recorded in
-  `## Decisions`), escalated (the work needs a worked design pass), or the IU is not raised. An open
-  question in the body is a failed handoff: the loop would surface it as a mid-loop operator question
-  or route the carrier out `blocked: insufficiently-defined`.
+  `## Decisions`), continued into the front (the work needs a worked design pass), or the IU is not
+  raised. An open question in the body is a failed handoff: the loop would surface it as a mid-loop
+  operator question or route the carrier out `blocked: insufficiently-defined`.
 
-If the test fails, you are not done: settle the gap with the operator (you are with them), escalate to
-`working-session` if it turns out to need a worked design pass, or do not raise the IU.
+If the test fails, you are not done: settle the gap with the operator (you are with them), continue
+into `working-session` if it turns out to need a worked design pass, or do not raise the IU.
 
-## Escalate branch — needs a worked design pass, do not build
+## Continuation branch — the work needs depth, continue into the front
 
-When the work needs a worked design pass, hand off to the unified front via the
-`escalates working-session` edge. This is a one-way cross-arc handoff, **not** ordinary next-stage
-flow:
+When driving to dec-complete needs a worked design pass, the single path **continues** into the
+unified front via the `escalates working-session` edge — this is the *deeper* disposition of the one
+path, not a separate up-front route. It is a one-way cross-arc handoff, **not** ordinary next-stage
+flow (graph-record + stage-projection semantics unchanged — the edge is excluded from arc traversal):
 
 1. **Create or reuse the work-item carrier** via the **`raise` action** — the front's create action
    (`product-dashboard-conventions`): raise creates the carrier with identity + initial content, placed
@@ -185,7 +193,7 @@ flow:
    it) is linked from the work-item. When a *standalone IU* was promoted, close it `dropped`
    (reason: promoted) with a pointer to the work-item. A promoted work-item without its source link
    is a defect (design doc §9 R5).
-3. **Create no standalone IU.** Escalation means the change goes through the front
+3. **Create no standalone IU.** Continuation means the change goes through the front
    (`design → specify → plan`, with `working-session` orchestrating); a standalone carrier-lite is
    wrong for it. (When a *standalone IU already exists* and is being promoted mid-loop, that is the
    promote path: the existing IU is closed `dropped`, reason promoted, and cited by the new work-item —
@@ -193,16 +201,20 @@ flow:
 
 ## Output
 
-- **Incremental** — a scaffolded standalone-IU instance file at `improvements-root/<id>.md` (stub
-  frontmatter **plus the definition body** — `## Context` + `## Decisions`), decision-complete and
-  passing the cold-handoff test, handed to `specify-slice`. You write the **carrier only**; the
-  manifest row is regenerated by `refresh-manifest`, not written here. Node-exit outcome:
-  `routed-incremental`.
-- **Wholesale (needs a worked design pass)** — a created-or-reused work-item carrier, raised (and
-  frame-shaped) for the unified front (`working-session`) with a two-way provenance link, **no**
-  standalone IU. Node-exit outcome: `escalated-wholesale`.
-- **All routes** — the enter/exit instrumentation events. You write the definition body but **no IU
-  content field** (those are `specify-slice`'s) and record no gate decision.
+The single path's first-class output is a **decision-complete IU classified AFK/HITL** (+ the one-line
+classifier trace). Two dispositions of *where* dec-complete is reached:
+
+- **Finished in place** — a scaffolded standalone-IU instance file at `improvements-root/<id>.md` (stub
+  frontmatter **plus the definition body** — `## Context` + `## Decisions`, the recorded AFK/HITL
+  classification + trace among the Decisions), decision-complete and passing the cold-handoff test,
+  handed to `specify-slice`. You write the **carrier only**; the manifest row is regenerated by
+  `refresh-manifest`, not written here. Node-exit outcome: `finished-in-place`.
+- **Continued to the front (needs a worked design pass)** — a created-or-reused work-item carrier,
+  raised (and frame-shaped) for the unified front (`working-session`) with a two-way provenance link,
+  **no** standalone IU here (the continuation produces it, classified at the front's raise terminus).
+  Node-exit outcome: `continued-to-front`.
+- **Both dispositions** — the enter/exit instrumentation events. You write the definition body but **no
+  IU content field** (those are `specify-slice`'s) and record no gate decision.
 
 ## Imported references
 

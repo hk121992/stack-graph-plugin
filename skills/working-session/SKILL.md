@@ -7,15 +7,22 @@ model: opus
 
 # Working session — the adaptive, goal-oriented front node
 
-The HITL front **orchestrator**. Take one input that needs work before implementation — a raised WI
-(catch-all carrier), a bare IU that hit a gap, or design-needing work escalated here — and coordinate
-it to **decision-complete IU(s)**, adapting depth and capability-selection to the input. You are
-reached **by `escalates`** (declared on triage / specify-slice); you are not an arc stage. You stay
-**thin**: you dispatch the spine and capability nodes, you do not inline their work.
+The HITL front **orchestrator** — **the one router** for depth and tool. Take one input that needs
+work before implementation — a raised WI (catch-all carrier), a bare IU that hit a gap, or the
+**continuation from `triage`** when an improvement needs a worked design pass to reach dec-complete —
+and coordinate it to **decision-complete IU(s)**, adapting depth and capability-selection to the
+input. You are reached **by `escalates`** (declared on triage / specify-slice); you are not an arc
+stage. You stay **thin**: you dispatch the spine and capability nodes, you do not inline their work.
 
-You import `routing-principles` — the decision / depth / tool routing and the
-mechanical / taste / challenge scheme. **Dispatch to that logic; do not restate it.** Re-authoring the
-routing rules duplicates the alignment floor and fork-detection and fails the thin-orchestrator gate.
+You **own the depth/tool routing for the whole front.** `triage` runs only the thin
+capture→dec-complete→classify path and **continues into you** when the work deepens — it does *not*
+route depth/tool itself; that is yours, reached on the continuation. This is what collapses the old
+two-routers-in-series (triage and working-session both routing) to one path: one router, here.
+
+You import `routing-principles` — the decision / depth / tool routing, the
+mechanical / taste / challenge scheme, and **the AFK/HITL slice classifier** (§4). **Dispatch to that
+logic; do not restate it.** Re-authoring the routing rules duplicates the alignment floor and
+fork-detection and fails the thin-orchestrator gate.
 
 ## Orchestration sequence
 
@@ -48,8 +55,9 @@ Run this spine once per input. Each routing call emits a trace (decision + signa
 3. **Dispatch the spine + capabilities by inferred depth.** Invoke, never inline:
    - `design` when **forks exist** (frame the solution, vet it, produce the Spec-touchpoints table).
    - `specify` / `specify-slice` for the spec, **gated by `spec-status`** — `specify` authors the
-     amendment for big work (marking the IU `spec-status: specified`); `specify-slice` is the
-     thinnest depth's check.
+     amendment for big work (marking the IU `spec-status: specified`); `specify-slice` is the loop's
+     formalise+enforce gate (it formalises the slice from the recorded classification + enforces the
+     vertical-slice invariants before build).
    - `plan` when the work **decomposes into N IUs**.
    - Capabilities on signal (conservative — lean toward running on a borderline signal, surface skips
      at the gate): `explore` for context gaps, `product-lens` for strategy uncertainty,
@@ -73,12 +81,19 @@ Run this spine once per input. Each routing call emits a trace (decision + signa
 
 ## Terminus
 
-- **Raise.** Terminate in a **`raise`** of the decision-complete IU(s) to the product dashboard — the
-   node-terminal effect, not an edge (the loop-runner drains the operator-approved ones). Follow
+- **Raise — classify each IU.** Terminate in a **`raise`** of the decision-complete IU(s) to the
+   product dashboard — the node-terminal effect, not an edge (the loop-runner drains the
+   operator-approved ones). **Apply the AFK/HITL classifier (`routing-principles` §4, AFK/HITL slice
+   classifier) to every IU you raise** and record its result — `AFK`, or `HITL` + where the human
+   point falls — **with the one-line trace** naming the fired trigger, exactly as `triage` does on its
+   in-place disposition. Same rule, same first-class output across both ends of the front: an IU the
+   front produces is classified too (a continuation that arrived from `triage` does not skip
+   classification — it gets it here). You **consult** the classifier; you do not restate it. Follow
    `product-dashboard-conventions` for the carrier content + the write-boundary.
 - **No-IU terminal disposition.** An input you resolve as not worth an IU gets a terminal disposition
    on its carrier — **park / kill / defer** (the home the removed `product-dashboard-curator`'s
-   `record-disposition` moves to), producing no IU rather than a dangling open state.
+   `record-disposition` moves to), producing no IU rather than a dangling open state. (The classifier's
+   5b-unconverged exit lands here as `defer`, per `routing-principles` §4.)
 
 ## Working-session record
 

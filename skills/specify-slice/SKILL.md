@@ -1,27 +1,32 @@
 ---
 name: "specify-slice"
-description: "Formalise a decision-complete standalone IU into a build-ready vertical slice — render the carrier's captured definition into the content fields and enforce the vertical-slice + testing + single-slice invariants before build. The thinnest depth of the unified front; does for one slice what the dev-sprint spine (design/specify/plan, orchestrated by working-session) does for a work-item. Runs collaborative when hand-run, unattended inside a loop-runner-dispatched session. Use when a triaged single improvement needs formalising before build. Use when: A standalone IU has been triaged decision-complete (Context + Decisions captured at raise) and must be formalised before build — render goal/files/acceptance/verification, formalise slice_type from the recorded AFK/HITL decision, and reject a horizontal slice (or escalate a hidden fork) here rather than downstream. Reached as a dispatched session's entry (unattended) or hand-run (collaborative)."
+description: "Formalise a decision-complete standalone IU into a build-ready vertical slice — the loop's formalise+enforce gate: render the carrier's captured definition into the content fields, formalise slice_type + hitl_point from the front's recorded classification + trace (it does not re-judge the call), and enforce the vertical-slice + testing + single-slice invariants before build. Runs collaborative when hand-run, unattended inside a loop-runner-dispatched session. Use when a triaged single improvement needs formalising before build. Use when: A standalone IU has been triaged decision-complete (Context + Decisions captured at raise) and must be formalised before build — render goal/files/acceptance/verification, formalise slice_type from the recorded AFK/HITL decision, and reject a horizontal slice (or escalate a hidden fork) here rather than downstream. Reached as a dispatched session's entry (unattended) or hand-run (collaborative)."
 ---
 
 
 # Specify slice
 
-You are the **single collapsed front stage** of the incremental-improvement loop. You take a
-**decision-complete standalone IU** — the carrier `triage` captured, carrying a `## Context` and
-`## Decisions` body — and turn it into a **build-ready vertical slice**: you **render** its captured
-definition into the content fields and **enforce** the vertical-slice, testing, and single-slice
-invariants **before** build runs. For one understood slice you do the job the dev-sprint front spine
-`design → specify → plan` (orchestrated by `working-session`) spreads across — at a fraction of the
-weight, because the slice has no design fork to resolve and no decomposition to plan.
+You are **the loop's formalise+enforce gate** — the single gate between capture and build in the
+incremental-improvement loop. You take a **decision-complete standalone IU** — the carrier `triage`
+captured, carrying a `## Context` and `## Decisions` body — and turn it into a **build-ready vertical
+slice**: you **render** its captured definition into the content fields, **formalise** `slice_type` +
+`hitl_point` **from the front's recorded classification + trace** (you do **not** re-judge the
+AFK/HITL call — that call is the front's, made at raise by the criteria-driven classifier), and
+**enforce** the vertical-slice, testing, and single-slice invariants **before** build runs. You are
+**kept, not deprecated**: this *enforce* gate (vertical-slice / testing / single-slice,
+reject-horizontal) is the only gate between capture and build — a rejection that does not happen
+downstream because there is no plan/review between here and build.
 
-Your job is **translation + enforcement, not specification.** `triage` ran the operator Q&A at
-raise time and recorded every call (including the AFK/HITL call) in the carrier's Decisions; you
-have **nothing to ask in the normal case.** You **derive** the formal content fields from the
+Your job is **translation + enforcement, not specification.** The front (`triage`, continued into
+`working-session`) ran the operator Q&A at raise time and **recorded the AFK/HITL classification + its
+one-line trace** in the carrier's Decisions; you **consume that recorded call**, you do not re-make
+it. You have **nothing to ask in the normal case.** You **derive** the formal content fields from the
 carrier's Context + Decisions, **confirming** against the codebase via `explore`; you **formalise**
-`slice_type` from the recorded decision; you **enforce** the invariants. You do **not** run the full
-lens panel (the rigor moves to `review`), you do **not** resolve a design fork or decompose (that is
-the escalate signal), and you do **not** write the carrier's lifecycle or any gate decision (those
-have other writers — see below).
+`slice_type` + `hitl_point` **from** the recorded classification + trace; you **enforce** the
+invariants. You do **not** re-judge the AFK/HITL call (it is the front's, per the classifier), you do
+**not** run the full lens panel (the rigor moves to `review`), you do **not** resolve a design fork or
+decompose (that is the escalate signal), and you do **not** write the carrier's lifecycle or any gate
+decision (those have other writers — see below).
 
 ## Two modes
 
@@ -138,8 +143,11 @@ from the hand-run discipline. A slice that fails is reshaped (collaborative) or 
 
 ## Phase 4 — Formalise AFK or HITL from the recorded decision
 
-The AFK/HITL **call was already made at raise time** and lives in the carrier's Decisions. You
-**formalise** it into `slice_type`; you do not re-decide it:
+The AFK/HITL **call was already made at raise time** and lives in the carrier's `## Decisions` — its
+classification **and the one-line trace** — by the criteria-driven classifier (see `routing-principles`
+§4, AFK/HITL slice classifier). That recorded shape **is the front→specify-slice data-contract**: you
+read the classification + trace from `## Decisions` and **formalise** the recorded result into
+`slice_type` (+ `hitl_point`); you do **not** re-decide it:
 
 - **`AFK`** — the loop can build → review → land it unattended.
 - **`HITL`** — the slice carries a named human decision or review point the agent must stop at.
