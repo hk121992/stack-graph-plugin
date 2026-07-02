@@ -1,6 +1,6 @@
 ---
 name: "harness-update"
-description: "Brings a harness's installed stack-graph plugin current — detects installed-vs-published version, runs the scope-aware marketplace-update → uninstall → install dance (the native `claude plugin update` is broken), regenerates the at-hand-references-index on a bump, re-binds only when the bindings-contract version moved (re-materializing the crystallised @git-policy surface and re-wiring the sg-root-instructions floor via harness-init), re-validates the ambient surface every run, and surfaces the restart reminder plus the version/commit landed. Steps — Detect, Update, Contract-drift, Ambient-sync, Hand off. Use when a harness operator needs to update an already-installed stack-graph plugin to the latest published version. NOT for first-time setup — standing up a harness from scratch is `harness-init scaffold`; this assumes the plugin is already installed and only advances its version."
+description: "Brings a harness's installed stack-graph plugin current — detects installed-vs-published version, runs the scope-aware marketplace-update → uninstall → install dance (the native `claude plugin update` is broken), regenerates the at-hand-references-index on a bump, re-binds only when the bindings-contract version moved (re-materializing the crystallised @git-policy surface and re-wiring the sg-root-instructions floor via harness-init), re-validates the ambient surface every run and re-vends the SG-managed CLAUDE.md on drift (customisation lives in the crystallised refs, never inline), and surfaces the restart reminder plus the version/commit landed. Steps — Detect, Update, Contract-drift, Ambient-sync, Hand off. Use when a harness operator needs to update an already-installed stack-graph plugin to the latest published version. NOT for first-time setup — standing up a harness from scratch is `harness-init scaffold`; this assumes the plugin is already installed and only advances its version."
 ---
 
 
@@ -16,7 +16,7 @@ plugin is **already installed**; if it is not, this is a first-time setup and th
 
 You are **vendored and general** — you carry **no product paths, ids, or toolchain**. The binding key
 set and the `bindings.yaml` format live in the **`bindings-contract`** reference (imported, not
-restated here); you read its `status:` line only to detect whether the contract moved. Every path you
+restated here); you read its **`Contract version:`** line only to detect whether the contract moved. Every path you
 touch is **runtime-owned** (the Claude Code install registry, resolved per scope) or harness-local —
 you never mutate the vendored plugin or the factory.
 
@@ -33,7 +33,7 @@ and is worth upstreaming to the plugin CLI.
 
 ## Preflight (before any step)
 
-Load `bindings-contract` — you need its current `status:` version for the drift check, and the key
+Load `bindings-contract` — you need its **`Contract version:`** line for the drift check, and the key
 set in case a re-bind is required. Confirm the plugin is **installed** (listed/enabled in the install
 registry — the same place `harness-init validate` checks). If it is **not** installed, stop and route
 the operator to `harness-init scaffold` — you update an existing install; you do not perform a
@@ -79,8 +79,9 @@ floor's ref map wrong; regeneration is the bump's standing companion, not contra
 
 ### 3. Contract-drift
 
-Compare the **new** `bindings-contract` `status:` version (the just-installed plugin's contract)
-against the version the harness **last bound against**.
+Compare the **new** `bindings-contract` **`Contract version:`** line (the just-installed plugin's
+contract) against the version the harness **last bound against** (recorded in the `bindings.yaml`
+header).
 
 - If it **moved** → invoke **`harness-init bind`** then **`harness-init validate`**, so new or changed
   binding keys and the dial knobs (`bindings-contract` §dials — maturity · plan-policy ·
@@ -115,11 +116,14 @@ never picks it up on update.
 - **Run `harness-init validate`** (read-only — it already asserts that `CLAUDE.md` `@`-refs the vended
   `@.claude/sg-root-instructions.md` and that the band files are present + non-empty) on **every**
   update, not only on a contract move.
-- **On a flagged ambient-surface gap** (an `@`-ref line missing, or a vended band file absent /
-  stale), invoke **`harness-init scaffold`** in its idempotent repair posture — it re-vends the file
-  and **inserts** the missing `@`-line in place (its Step 0 detection + Step 4 insert),
-  non-interactively and without clobbering the authored `CLAUDE.md`. Then **re-validate** to confirm
-  the gap closed.
+- **On a flagged ambient-surface gap** (an `@`-ref line missing, a vended band file absent / stale,
+  or the `CLAUDE.md` drifted from the vended shape), invoke **`harness-init scaffold`** in its
+  idempotent repair posture. The `CLAUDE.md` is an **SG-managed, vended surface** — **re-vend it
+  wholesale** from the ambient template (never an insert-around-authored-prose repair): all harness
+  customisation lives in the **crystallised refs behind the `@`-band** (the identity surfaces ·
+  @git-policy · the at-hand index · the nav layer), never inline. Inline non-template content found
+  at re-vend is **MIGRATED** — quote it to the operator with its right home per `context-principles`
+  — never silently dropped. Then **re-validate** to confirm the gap closed.
 - **State-based, not version-gated.** The trigger is the validate result — does the `@`-ref actually
   resolve? — never a version counter, so it self-heals a harness however it drifted (never-wired,
   hand-edited, half-scaffolded) and is a clean **no-op** when the surface is already current.

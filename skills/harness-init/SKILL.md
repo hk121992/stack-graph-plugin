@@ -126,14 +126,17 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    handoff-prompt convention (the stack-graph plugin's `handoff-prompt-convention` reference,
    shipped with harness-init) — delta only, policy by pointer not by copy."* Name the convention and
    where it ships rather than a brittle filesystem path (the reference travels inside the vendored
-   plugin, not at a bound surface). Structure only; **idempotent** — never clobber an existing
-   authored `CLAUDE.md`; if one exists, confirm it carries the ambient pointers + the band `@`-refs
-   and re-vend a stale **or absent** band copy. **If an `@`-ref line itself is missing, insert it** —
-   appended to the ambient-pointers block, or, where the `CLAUDE.md` carries no recognisable
-   ambient-pointers block, at end-of-file — a surgical one-line patch that never rewrites or
-   reorders the authored body; warn only on a missing *ambient pointer* (bindings / navigation) you
-   cannot safely place. This repair is **non-interactive** — it re-vends the file and inserts the
-   `@`-line without re-running the Step 2 binding confirmation.
+   plugin, not at a bound surface). Structure only. **The `CLAUDE.md` is an SG-MANAGED, VENDED
+   surface** — never operator-authored prose: on scaffold AND on every repair/re-vend, **write it
+   wholesale from the template** (instantiated with the binding values), never an
+   insert-around-existing-prose patch. All harness customisation lives in the **crystallised refs
+   behind the `@`-band** — the identity surfaces, `@git-policy`, the at-hand index, the nav layer,
+   the local references — never inline in `CLAUDE.md`. **Idempotent by content**: a `CLAUDE.md`
+   already matching the vended shape is untouched; one that drifted is re-vended. If the existing
+   file carries inline non-template content, **MIGRATE it** — quote each block to the operator with
+   its right home per `context-principles` (an identity surface, a local reference, a binding) —
+   **never silently drop it**. This re-vend is otherwise **non-interactive** — it does not re-run
+   the Step 2 binding confirmation.
 4b. **Seed the three crystallised identity surfaces** into `<org-root>/.claude/` —
    `product-definition` (what the product is: why · who · value), `product-principles` (the bar:
    the standing quality non-negotiables), `constitution` (how work runs here: autonomy posture ·
@@ -232,12 +235,15 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
 1. **bindings.yaml present** at `<org-root>/.claude/bindings.yaml` and parseable as flat YAML.
 2. **Every required key resolves** (per `bindings-contract`) to a real path/target; optional keys
    either resolve or are explicitly marked not-yet. Report each missing/dangling key by name.
-3. **The org-root `CLAUDE.md` is present and wired** — it exists at the org root, reaches the
-   bindings reference, and carries the **always-on band `@`-refs**: the vended floor
+3. **The org-root `CLAUDE.md` is present, wired, and vended-shaped** — it exists at the org root,
+   reaches the bindings reference, carries the **always-on band `@`-refs**: the vended floor
    (`@.claude/sg-root-instructions.md`, that file present + non-empty), the three identity surfaces,
    and — via the floor — the generated `at-hand-references-index` and the `@git-policy` surface,
-   each resolving to a present, non-empty file. This is the runtime pre-flight: a harness whose
-   ambient surface does not load the bindings + the band will not orient on the next session.
+   each resolving to a present, non-empty file; and **matches the vended template shape** (an
+   SG-managed surface — inline non-template content is drift, flagged for re-vend + migration; the
+   customisation home is the crystallised refs, never `CLAUDE.md` prose). This is the runtime
+   pre-flight: a harness whose ambient surface does not load the bindings + the band will not
+   orient on the next session.
 4. **The surface exists**: `surface-root`, `items-root` + a parseable `manifest.json`,
    `objectives-doc`, `strategy-doc`, `sprints-root`, `improvements-root` + a parseable
    `improvements-manifest`, `learnings-archive` (the committed archive file), the

@@ -15,6 +15,10 @@ related: [okr-schema, work-item-schema, local-node-schema, git-policy-schema, sg
 
 # Bindings contract — the harness instantiation seam
 
+**Contract version: v0.12.0** (adds the decisions-store key). The version the harness records in its
+`bindings.yaml` header and `harness-update`'s drift check compares — bump it on any key-set or
+file-format change. (Distinct from this file's `status:`, a lifecycle word.)
+
 The factory contract a plugin ships so a consuming workspace can instantiate a **harness**: the binding keys the
 vendored graph may resolve, the bindings-file shape, and the ambient + surface scaffolds `harness-init` creates.
 It is the **vendored seam** between the general graph and a local harness — the factory ships the *pointer* (the
@@ -44,7 +48,7 @@ property**, not a per-key path (the path is the harness's instance value):
 
 | category | keys (by role) |
 |---|---|
-| **Work-ledger surfaces** | the dashboard surface root · the work-items dir + its manifest · the sprint-records dir · the working-sessions dir |
+| **Work-ledger surfaces** | the dashboard surface root · the work-items dir + its manifest · the sprint-records dir · the working-sessions dir · the decisions store (the D-numbered conclusion layer `log-decision` writes and the generated decisions-index projects; per [decisions-schema](decisions-schema.md)) |
 | **Improvements surface** | the standalone-IU surface (a **sibling** of the work-ledger, off it) + its manifest |
 | **Outcome / strategy** | the objectives surface (per [okr-schema](okr-schema.md)) · the strategy thesis · the outcome-anchor resolution rule |
 | **Runtime** | the analyzer's derived event-log path (under the gitignored runtime-state root) |
