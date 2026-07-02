@@ -1,19 +1,22 @@
 ---
-kind: reference
-id: handoff-prompt-convention
-title: Handoff-prompt convention — the delta-only field form for cold agent→agent handoffs
-description: >-
-  The field form an agent→agent handoff prompt is written in — a spawn_task chip, a loop-runner
-  dispatch prompt, or any message a cold session consumes. Delta only, ≤150 words, paths over prose,
-  policy by pointer never by copy. Use when authoring a chip or any prompt that will execute in a
-  session that does not share this one's context.
-status: v0.2.0 — 2026-06-12
+subject: handoff-prompt-convention
+title: Handoff-prompt convention — the delta-only field form for cold handoffs
+provenance: vendored
+level: L2
+cadence: on-demand
+read-when: "Composing a cold handoff prompt."
+derive-from: [handoff-prompt-convention]
+reviews-on: handoff-prompt-convention-source
+last-reviewed: 2026-07-01
+entropy: unmeasured
+status: drafted
+related: [pr-description-shape, routing-principles]
 ---
 
 # Handoff-prompt convention
 
-A handoff prompt is consumed by a **cold session** — a `spawn_task` chip, a loop-runner dispatch
-prompt, or any message handed to an agent that does not share this conversation's context. Written as
+A handoff prompt is consumed by a **cold session** — a `spawn_task` chip, a `dispatch` prompt,
+or any message handed to an agent that does not share this conversation's context. Written as
 human prose with standing policy inlined, such a prompt **bloats** (the same repo coordinates and
 push/branch rules re-stated per handoff) and **goes stale** (inlined policy is frozen at authoring
 time; it can already be wrong by execution time). The fix is structural, not discipline: write the
@@ -31,11 +34,10 @@ EPH(<date>): <expiring facts: PR#s, untracked files, concurrent-session state>
 META: carrier=<id> kind=<work-item|standalone-iu> arc=<dev-sprint|incremental> iu=<id>
 ```
 
-`META:` is the **machine-readable attribution line** — present on a **loop-runner dispatch prompt**
+`META:` is the **machine-readable attribution line** — present on a **dispatch prompt**
 (omit it on a human chip that carries no carrier context). It is a single line of
 `key=value` tokens in a fixed, stable grammar so the transcript analyzer can attribute a dispatched
-session's derived analytics to the right `(carrier, kind, arc, iu)` deterministically (see
-[the unified analytics design](../../docs/issue-sweep-designs/cluster-A-unified-analytics.md) §3.5).
+session's derived analytics to the right `(carrier, kind, arc, iu)` deterministically.
 Values are drawn from the closed vocabularies the projection already enforces (`carrier_kind`, `arc`
 allowlists), so a malformed token degrades to a null attribution at the publisher, never a wrong one.
 
@@ -54,7 +56,7 @@ allowlists), so a malformed token degrades to a null attribution at the publishe
   an on-disk home), not a reason to inline it.
 - **`EPH(<date>)` for expiring facts.** PR numbers, untracked files, concurrent-session state — date
   them so a reader at execution time can see at a glance whether they are still current.
-- **`META:` is machine-readable, not prose.** On a loop-runner dispatch prompt, carry one `META:`
+- **`META:` is machine-readable, not prose.** On a dispatch prompt, carry one `META:`
   line of fixed `key=value` attribution tokens so the transcript analyzer can attribute the dispatched
   session deterministically. Keep the grammar stable (the analyzer parses it with a bounded regex);
   use only the allowlisted `kind`/`arc` values. Omit the line on a human chip with no carrier.
@@ -69,7 +71,7 @@ PR numbers.
 
 ## One home for cold-handoff doctrine
 
-The same convention covers **loop-runner dispatch prompts** and **return envelopes** (both already
+The same convention covers **dispatch prompts** and **return envelopes** (both already
 field-shaped): a dispatch prompt is a handoff into a sub-agent, an envelope is a handoff back. This
 reference is the **single home** for cold-handoff message doctrine — author all three against this
 field form. The dispatch prompt's `META:` line doubles as the **attribution source** the

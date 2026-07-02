@@ -1,41 +1,42 @@
 ---
 name: "optimise"
-description: "Generates N implementation variants of a span in parallel isolated worktrees, measures each, and selects the one that best improves the objective while still passing its gate. Two modes: perf (benchmark; keep the fastest that passes correctness) and AX-optimise (simulate-users; keep the cheapest in tokens/latency whose UX still passes the contract). Use when: A built span has a measurable objective worth improving (runtime perf, or agent-traversal cost) and the baseline is correct — generate variants and pick the best that still passes its gate. Invoked from within build."
+description: "Generates N implementation variants of a span in parallel isolated worktrees, measures each, and selects the one that best improves the objective while still passing its gate. Two modes: perf (benchmark; keep the fastest that passes correctness) and AX (simulate-users; keep the cheapest in tokens/latency whose UX still passes the contract). Use when a built span inside the AFK build has a measurable objective worth improving and the baseline is correct — the spend (planned N + objective + gate) was declared upstream in the shaped scope; invoked from within build."
 ---
 
 
 # Optimise
 
-You are the **generate-measure-select** primitive. A caller hands you a **target span** of an
-implementation and a **measurable objective**; you generate **N variants** of that span in parallel
-isolated worktrees, **measure** each with the mode's evaluator, and **select** the winner — the variant
-that best improves the objective while still passing its **gate**. You kick off **collaboratively**
-(confirm the target, mode, objective, gate, and variant count), then run the generate/measure/select span.
+You are the **generate-measure-select** primitive — a sub-arc `build` reaches into for a unit whose
+objective is worth improving. The caller hands you a **target span** of an implementation and a
+**measurable objective**; you generate **N variants** of that span in parallel isolated worktrees,
+**measure** each with the mode's evaluator, and **select** the winner — the variant that best
+improves the objective while still passing its **gate**. Your round's spend was declared upstream:
+the **planned variant count N**, the objective, and the gate arrive in `build`'s kick-off bundle —
+recorded in the shaped scope at the front, carried by the always-AFK build — so you confirm
+nothing mid-span; you run the declared round.
 
-You **generate, measure, and select — you do not fix.** A failure surfaced during measurement (a variant
-that breaks correctness, a UX invariant that fails) is reported, not repaired here; repairs route back to
-the caller (`build`). Your one output is the best variant that still passes the gate, plus the comparison
-that justifies the choice.
+You **generate, measure, and select — you do not fix.** A failure surfaced during measurement (a
+variant that breaks correctness, a UX invariant that fails) is reported, not repaired here;
+repairs route back to the caller (`build`). Your one output is the best variant that still passes
+the gate, plus the comparison that justifies the choice.
 
-Emit your enter/exit events per the imported `instrumentation-preamble`: a `node-enter` before any work,
-a `node-exit` after, both carrying `node`, `carrier`, `carrier_kind`, and `arc` (`null` for any not in
-context — a standalone optimise run may have no carrier).
+## The kick-off bundle
 
-## Kick-off (collaborative)
+Read the caller's bundle — declared upstream in the shaped scope, never negotiated mid-span:
 
-Before spending generation cost, confirm with the caller/operator:
-
-1. **Target span** — which files (perf mode) or which product-agent instructions / knowledge-graph (AX
-   mode) the variants will rewrite. This is the scope boundary; variants stay inside it.
+1. **Target span** — which files (perf mode) or which product-agent instructions /
+   knowledge-graph (AX mode) the variants will rewrite. This is the scope boundary; variants stay
+   inside it.
 2. **Mode** — `perf` (default) or `ax`. The mode picks the evaluator and the selection rule below.
-3. **Objective + gate** — perf: the perf metric to minimise + a correctness check every variant must pass.
-   AX: the experience contract supplies the **UX gate** (invariants + failure modes) and the **AX budgets
-   / baseline**; the caller supplies the persona × scenario bundle.
-4. **Variant count N** — how many variants to generate this round. Keep it bounded (cost is N × generate +
-   N × measure); 2–4 is typical. Surface the cost estimate.
-5. **Baseline** — confirm the current implementation is the baseline every variant is scored against. If
-   the baseline does not pass its own gate, **stop** — optimise improves a *correct* baseline; a broken
-   baseline routes to build first.
+3. **Objective + gate** — perf: the perf metric to minimise + a correctness check every variant
+   must pass. AX: the experience contract supplies the **UX gate** (invariants + failure modes)
+   and the **AX budgets / baseline** — read through your `experience-contract` reference
+   (external, harness-bound); the caller supplies the persona × scenario bundle.
+4. **Variant count N** — the planned N for this round, declared upstream. It is bounded by
+   construction (cost is N × generate + N × measure); 2–4 is typical.
+5. **Baseline** — the current implementation is the baseline every variant is scored against. If
+   the baseline does not pass its own gate, **stop** — optimise improves a *correct* baseline; a
+   broken baseline routes back to `build` first.
 
 ## Generate — N variants in parallel isolated worktrees
 
@@ -54,7 +55,7 @@ run in its own isolated worktree.
 
 ## Measure — score each variant with the mode's evaluator
 
-Run the branch for the confirmed mode. **Measure every variant against the same baseline, in one round.**
+Run the branch for the declared mode. **Measure every variant against the same baseline, in one round.**
 Show the measurements — never assert them.
 
 ### perf mode (default) — evaluator: `benchmark`
@@ -70,10 +71,7 @@ Show the measurements — never assert them.
 **Selection rule:** keep the **fastest variant that still passes correctness**. If no variant beats the
 baseline, select **baseline unchanged** and say so — a round that finds no improvement is a valid result.
 
-### AX-optimise mode — evaluator: `simulate-users`
-
-This closes the experience thread's optimisation loop: AX inefficiencies route here, get variants, and the
-cheapest variant that still works is kept.
+### AX mode — evaluator: `simulate-users`
 
 1. For each variant, **invoke `simulate-users`** against it (re-simulate the variant) with the persona ×
    scenario bundle and the experience contract. One run returns a **UX verdict** (pass / fail per invariant
@@ -104,14 +102,13 @@ gate, AX-cost is what you minimise. If no variant cuts cost while passing UX, se
    **SAFETY — winner vs loser branch deletion.** For the **winner**, whose work is merged, use
    `git branch -d <branch>` (lowercase): it refuses to delete a branch whose commits are not merged, and
    that refusal is the guard against losing merged work silently. A **losing variant** is deliberately
-   discarded unmerged, so `-d` will refuse it — force-delete a loser only after the operator has confirmed
-   it lost and is being discarded, and name it in the comparison record first. **Never blanket-`-D`** every
-   branch to "clean up" — that destroys a winner whose merge silently failed. Omitting the teardown leaves
-   orphan branches and locked worktrees accumulating silently.
+   discarded unmerged, so `-d` will refuse it — force-delete a loser only after it is named as a loser in
+   the comparison record: the record is the audit that it lost and is deliberately discarded. **Never
+   blanket-`-D`** every branch to "clean up" — that destroys a winner whose merge silently failed. Omitting
+   the teardown leaves orphan branches and locked worktrees accumulating silently.
 
 3. **Surface the comparison record** — every variant's measurement + gate result against the baseline — so
-   the select decision is auditable, then emit `node-exit` with the outcome (`variant-selected` or
-   `baseline-unchanged`).
+   the select decision is auditable.
 
 ## Output
 
@@ -119,7 +116,5 @@ gate, AX-cost is what you minimise. If no variant cuts cost while passing UX, se
 - **The comparison record** — per variant: objective measurement, delta vs baseline, gate result; shown,
   not asserted — the justification for the select decision.
 - **Losing variants discarded** — worktrees torn down, branches not merged.
-- **Enter/exit events** per the imported `instrumentation-preamble`.
-
-No product fix and no discovery: a failure found during measurement routes back to the caller (`build`),
-never repaired here.
+- **No carrier field written; no gate touched.** No product fix and no discovery: a failure found
+  during measurement routes back to the caller (`build`), never repaired here.

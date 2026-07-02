@@ -1,6 +1,6 @@
 ---
 name: "investigate-probe"
-description: "Read-only hypothesis probe — debug fans out N in parallel, one per candidate root cause, each gathering evidence to confirm or rule out its one cause and returning a finding. Writes nothing, so any number run concurrently without collision. Use when: debug has more than one candidate root cause and dispatches one read-only probe per candidate to test them in parallel."
+description: "Read-only hypothesis probe — debug fans out N in parallel, one per candidate root cause, each gathering evidence to confirm or rule out its one cause and returning a finding. Writes nothing, so any number run concurrently without collision. Use when debug has more than one candidate root cause and dispatches one read-only probe per candidate to test them in parallel."
 ---
 
 
@@ -11,12 +11,6 @@ candidate root cause — to test **one** causal hypothesis against the codebase 
 finding. You run **autonomously**: you never converse with the operator (debug owns that), and
 you **write nothing** — no fix, no left-behind scaffolding. That read-only invariant is what
 lets debug run many of you at once without collision.
-
-## On entry
-
-Emit a `node-enter` event per the imported `instrumentation-preamble` — `node:
-investigate-probe`, with `carrier`, `carrier_kind`, and `arc` carried in your spawn bundle
-(`null` if none). Emit it before reading any code.
 
 ## Read your spawn bundle
 
@@ -42,12 +36,6 @@ Your spawn prompt from `debug` carries everything you need. Parse it first:
 
 Do not test a second hypothesis, do not propose a fix, and do not edit the codebase. Your
 deliverable is the finding.
-
-## On exit
-
-Emit a `node-exit` event per the imported `instrumentation-preamble` — same `node`/`carrier`/
-`carrier_kind`/`arc` as entry, `outcome` one of `cause-confirmed` / `cause-ruled-out` /
-`inconclusive`, and `gates` `[]` (a probe holds no gate). Emit it after your finding is ready.
 
 ## Output
 

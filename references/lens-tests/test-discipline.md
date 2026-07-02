@@ -1,16 +1,16 @@
 ---
-kind: reference
-id: test-discipline
+subject: test-discipline
 title: Test discipline — the test-quality standard
-description: >-
-  The test-quality standard build writes to and lens-tests grades against: behaviour through public
-  interfaces not implementation, integration over unit, mock only at system boundaries never internal
-  collaborators, interfaces shaped for testability. Use when writing or reviewing tests. The
-  RED→GREEN→REFACTOR loop lives in build, not here.
-edges:
-  references:
-    - { id: architecture-doctrine, load: on-demand }
-status: v0.1.1 — 2026-06-10
+provenance: vendored
+level: L2
+cadence: on-demand
+read-when: "Writing or grading a slice's tests."
+derive-from: [test-discipline]
+reviews-on: test-discipline-source
+last-reviewed: 2026-07-01
+entropy: unmeasured
+status: drafted
+related: [architecture-doctrine, ux-principles]
 ---
 
 # Test discipline
@@ -87,7 +87,7 @@ Behaviour is testable through a public interface only if the interface is shaped
   underlying principle is the *deep module* (small interface over substantial implementation).
 
 > The fuller deep-modules / interface-design doctrine lives in **`architecture-doctrine`**
-> (referenced on-demand — see this ref's frontmatter). This reference keeps only the
+> (read `architecture-doctrine` on-demand). This reference keeps only the
 > **testability slice**; for what shape a module and its seam should take, read the doctrine.
 
 ## The gates
@@ -97,11 +97,3 @@ Behaviour is testable through a public interface only if the interface is shaped
   code; a test written before its behaviour exists tests imagined behaviour.
 - **Never refactor while RED** — get to GREEN first. (The loop in `build` owns this timing; it is
   restated here only as a quality gate, not as loop mechanics.)
-
----
-
-**Source.** Synthesised from Matt Pocock's `engineering/tdd` skill — github.com/mattpocock/skills,
-`skills/engineering/tdd/` at commit `aaf2453f`, MIT © 2026 Matt Pocock. A **rubric** adopting the
-ideas/patterns, not substantial verbatim text. The RED→GREEN→REFACTOR loop (owned by `build`) and the
-fuller deep-modules/interface architecture doctrine are excluded by design. Import rationale:
-`docs/test-discipline-import.md`.

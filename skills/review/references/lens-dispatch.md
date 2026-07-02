@@ -1,10 +1,19 @@
 ---
-kind: reference
-id: lens-dispatch
+subject: lens-dispatch
 title: Lens dispatch — fan-out, merge, triage, route
-description: The shared procedure a stage runs to fan out to the review lens family and turn their returns into a ranked, routed finding set.
-status: v0.1.0 — 2026-05-30
+provenance: vendored
+level: L2
+cadence: on-demand
+read-when: "Fanning out the lens panel."
+derive-from: [lens-dispatch]
+reviews-on: lens-dispatch-source
+last-reviewed: 2026-07-01
+entropy: unmeasured
+status: drafted
+related: [findings-schema, severity-scale, confidence-anchors]
 ---
+
+# Lens dispatch
 
 This is the shared lens-panel procedure. The consuming stage (review over a diff; design or
 plan over a doc) follows it to fan out to the active lenses and reduce their returns to one
@@ -17,15 +26,14 @@ analyses.
 
 Always run the always-on lenses: `lens-correctness`, `lens-security` (lower reporting gate),
 `lens-tests`, `lens-maintainability`. Add a conditional lens only when its trigger is met —
-`lens-performance` (DB/loops/IO/async touched), `lens-design` (UI surface), `lens-dx`
-(public API/CLI/docs changed), `lens-runtime` (error handling/retries/migrations),
-`lens-adversarial` (high risk or large blast radius), `lens-external` (cross-model second
-opinion requested). Two of these conditional lenses are **autonomous measurement agents**, not
-diff-judgment lenses: `benchmark` (perf — dispatch when the change could move page-load /
-Core-Web-Vitals / bundle size) and `health` (code-quality — dispatch when a whole-tree quality
-re-score is warranted). They compare against a stored baseline and return a regression /
-quality verdict that folds into the same finding set. Skipping a conditional lens is the
-default, not a finding.
+conditional lenses are **harness-supplied extensions** resolved by name at dispatch (a local
+overlay may add e.g. a performance, UI-design, DX, runtime-resilience, adversarial, or
+cross-model lens with its own trigger); the vendored panel ships the four above. One conditional
+member is an **autonomous measurement agent**, not a diff-judgment lens: `health` (code-quality —
+dispatch when a whole-tree quality re-score is warranted); it compares against a stored baseline
+and returns a quality verdict that folds into the same finding set. Runtime perf measurement
+(`benchmark`) is **`verify`'s dynamic modality, not a panel member**. Skipping a conditional lens
+is the default, not a finding.
 
 ## 2. Fan out
 

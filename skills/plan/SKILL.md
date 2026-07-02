@@ -1,45 +1,49 @@
 ---
 name: "plan"
-description: "Produce a staged, dependency-annotated, lens-vetted plan for a settled work-item. The plan artifact is what the commit-to-build gate decides against. Use when: A design is settled and its spec amendment is through — decompose the work into implementation units, sequence them, dispatch the lens family over the plan doc, and surface it for the operator's commit-to-build decision."
+description: "Produce a staged, dependency-annotated, lens-vetted plan for a settled, specced work-item — decompose it into implementation units (the build carriers), sequence them with complete dependencies and per-IU autonomy, and hand the plan doc back to shape as the commit-to-build gate's decision artifact and dispatch's input. Use when a design is settled and its spec amendment is through, and the work decomposes into IUs for the operator's commit-to-build decision."
 ---
 
 
 # Plan
 
-Produce a **staged, dependency-annotated plan** for a settled work-item. You own
-**decomposition, sequencing, operator interaction, and the lens dispatch over the plan
-doc** — you do not perform any lens dimension yourself (the lens agents own that) and you
-do not decide product strategy yourself (the product-lens, if present, owns that). Your
-deliverable is a **plan doc**: an ordered set of implementation units conforming to the
-IU-schema, with explicit dependency annotations and sequencing rationale, lens-vetted and
-ready for the operator's **commit-to-build gate**.
+Produce a **staged, dependency-annotated plan** for a settled, specced work-item. You own
+**decomposition, sequencing, operator interaction, and the lens dispatch over the plan doc** — you
+do not perform any lens dimension yourself (the lens agents own that), and product strategy is
+settled upstream (`shape-product`'s discovery; `design`'s outcome-driven resolution). Your
+deliverable is a **plan doc**: an ordered set of **implementation units that are the build
+carriers**, each conforming to the IU-schema, with explicit dependency annotations and sequencing
+rationale, lens-vetted. That doc is the artifact the **`commit-to-build` gate decides against**
+and then the **input `dispatch` consumes** — you hand it back to `shape`, whose session fires the
+gate.
 
-You hold the operator in the loop throughout — plan is collaborative by nature, and on a
-novel or contested decomposition it may take rounds. Teach the sequencing rationale as you
-go: the operator should leave understanding why the plan is ordered as it is.
+You hold the operator in the loop throughout — plan is collaborative by nature, and on a novel or
+contested decomposition it may take rounds. Teach the sequencing rationale as you go: the operator
+signs the commitment against this plan and should leave understanding why it is ordered as it is.
 
 ## What you read, and what you must not write
 
 Read for context; write only to harness surfaces.
 
 - **The carrier** — read it via bindings for its `lifecycle_state`, prior
-  `transition_history`, the objective it serves, and any parent/child decomposition already
-  recorded. It is a harness surface, not a node, and you hold no edge to it.
-- **The design doc + spec amendment** — the settled artefacts handed forward by `specify`
-  (or the operator's invocation, in `re-plan` mode). Read them for the scope, the resolved
-  design decisions, and the spec touchpoints.
+  `transition_history`, the objective it serves, and any decomposition already recorded. It is a
+  harness surface, not a node, and you hold no edge to it.
+- **The design doc + spec amendment** — the settled artefacts handed forward by `specify` (or by
+  `shape` on a re-plan). Read them for the scope, the resolved design decisions, the spec
+  touchpoints, and — for a HITL unit — the artefacts the front's build-and-look resolved.
 - **The IU-schema** — you hold it via a `references` edge (`load: import`). Read it at the
-  start of every session; it is always present. It defines the seven fields every
-  implementation unit must carry: `id`, `goal`, `files`, `dependencies`, `acceptance`,
-  `acceptance_check`, `size`. When the harness uses the zone matrix, an IU also carries the
-  optional **`zone: {vertical, horizontal?}`** dispatch coordinate (see the decomposition criteria).
+  start of every session; it is always present. It defines the **one IU shape** every unit
+  carries: the content fields (`id`, `goal`, `files`, `dependencies`, `acceptance`,
+  `acceptance_check`, `size`) plus the authored band you populate at plan time — **`autonomy`**,
+  **`verification`**, and **provenance**. When the harness uses the zone matrix, an IU also
+  carries the optional **`zone: {vertical, horizontal?}`** dispatch coordinate (see the
+  decomposition criteria).
 
-You **do not write the carrier**. You write the plan doc to a harness surface. Completing
-this stage is the signal the projection/curator picks up to advance the carrier's
-`current_stage`; the projection is derived from the observed traversal, not written by you.
-The `children[]` field of the carrier is populated by the curator (from the plan) and/or
-projected when `build` spawns child work-units as their own traversals — you populate the
-plan doc, not the carrier.
+You **do not write the carrier**. You write the plan doc to a harness surface. Completing this
+stage is the signal the projection picks up to advance the carrier's `current_stage`; the
+projection is derived from the observed traversal, not written by you. The WI's `children[]` is
+populated downstream from the plan doc — you populate the plan doc, not the carrier. The units
+you emit **inherit the WI's single `commit-to-build` by reference**: the gate fires once, on the
+WI grouping, at `shape`'s exit after you return.
 
 ## Phase 1 — Frame the decomposition
 
@@ -55,8 +59,8 @@ plan doc, not the carrier.
    contract (the UX end goal), its in-scope rules ranked by specificity, the touched code regions,
    and the code-map-traced cross-layer path. That digest is the material each vertical slice is
    decomposed and built against.
-3. Draft the **implementation unit list** — a first-pass decomposition into buildable child
-   workstreams. Apply the decomposition criteria:
+3. Draft the **implementation unit list** — a first-pass decomposition into buildable units.
+   Apply the decomposition criteria:
    - **One unit, one goal**: each unit has a single stated outcome in outcome-framed language.
    - **Files is the scope contract**: name the files and directories explicitly. No unit
      owns an unbounded scope.
@@ -84,22 +88,38 @@ plan doc, not the carrier.
 For each unit, fill the IU-schema fields completely:
 
 - **`id`**: a stable slug unique within this plan. Keep it stable across re-plans — dependency
-  references and the curator use it.
+  references and downstream consumers use it.
 - **`goal`**: one sentence, outcome-framed ("so that X is true after build"). This is what
   build is held to. Not a task description; not a solution description.
 - **`files`**: the explicit scope boundary — the files and directories this unit owns. Build
   does not touch files outside this set without flagging scope expansion.
-- **`dependencies`**: the other IU `id`s this unit depends on — units whose output this unit
-  consumes or assumes. Build uses this list to sequence work and detect when a dependency
-  is unfinished or broken.
+- **`dependencies`**: the other IU `id`s this unit depends on — capturing **both logical
+  ordering and file/surface overlap**, so that **no-deps = parallelizable** holds by
+  construction. Two *unordered* units that touch the same files still collide when run in
+  parallel — record the overlap as a dependency. This is the parallelisability signal `dispatch`
+  consumes (sequential by default; the parallel escape hatch parallelizes only no-deps units);
+  dispatch never re-derives independence, so a dependency you omit is a collision you shipped.
 - **`acceptance`**: observable conditions (tests pass, behaviour X holds, endpoint returns Y).
-  Not effort ("implement Z"). Build evaluates these before emitting a unit-complete event.
+  Not effort ("implement Z"). Build evaluates these and records the result before the unit
+  counts as complete.
 - **`acceptance_check`**: the runnable command that proves the unit's `acceptance` — build
   runs it and shows the raw output as the done-evidence. A unit with `acceptance` but no
   `acceptance_check` is an incomplete IU; flag it at lens review.
 - **`size`**: `XS | S | M | L | XL` — the single-agent-fit signal (Phase 1), not a raw effort
   estimate. `L`/`XL` read as "probably split". State the rationale for any `L`/`XL` unit and
   split a unit whose context overflows the single-agent budget.
+- **`autonomy`**: `AFK | HITL` — **record** the front's call; the classification is upstream's
+  (`shape` finalises it), and you formalise the field from the recorded call, never re-judging
+  it. HITL means reaching an AFK-implementable spec needed the front's **build-and-look** (real
+  artefacts, resolved warm in the shaping session, before the gate); AFK means doc-spec-able.
+  The flag is **front-consumed** — every dispatched build runs AFK to production — and it
+  sequences: a HITL unit's design-resolution comes before the AFK work that depends on it.
+- **`verification`**: the verification expectation judged at `commit-to-build` —
+  `{ end_to_end: <the complete observable behaviour the unit delivers>, tests: [<the tests that
+  prove that path>] }`, the vertical-slice proof.
+- **provenance**: the parent WI + the authorizing gate each unit inherits — the IU is the build
+  carrier, carrying its lineage by reference rather than its own front gate entries. Each unit
+  also inherits **`spec-status: specified`** from the settled amendment.
 
 ### Close Phase 2 with a scope-claim
 
@@ -151,18 +171,25 @@ A finding that names a plan-altitude risk (a missing dependency, an under-specif
 acceptance criterion, a scope boundary that will cause build to stall) is the point of this
 phase: surface it here, not at build.
 
-## Phase 4 — Finalise the plan doc
+## Phase 4 — Finalise the plan doc and return to shape
 
 Produce the **plan doc** to a harness surface:
 
-- The ordered **implementation units**, each with all seven IU-schema fields populated
-  (including `acceptance_check`).
+- The ordered **implementation units**, each with all IU-schema fields populated — the content
+  fields (including `acceptance_check`), `dependencies` (ordering **and** overlap), `autonomy`,
+  `verification`, and provenance.
 - Explicit **sequencing rationale** — the dependency graph and the stated reason for each
-  ordering decision.
+  ordering decision, including any HITL-before-dependent-AFK coupling.
 - A **scope summary**: what the plan covers, what it explicitly defers, and any items the
   lens panel flagged as out-of-scope drift.
 - The actioned lens findings folded in — the plan doc reflects the vetted plan, not the
   first draft.
+
+Then **return to `shape`**. The plan doc is the **decision artifact `commit-to-build` decides
+against** — shape's session holds the operator turn and fires the gate, once, on the WI grouping;
+the N units inherit the commitment by reference. Downstream of the gate, the plan doc is
+**`dispatch`'s input contract**: the IU set + `dependencies` + `autonomy`, read as-is. You fire
+no gate and record no gate decision.
 
 ## Modes
 
@@ -187,47 +214,48 @@ In this mode you run the dispatch with **`lens-adversarial` active** — `deepen
 condition (any of: architectural uncertainty, a contested scope boundary, a novel dependency
 graph, a cross-cutting change / large blast radius) *is* the adversarial lens's activation
 trigger, so naming the mode names why the lens fires. The other conditional lenses fire on
-their own `lens-dispatch` triggers as the plan's content meets them (e.g. `lens-performance`
+their own `lens-dispatch` triggers as the plan's content meets them (e.g. a harness-bound performance lens
 when the work touches DB/loops/IO/async). Selection stays owned by `lens-dispatch`; this mode
 only fixes that the plan is in the adversarial-active class — so the lens neither fires every
 time (waste) nor sits dormant when the decomposition is genuinely hard.
 
 ### re-plan
 
-Re-entry from the build stage. The prior plan doc and the build-stage signal that triggered
-re-entry (a stalled unit, a discovered scope gap, a failed acceptance criterion) are passed
-as context. Read the prior plan; reason from what changed; produce a revised plan doc with
-the affected units updated and the sequencing rationale re-stated. Do not discard the stable
-units — preserve their `id` values so references and curator content survive the revision.
-Re-state the full plan (not a diff) so build starts clean.
+Re-entry from the build span, through the front: a dispatched unit that blocks on a definition
+gap routes out to `shape`, which re-dispatches you with the prior plan doc and the signal that
+triggered re-entry (a stalled unit, a discovered scope gap, a failed acceptance criterion).
+Read the prior plan; reason from what changed; produce a revised plan doc with the affected
+units updated and the sequencing rationale re-stated. Do not discard the stable units —
+preserve their `id` values so dependency references and downstream consumers survive the
+revision. Re-state the full plan (not a diff) so the build span starts clean.
 
-## Process seams (deferred edges — F7)
+## Process seams
 
-- **← `specify`** (`can-follow`, authored): plan follows a settled spec amendment. The
-  `can-follow specify` edge is declared. The reverse — `specify precedes plan` — is on
-  `specify`'s side and deferred to the backbone wiring wave.
-- **→ `build`** (`precedes`, deferred): plan precedes build. The edge is authored once
-  `build` exists. Until then the flow holds in prose: a finalised plan doc with all IUs
-  populated feeds the commit-to-build gate; on approval, build is invoked.
-- **plan ← `build`** (re-plan loop, `can-follow`, deferred): when build discovers a scope
-  gap or a failed dependency that planning did not anticipate, it signals re-entry to plan.
-  The `plan can-follow build` edge is deferred until `build` exists. The re-plan mode
-  handles this re-entry behaviourally — described above.
-- **← `design`** (through `specify`): design does not directly precede plan; the seam runs
-  through `specify`. The `design precedes specify precedes plan` chain holds in the design
-  node's prose seams and in `specify`'s `can-follow design` edge.
+- **← `specify`** (`can-follow`, authored): plan follows the settled spec amendment — you
+  decompose against settled spec, never a moving target.
+- **exit → `shape` → `commit-to-build`**: your exit returns to `shape`; the coordinator owns the
+  forward gate edge at every phase, and your doc is what the gate decides against. You hold no
+  gate edge.
+- **→ `dispatch`** (prose seam — the input contract): after the gate, `dispatch` consumes the
+  plan doc as-is — the IU set, `dependencies` (no-deps = parallelizable), `autonomy` — and
+  schedules sequential-by-default with the parallel escape hatch. It never re-derives
+  independence.
+- **The re-plan loop** runs through the front: a mid-build definition gap routes
+  `dispatch → shape → plan` (re-plan mode) — the front re-shapes; build does not patch around a
+  front decision.
 
 ## Output
 
-- A **plan doc** on a harness surface: an ordered set of implementation units, each
-  conforming to the IU-schema (id, goal, files, dependencies, acceptance, `acceptance_check`,
-  size), with sequencing rationale and a scope summary. `acceptance_check` is the runnable
-  command that proves each unit's `acceptance` — build runs it and shows the raw output.
+- A **plan doc** on a harness surface: an ordered set of implementation units — the build
+  carriers — each conforming to the IU-schema (content fields incl. `acceptance_check`, complete
+  `dependencies` capturing ordering and overlap, `autonomy`, `verification`, provenance), with
+  sequencing rationale and a scope summary. `acceptance_check` is the runnable command that
+  proves each unit's `acceptance` — build runs it and shows the raw output.
 - The **ranked, routed lens findings** over the plan doc (from the dispatch), surfaced and
   actioned in-session, folded back into the plan.
-- **No carrier write.** Completing plan is the signal the projection/curator picks up to
-  advance `current_stage`; the lifecycle and commit-to-build gate decisions remain
-  PM/operator calls.
+- **No carrier write and no gate record.** The plan doc returns to `shape`, which fires
+  `commit-to-build` — the operator's decision, recorded once on the WI grouping; the units
+  inherit it by reference.
 
 ## Imported references
 

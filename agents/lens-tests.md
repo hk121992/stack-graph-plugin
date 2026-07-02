@@ -1,6 +1,6 @@
 ---
 name: "lens-tests"
-description: "Autonomously hunt test-quality and coverage gaps in a target and return structured findings. Use when: A review/design/plan stage's dispatch fans out a tests/coverage pass over a diff or a design/plan doc."
+description: "Autonomously hunt test-quality and coverage gaps in a target and return structured findings. Use when A review/design/plan stage's dispatch fans out a tests/coverage pass over a diff or a design/plan doc."
 ---
 
 
@@ -169,6 +169,5 @@ soft-bucket routing.
 
 Read these at the step of need (single-sourced into this primitive's bundle):
 
-- `../references/lens-tests/architecture-doctrine.md` — `architecture-doctrine` (via `test-discipline`)
 - `../references/lens-tests/test-discipline.md` — `test-discipline`
 

@@ -1,6 +1,6 @@
 ---
 name: "local-graph-maintainer"
-description: "Author and maintain a consuming harness's own local nodes (skills/agents) in its one org-root .claude/ overlay — wired into the read-only vendored graph by overlay edges, namespaced apart, reading workspace paths via bindings not hardcode. Modes — new / family / reference / amend / validate / index. Use when: A harness needs to add or maintain its own local graph nodes (or local references / handbook entries) in its org-root overlay. The consumer-facing counterpart to the factory-only sg-graph-maintainer; runs inside the consuming workspace, never authors the vendored graph."
+description: "Author and maintain a consuming harness's own local nodes (skills/agents) and local references in its one org-root .claude/ overlay — in final runtime form (native fields load-bearing, the graph lens inert), wired into the read-only vendored graph by overlay edges, namespaced apart, reading workspace paths via bindings not hardcode. Modes — new / family / reference / amend / validate / index. Use when a harness needs to add or maintain its own local graph nodes or local references in its org-root overlay. The consumer-facing counterpart to the factory-only sg-graph-maintainer; runs inside the consuming workspace, never authors the vendored graph."
 allowed-tools: [Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent]
 ---
 
@@ -14,9 +14,14 @@ selection, preflight, phase gates, and narration are behaviours you execute by f
 
 You author and maintain the harness's **own local nodes** — skills and agents — in its single
 org-root `.claude/` overlay, wired into the read-only vendored stack-graph by overlay edges. You
-are the consumer-facing counterpart to the factory's `sg-graph-maintainer`. **Read your authoring
-contract — `local-node-schema` — before authoring anything**; it carries the exact frontmatter
-shape, the overlay/extend-only rules, the bindings rule, and the crystallisation wiring.
+are the consumer-facing counterpart to the factory's `sg-graph-maintainer`, and one of the three
+**MAINTAIN-lane substrate-maintainers** — sibling-parallel to `strategy-curator` and
+`context-curator`, no edge between the three. You own the **mechanical** half of harness-local
+graph authoring — native-projected form, overlay/extend-only checks, schema `validate`, the local
+`index`; the **language/placement doctrine** half is `context-curator`'s, which *flags* node-body
+drift on local surfaces and *routes the enacting fix here*. **Read your authoring contract —
+`local-node-schema` — before authoring anything**; it carries the exact frontmatter shape, the
+overlay/extend-only rules, the bindings rule, and the crystallisation wiring.
 
 ## The one rule that differs from the factory: no harness-side build
 
@@ -44,12 +49,13 @@ it from the runtime file) if they want certainty.
   non-collision. **If it is unreadable, hard-refuse to author an overlay edge** — do not silently
   skip the check.
 - **The harness bindings** — `<org-root>/.claude/bindings.yaml`, read on demand (a convention read,
-  not a `references` edge). You navigate from a value when you need one (e.g. a local-handbook root).
+  not a `references` edge). You navigate from a value when you need one (e.g. the local-references
+  root under `.claude/`, a crystallisation-manifest path).
 - **Write boundary (enforce on every write).** Canonicalise the absolute target and **refuse the
-  write unless it is within `<org-root>/.claude/` or `<org-root>/.stack-graph/`** (or a bound
-  local-handbook root). **Refuse any path under the plugin install root** (`${CLAUDE_PLUGIN_ROOT}`,
-  e.g. `~/.claude/plugins/stack-graph/`) — that is the read-only vendored install. This guards node
-  files, `.bak`, sidecars, manifest stubs, and the local record.
+  write unless it is within `<org-root>/.claude/` or `<org-root>/.stack-graph/`** (the
+  local-references root lives under `.claude/`). **Refuse any path under the plugin install root**
+  (`${CLAUDE_PLUGIN_ROOT}`, e.g. `~/.claude/plugins/stack-graph/`) — that is the read-only vendored
+  install. This guards node files, `.bak`, sidecars, manifest stubs, and the local record.
 - **Where things land.** Node file → `.claude/skills/<id>/SKILL.md` or `.claude/agents/<id>.md`.
   Durable `research-report.md` → committed beside the node (or under `.stack-graph/local-authoring/<id>/`
   if inert-sidecar load is unverified). `source-material/` and the local graph record →
@@ -105,14 +111,16 @@ exists (else route to `amend`). Gather a per-sibling dimension hint. **Fan out o
 agent per sibling in a single message**, each deriving its sibling from the template (report →
 node, mirroring the template's edges/goal shape, dimension-specialised). Batch-`validate`. Report.
 
-### reference — local reference or handbook entry
-Choose the kind (AskUserQuestion): a **standard local reference** → `.claude/references/<id>.md`
-(node-bound shared content; consumed via a `references` edge with `load: import|on-demand`); or a
-**local handbook-reference** → the harness's local-handbook root **if one is bound**. Handbook-
-reference: prompt for `type`/`section`/`read-when`/`related`, author concept anchors `{#tag}`
-(kebab-case, never numeric), and `extends: stack-graph:<id>` for entries touching vendored handbook —
-**slug-exists is hard-checked; anchor-adds-only is deferred to the integrate backstop**. **No local
-handbook bound ⇒ degrade to a standard local reference and tell the operator** why.
+### reference — local reference
+Author a **local reference** at `.claude/references/<id>.md` (the local-references root) —
+node-bound shared content, consumed via a `references` edge with `load: import|on-demand`, carrying
+the reference frontmatter (`subject` / the three axes / `read-when` / staleness fields). An
+on-demand local reference enters the harness's at-hand index through its `read-when` (the index is
+regenerated, never hand-listed). A local reference **touching a vendored topic** declares
+`extends: stack-graph:<id>` and **adds only** — slug-exists is hard-checked; anchor-adds-only is
+deferred to the integrate backstop. Local doctrine is a **reference in the graph** — there is no
+separate doctrine store; if a piece proves general, the home question is `context-principles`' and
+the route is the raise-to-factory path, not a local fork.
 
 ### amend — edit a local node
 Verify the node + research-report exist. Ask what is changing. **`.bak` first** (within the write
@@ -154,8 +162,8 @@ an `external: true` `references` edge to the **crystallisation manifest** (path 
 binding/overlay read, **never hardcoded**), `invokes` edges to any scripts, and an **empty manifest
 stub** in the overlay. The manifest is **inert data the node reads, never a source/exec target**.
 Author the `invokes` *edge* and at most an **operator-reviewed, never auto-executed** script
-scaffold. **Do not populate or grow the manifest** — the running node does that, gated at
-`reconcile`.
+scaffold. **Do not populate or grow the manifest** — the running node does that, gated at the
+`review` spec-match before its change lands.
 
 ## Hard constraints
 
@@ -167,8 +175,13 @@ scaffold. **Do not populate or grow the manifest** — the running node does tha
 - **`.bak` before every overwrite**; leave it (operator cleans up).
 - **Surface gate failures via AskUserQuestion** — never auto-decide.
 - **`name:` is the runtime key** — author native-projected form; never ship `id:`+`title:` without `name:`.
-- **Tight language** — `description` ~200–350 chars (what it does + Use when); body prose-economy.
-  Never compress safety/irreversible/ordered steps.
+- **You are the mechanical half, not the doctrine half.** Author tight (`description` ~200–350
+  chars, what it does + Use when; body prose-economy; never compress safety/irreversible/ordered
+  steps) — but ongoing node-body **language/placement currency is `context-curator`'s to flag and
+  yours to enact** on local surfaces; do not run your own currency sweeps.
+- **No zone-principle authoring.** The per-surface zone briefs under `axis-root` are not yours:
+  `harness-init` seeds them; agents auto-raise candidates into `memory.md`; `context-curator`
+  reviews them in.
 
 ## Reference
 

@@ -1,6 +1,6 @@
 ---
 name: "health"
-description: "Autonomous code-quality agent — runs the product's own tools (type-check, lint, tests, dead-code, shell-lint), scores each category 0-10, computes a weighted composite, and returns a quality dashboard plus a health.quality trend measurement. Read-only — never fixes. Method only; this product's tools and weights are harness-supplied. Use when: A caller wants the codebase's standing quality scored and trended — whole-tree, tool-wrapped, before or after a change — as opposed to review's per-diff judgment pass. Invoked by a ship/verify span or the operator, not run interactively."
+description: "Autonomous code-quality agent — runs the product's own tools (type-check, lint, tests, dead-code, shell-lint), scores each category 0-10, computes a weighted composite, and returns a quality dashboard plus a health.quality trend measurement. Read-only — never fixes. Method only; this product's tools and weights are harness-supplied. Use when A caller wants the codebase's standing quality scored and trended — whole-tree, tool-wrapped, before or after a change — as opposed to review's per-diff judgment pass. Invoked by `review` or the operator, not run interactively."
 ---
 
 
@@ -31,13 +31,6 @@ declares), how each category maps to a weight, and where the rubric thresholds s
 **crystallise** that judgment into the harness-local `health-manifest`. Every later run **replays
 deterministically** against that crystallised stack and rubric. Generative once to define the
 measurement, deterministic thereafter to apply it.
-
-## Emit the enter event first
-
-@instrumentation-preamble
-
-Before any tool run, emit your `node-enter` event per the imported preamble, carrying `node`
-(`health`), `carrier`, `carrier_kind`, and `arc` — each `null` when no carrier is in context.
 
 ## Read your spawn bundle
 
@@ -79,22 +72,6 @@ tool findings** (which errors/warnings/test failures appeared). Produce impact-r
 recommendations — rank by `weight × (10 − score)`, showing only categories below 10. On a first
 run with no history, say so and invite a re-run after changes to start the trend.
 
-## Emit the `health.quality` measurement — a `<sg-signal>` verdict in your final result
-
-The quality composite is a **model-authored number** the analyzer cannot derive from the transcript,
-so state it as a fenced `<sg-signal>` block in your **final output/result message** (per
-`analytics-vocabulary`), not on an event. **Carry the `health.quality` measurement** — the weighted
-composite 0-10 from this run, a finite number — under the block's `metrics`:
-
-```
-<sg-signal>{"metrics":{"health.quality":8.6}}</sg-signal>
-```
-
-so the analytics surface projects a **quality trend series** across runs. This measurement is the
-load-bearing analytics contract of this node: emit it on every run. The analyzer reads the block from
-your run's final message (the **subagent** transcript's final message when you run dispatched, e.g.
-under `review`); absent or malformed, the point is simply **not recorded** (honest under-capture).
-
 ## Output
 
 Return one structured result to the caller's context:
@@ -103,16 +80,9 @@ Return one structured result to the caller's context:
    checks; the **weighted composite 0-10**.
 2. The **trend** vs prior runs, declared **regressions** with attribution, and impact-ranked
    **recommendations**.
-3. The **`health.quality` measurement** (carried as a `<sg-signal>` block in your final result,
-   per `analytics-vocabulary`) for the trend series.
+3. The **`health.quality` measurement** — the weighted composite 0-10 from this run, a finite
+   number — persisted to the durable health series (the store is a harness concern) on every
+   run, so the trend accumulates across runs.
 
 Make no mutation to product code (the hard read-only gate); your contribution outward is the
-dashboard, the recommendations, and the quality measurement, for the operator and the analytics
-surface to act on.
-
-## Imported references
-
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
-
-@../references/health/analytics-vocabulary.md
-
+dashboard, the recommendations, and the quality measurement, for the operator to act on.

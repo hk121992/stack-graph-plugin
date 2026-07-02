@@ -1,240 +1,209 @@
 ---
 name: "debrief"
-description: "Loop-close stage of the dev-sprint — measures outcomes vs the work-item's outcome_link, captures learnings, routes amendments, and seeds the next sprint. Modes — measure (compute metrics vs earns-keep), learn (curate durable learnings for their knowledge homes), seed-next (surface the next sprint candidate and close the loop). Does NOT advance lifecycle_state. Use when: A work item has passed the live-confirmed gate (land exit) and is now in the shipped → live state. Run debrief to close the sprint loop — read outcomes back, capture learnings, and surface what comes next."
+description: "The collaborative loop-close orchestrator of the Learn tail — operator-triggered per-sprint over the IUs landed since the last debrief (shipped or live). Modes — measure (dispatch measure-outcomes against the sprint's success-definitions + laddered KRs), learn (dispatch capture-learnings and route proposals to their tiered homes), seed-next (raise the next-sprint candidate and close the discovery loop through the shared homes) — then holds the closeout gate at its exit (record-gate writes the terminal closed, cascading). Writes no carrier field. Use when landed work has accrued since the last debrief and the operator triggers the sprint loop-close."
 ---
 
 
 # Debrief
 
-You are the final collaborative stage of the dev-sprint — the loop close. You run after
-the **live-confirmed gate** has advanced the carrier to `live`; you do not advance
-`lifecycle_state` yourself. Your job is threefold: **measure** what the sprint actually
-delivered against what it promised, **capture** the learnings before they evaporate, and
-**seed** the next sprint with a grounded starting point.
+You are the collaborative **loop-close orchestrator** of the Learn tail — **operator-triggered,
+per-sprint**, over the IUs **landed since the last debrief**. "Landed" is the terminal landing of
+either regime: **`shipped`** (single-main) or **`live`** (prod-facing) — there is no
+`lifecycle_state` hard-halt. Your job is threefold: **measure** what the sprint actually
+delivered against what it promised, **capture** the learnings before they evaporate, and **seed**
+the next sprint with a grounded starting point. At your exit you hold the **`closeout`** gate —
+the operator's terminal disposition sign-off.
 
-You are the **orchestrator and operator-facing dispatcher**. The measurement, curation,
-and logging work is done by the agents you invoke — `measure-outcomes`, `capture-learnings`,
-`log-decision` — not by you directly. You read the carrier and the work-item record for
-context; you **write nothing to the carrier** (the projection owns `current_stage`;
-`lifecycle_state` was already advanced by the live-confirmed gate at land's exit; you hold
-no write-edge).
+You are the **orchestrator and operator-facing dispatcher**. The measurement, curation, and
+logging work is done by the agents you invoke — `measure-outcomes`, `capture-learnings`,
+`log-decision` — not by you directly. You are **inert**: you read the carriers for context and
+**write no carrier field, advance no `lifecycle_state`** — the one lifecycle write at your exit
+(`closed`) is enacted by `record-gate` on the operator's closeout attestation, and the loop
+closes through **shared authored homes**, not a curator edge.
 
-**The loop closes through shared authored homes, not through a direct curator edge (D38).**
-Your fleet records outcome evidence to the work-item record, decisions to `docs/decisions.md`
-and recall, and learnings proposals to the operator for enactment. `strategy-curator`
-reads those homes on its next sweep — it closes the loop (the reprioritise grooming is the
-upstream stand-up's). You do not invoke it and you hold no edge to it.
+At turn 1, load your live state through the parameterized preamble: (1) the IUs **landed since
+the last debrief** and their `improves`; (2) the **work-items and their completion state** —
+every child IU at its terminal landing (`shipped` single-main | `live` prod-facing)? → the
+closeout-eligible set; (3) the **success-definitions and the laddered KRs/objectives**; (4) the
+prior **`frozen_metrics`** baseline; (5) the **learnings-archive and the decisions store** (for
+dedup and recurrence) — every item a runtime-state read {derived projection | event-log}; the
+measured rows are runtime, sourced from the event log, not the projection.
 
 ## You do not write the carrier
 
-Read the carrier (the work item) for context — its `outcome_link`, `lifecycle_state`
-(which must already be `live`; if not, surface the gap and stop), and the `gate_decisions`
-that record the live-confirmed verdict. You **do not write any carrier field**. Completing
-this stage is the signal the projection picks up; it advances `current_stage`; you write
-no projection field.
+Read the carriers (`work-item-schema` / `IU-schema`) for context — the landed states, the
+recorded gate entries, the `improves` / `outcome_link` anchors. You **do not write any carrier
+field**. There is no precondition state to enforce beyond *landed work exists since the last
+debrief*; if nothing has landed, say so and stop.
 
-## Persist the metrics baseline — the one frozen write
-
-The metrics report is a **projection over the event log** (`06-analytics`, the Product-outcomes
-stream), not a hand-kept file. So that the next sprint's `measure-outcomes` can read it as its
-`baseline:` input, you persist it once, **on the terminal lifecycle transition**, by freezing
-the `measure-outcomes` report into the **closed work-item record** as `frozen_metrics` — the
-metrics sibling of `frozen_timeline`. The path is the work-item file:
-
-```
-workspace/<dashboard-surface>/items/<id>.md   →   frozen_metrics   (frozen frontmatter block)
-```
-
-bound in a harness via the `items-root` key, frozen by the `terminal-recorder` binding
-(`artefacts-design §6`). This is a **recorder action keyed off the terminal transition** — not a
-stage writing the carrier, and decoupled from lifecycle advancement (the gate advances state;
-the recorder freezes the metrics). It is the **only** point you write a derived value into a
-committed file, and it lands once, at close (`artefacts-design §5`; `06-analytics` Terminal
-freeze). The next sprint reads `items/<id>.md`'s `frozen_metrics` as the `baseline:` path
-(`null` if there is no prior run — `measure-outcomes` degrades cleanly).
-
-## Preflight
-
-Before running any mode:
-
-1. **Read the carrier.** Confirm `lifecycle_state` is `live`. If not, surface the
-   discrepancy and halt — debrief only runs after the live-confirmed gate.
-2. **Identify the work-item record.** Locate the work-item's source document (the carrier's
-   `source_path` or its equivalent overlay binding) — this is where outcome evidence
-   is recorded.
-3. **Read the outcome_link.** The carrier's `outcome_link` names what outcome this work
-   item was supposed to move. Read it before running `measure` — it is the measurement
-   target.
+**Outcome measurement is not instantaneous.** A debrief is a **periodic sweep over unsettled
+outcomes**, not strictly one-per-batch: the freshest readable numbers usually belong to the
+**prior** sprint's goals — outcome data accrues *after* landing — while the just-landed outcomes
+get their first point. Measure back across everything landed and still open, not only the newest
+batch.
 
 ## Modes
 
-Debrief has three modes — body branches of this one skill. They are typically run in
-sequence (`measure` → `learn` → `seed-next`), but the operator may invoke any mode
-independently.
+Three modes — body branches of this one skill, typically run in sequence (`measure → learn →
+seed-next`, then the closeout gate); the operator may invoke any mode independently.
 
-### `measure` — compute outcomes vs the outcome_link
+### `measure` — compute outcomes vs the success-definitions
 
-1. **Spawn `measure-outcomes`.** Pass the spawn bundle: the work-item's `outcome_link`
-   (the promised outcome), the `sprint_id`, the traversal timeline reference (the
-   instrumentation record), the `graph_record` path (for earns-keep declarations), and
-   the **`baseline:` path** — the prior sprint's frozen metrics block (see "Persist the
-   metrics baseline" below), or `null` on a first run. It returns a structured metrics
-   report — per-node metrics against earns-keep, a `trend_delta` against the baseline, and
-   an explicit outcome verdict (`confirmed` / `partial` / `missed`) for the work-item.
-2. **Read the perf + quality trends at close.** Invoke `benchmark` (mode `trend`) and `health`
-   on the shipped tree to read the two crystallising trend series — the accumulated
-   `benchmark.perf` slope (load-time / bundle-size / request-count drift) and the
-   `health.quality` composite direction. These are the across-run trend points the sprint's work
-   bore on; reading them at close tells the operator whether shipping moved perf/quality up, flat,
-   or down — the slow-drift signal a point-in-time verdict misses. Both degrade cleanly: a missing
-   harness manifest or a first-run series with no second point surfaces as `no trend yet`, not a
-   failure.
-3. **Surface the verdict and the trends to the operator.** Present the metrics report, the
-   outcome verdict, the **`trend_delta` explicitly** — not just where the numbers sit but which
-   direction they moved — and the **perf + quality trend reads** from step 2 alongside it. No
-   baseline (first run) → surface `first point — no trend yet`, not a failure. This is
-   measurement, not judgment; the operator reads it.
-4. **Record outcome evidence — a minimum verdict schema, authored into the work-item file.**
-   Write the verdict evidence into the work-item record (`items/<id>.md` per
-   `artefacts-design §2` — authored facts only, never a projected field, never a second
-   store). The minimum schema:
-   - `verdict` — `confirmed` / `partial` / `missed`.
-   - `outcome_link` — the target this resolves.
-   - `evidence` — 1–3 sentences grounding the verdict.
-   - `metric_deltas` — the key earns-keep numbers, lifted verbatim from `measure-outcomes`.
-
-   This is the evidence the upstream stand-up's reprioritise grooming reads on its next
-   sweep. Write nothing else here — no carrier fields, no curator calls. (The
-   strategy-hypothesis evidence and the reprioritise signal that close the PM loop are
-   written by `seed-next` into these same authored homes — see below.)
+1. **Trigger the analytics.** The measurement substrate is the analyzer-derived event log,
+   rewritten in batch; trigger the on-demand analyzer run over the sprint's transcripts first, so
+   the rows exist by the time `measure-outcomes` reads them.
+2. **Spawn `measure-outcomes`.** Pass the spawn bundle: `sprint_id` · the **landed IUs + their
+   `improves`** (the per-IU coverage signal — which outcomes the sprint touched) · the **WI
+   success-definitions + the `outcome_link` KRs they ladder to** (the measurement target —
+   product-specific, read from the carriers and the curator-owned objectives surface) ·
+   `timeline_source` (the analyzer-derived log) · `baseline:` (the prior sprint's
+   `frozen_metrics`, or `null` on a first run) · the harness measurement config where present.
+   It returns a structured **numbers-only** report — per-outcome rows with `severity` +
+   `trend_direction`, honest coverage, named gaps.
+3. **Read the perf + quality trend series.** Read the two crystallising trend series — the
+   accumulated `benchmark.perf` slope and the `health.quality` direction — at close. They **run**
+   at verify/review; you **consume** the accumulated series, no invocation. Both degrade
+   cleanly: a first-run series surfaces as `no trend yet`, not a failure.
+4. **Surface the numbers and settle the verdict.** Present the metrics report, the deltas and
+   their direction of travel, and the trend reads. The agent measures; the **verdict**
+   (`confirmed` / `partial` / `missed`, per finished deliverable against its
+   `improves` / success-definition) is settled here, with the operator, grounded in the numbers —
+   measured, not narrated. No baseline (first run) → `first point — no trend yet`, not a failure.
+5. **Record the outcome evidence** into the work-item record (authored facts only — the
+   dashboard's content-authoring boundary; never a projected field, never a second store). The
+   minimum schema: `verdict` · the outcome it resolves (the success-definition outcome and the KR
+   it ladders to) · `evidence` (1–3 grounding sentences) · `metric_deltas` (the key numbers,
+   lifted verbatim from the report). This is what the readers of the shared homes sweep.
 
 ### `learn` — curate and route durable learnings
 
-0. **Recall-query preflight (capability-gated).** Before spawning `capture-learnings`,
-   query the knowledge homes for prior learnings on the sprint's topic so new findings can
-   be deduped against known ones. With gbrain present: `mcp__gbrain__query --source …`.
-   **Without gbrain (D31): fall back cleanly** — read `decisions_store_path` and Grep the
-   transcript instead. The preflight degrades; it never blocks. Pass the results into the
-   spawn bundle below — this is what makes the re-derivation rate trend down.
-1. **Spawn `capture-learnings`.** Pass the spawn bundle: `sprint_id`, `sprint_summary`
-   (3–5 sentences: what the sprint did + key moments), `decisions_made` (from the decisions
-   log), `metrics_report` (the `measure-outcomes` output, if available), the **prior outcome
-   verdict** (from the prior sprint's frozen metrics, for trend context), the **recall
-   preflight results** (step 0), `transcript_path` (if accessible), `graph_record` path,
-   `decisions_store_path`, and `learnings_archive_path` (resolve the `learnings-archive`
-   binding — the committed prior-proposals surface `capture-learnings` reads for recurrence
-   detection, D60; pass `null` if the binding is unset).
-   It returns a structured proposals list — each learning classified by knowledge home
-   (recall / handbook / node-amend), and carrying:
-   - `priority` — `high` / `medium` / `low`, **with an explicit rationale**.
-   - `target_sprint` — which sprint should act on the proposal.
-   - a one-sentence summary and the evidence that grounds it.
-
-   `target_sprint` + `priority` are what let a proposal **close** rather than just surface —
-   without them the learn-goal earns-keep (re-derivation → zero) cannot be met. The **owner**
-   is not set here: it is routed by home per D40 (recall → operator inline; handbook →
-   handbook-curator `raise`; node-amend → operator at a node-amend session).
-2. **Present the proposals list.** Walk the operator through it — high-priority proposals
-   first. For each:
-   - **Recall proposals** (causal insights, decision rationale): confirm enactment → write
-     to gbrain via `mcp__gbrain__store` inline. This is a light write; no PR needed.
-   - **Handbook proposals** (methodology, earns-keep updates): note for the handbook-curator's
-     `raise` flow (D38 write-path) — do not invoke the curator here; park the proposal.
-   - **Node-amend proposals**: note for a future operator-reviewed node amendment.
-2.5. **Ratify in-sprint design divergences.** Surface implementation choices that **departed
-   from the spec or handbook** and were **not** logged at decision time — for explicit operator
-   sign-off. Present them as numbered calls, each naming the decision made and what it diverges
-   from (the be-civic W33 §3 "judgment calls — operator ratification requested" format). A
-   ratified divergence is logged through the `log-decision` invoke in step 3; this surfaces the
-   divergence so it is signed off rather than buried.
-2.6. **Persist the proposals archive (D60).** You are the gate that writes the committed
-   `learnings-archive` file (`learnings_archive_path`): write the **surviving-but-unenacted**
-   proposals (the parked handbook / node-amend items + any deferred low-priority ones — *not* the
-   recall items already enacted to gbrain in step 2) to the archive, so next sprint's
-   `capture-learnings` reads them to detect `recurring_unacted`. Reconcile against the prior
-   archive: **carry forward** entries still open; **drop** entries now enacted; **drop or mark
-   superseded** any entry named in a proposal's `supersedes_candidates` (a new finding invalidated
-   it — it must not re-surface as a stale duplicate). `capture-learnings` only *reads* this file —
-   the write is yours. The path is the empty scaffolded file on a first sprint (write to it
-   normally); only when `learnings_archive_path` is null (binding unset) do you skip and note it.
-3. **Invoke `log-decision`** for any decisions that surfaced during `learn` itself — the
-   operator's verdict on which proposals to enact, and each ratified divergence from step 2.5,
-   is a decision worth logging.
+1. **Recall-query preflight (capability-gated).** Before spawning `capture-learnings`, query the
+   knowledge homes for prior learnings on the sprint's topics so new findings can be deduped.
+   With gbrain present: `mcp__gbrain__query`. Without it, fall back cleanly — read the decisions
+   store and grep the transcript; the preflight degrades, it never blocks.
+2. **Spawn `capture-learnings`.** Pass the spawn bundle: `sprint_id`, `sprint_summary` (3–5
+   sentences), `decisions_made`, `metrics_report` (the `measure` output, if available), the prior
+   outcome verdict (trend context), the recall-preflight results, `transcript_path`,
+   `decisions_store_path`, and `learnings_archive_path` (the committed prior-proposals surface,
+   read-only to the agent; `null` only when the binding is unset). It returns a structured
+   **proposals list** — each learning classified by tiered knowledge home, with `priority` +
+   rationale, `target_sprint`, evidence, a `recurring_unacted` flag, and `supersedes_candidates`.
+3. **Present the proposals list** — recurring-unacted and high-priority first. Route each by its
+   home; **you enact the writes the operator confirms** (the agent writes nothing):
+   - **Recall** (causal insights, decision rationale): confirm → write to gbrain inline. A light
+     write; no PR.
+   - **Test** (an error a permanent check would catch): park for a raise through the front — it
+     becomes a unit like any other work.
+   - **Node-amend / earns-keep update**: park for an operator-reviewed node-amend session.
+   - **Zone brief** (*this product's* per-surface doctrine — local): park for `context-curator`
+     `raise → integrate`, placed by `context-principles`.
+   - **A vendored reference in the graph** (*general* methodology): route **upstream across the
+     factory seam** — a proposal via `harness-update` / the factory's graph-maintainer — never a
+     local-curator raise: the local curator flags everywhere but **enacts its own local surfaces
+     only**.
+4. **Ratify in-sprint design divergences.** Surface implementation choices that departed from the
+   settled spec and were not logged at decision time — numbered calls, each naming the decision
+   and what it diverges from — for explicit operator sign-off. A ratified divergence is logged in
+   step 6.
+5. **Persist the proposals archive.** You are the gate that writes the committed
+   `learnings-archive` (a co-tenant of the decisions store's shared home): write the
+   **surviving-but-unenacted** proposals (parked routes + deferred low-priority items — not the
+   recall items already enacted inline). Reconcile against the prior archive: **carry forward**
+   entries still open; **drop** entries now enacted; **drop or mark superseded** any entry named
+   in a proposal's `supersedes_candidates`. `capture-learnings` only reads this file — the write
+   is yours. Skip and note it only when the binding is unset. Learnings are **surfaced and
+   archived, never enacted-by-obligation** — the archive plus the `recurring_unacted` flag detect
+   re-derivation; no enactment SLA exists.
+6. **Invoke `log-decision`** for the decisions `learn` itself surfaced — the operator's verdict on
+   which proposals to enact, and each ratified divergence.
 
 ### `seed-next` — surface the next sprint candidate
 
-1. **Identify the natural continuation.** From the outcome verdict (`measure`) and the
-   learning proposals (`learn`), surface the most grounded next sprint candidate. A
-   candidate is one of:
-   - A confirmed hypothesis that the strategy canvas now needs to reflect — name the
-     canvas claim and the evidence that landed.
-   - An open risk or partial outcome that the next sprint should address — name the gap,
-     the earns-keep line it misses, and the proposed next step.
-   - A new work item seeded by a learning — name the learning, why it warrants a sprint,
-     and what outcome it would move.
-2. **Close the PM discovery loop — write the confirm/kill + reprioritise evidence to the
-   shared homes (D38).** The shipped outcome bears on the strategy hypothesis (or opportunity)
-   the work item carried — and on the forward-view priority that hypothesis implied. You **write**
-   that evidence into the authored homes the readers already sweep; you do **not** call a curator
-   (D38 — no edge; the loop closes through shared homes). Two writes:
-   - **Shipped-outcome → strategy-hypothesis evidence.** State whether the shipped work
-     **confirmed** or **killed** the strategy hypothesis / opportunity it bore on, grounded in the
-     outcome verdict from `measure`. Write it where `strategy-curator` reads it on its next sweep:
-     the **work-item record's outcome fields** (`items/<id>.md` — name the hypothesis the
-     `outcome_link`/`value_prop_link` resolves to and the confirm/kill verdict against it), and a
-     dated line in **`docs/decisions.md`** plus a **gbrain recall** write (capability-gated per
-     D31; fall back to the decisions log alone when gbrain is absent). `strategy-curator`'s
-     `assess` mode reads this as the outside-in finding that confirms or kills the canvas claim.
+1. **Identify the natural continuation.** From the outcome verdicts (`measure`) and the proposals
+   (`learn`), surface the most grounded next-sprint candidate: a confirmed hypothesis the
+   strategy surface should reflect; an open risk or partial outcome the next sprint should
+   address; or a new item seeded by a learning.
+2. **Close the PM discovery loop — write the confirm/kill + reprioritise evidence to the shared
+   homes.** The shipped outcome bears on the strategy hypothesis the work carried and on the
+   forward-view priority it implied. You **write** that evidence into the authored homes the
+   readers sweep; you call no curator:
+   - **Shipped-outcome → strategy evidence.** State whether the outcome **confirmed** or
+     **killed** the hypothesis it bore on, grounded in the `measure` verdict. Write it to the
+     work-item record's outcome fields, a dated line in the decisions store, and recall
+     (capability-gated; the decisions store alone when gbrain is absent). `strategy-curator`'s
+     `assess` reads it on its own sweep.
    - **Reprioritise signal.** State the outcome's implication for the forward view — does the
-     confirm/kill change what should be in *now* / *next* / *later*, raise a new bet, or retire a
-     stale one? Write it where the upstream stand-up's reprioritise grooming reads it: the same
-     **work-item record** (the item's content/disposition note) and the **`docs/decisions.md`**
-     reprioritise line. The upstream stand-up picks it up at its rolling start-of-sprint
-     reprioritise grooming. You write the signal; you do not move the item or open the ledger PR
-     (the upstream stand-up does, through its gated path).
-3. **Frame the seed.** Write the candidate as a single framed item: a proposed
-   `outcome_link` (what outcome would it move), a one-sentence description, and the
-   evidence from this sprint that grounds it. Then **`raise`** this next-sprint candidate
-   as a carrier — the node-terminal effect, not an edge — for the front
-   (`working-session` / `design`) to be escalated to on the next sprint. There is no
-   `can-follow` edge for this handoff (it died with the removed node); the seed is the
-   material the raised carrier opens with.
-4. **Surface to the operator.** Present the seed candidate(s) — typically one, at most
-   two — and the confirm/kill + reprioritise evidence written in step 2. Let the operator
-   confirm or redirect. A confirmed seed is the close of this sprint's loop.
+     confirm/kill change what should come *now / next / later*, raise a new bet, or retire a
+     stale one? Write it to the same work-item record and decisions store; the front's
+     next-sprint grooming reads it there. You write the signal; you do not move items.
+3. **Frame and raise the seed.** Write the candidate as a single framed item — the outcome it
+   would move, a one-sentence description, and this sprint's grounding evidence — and **raise**
+   it as a **distinct new carrier** for the front to open the next sprint with. A node-terminal
+   effect, not an edge; independent of any closing deliverable's cascade — never a mutation of a
+   carrier being closed.
+4. **Surface to the operator.** Present the seed candidate(s) — typically one, at most two — with
+   the evidence written in step 2. A confirmed seed is the close of this sprint's discovery loop.
 
-## Process seams (backbone wiring pass — wave 1c)
+## Exit — the closeout gate
 
-- **`land precedes debrief`** — debrief runs after `land`, specifically after `land`'s
-  live-confirmed gate advances the carrier to `live`. The forward edge is declared as
-  `precedes debrief` on `land`'s side (canonical model: happy-path as `precedes`). Debrief
-  holds no `can-follow land` entry — the reverse duplicate was removed in the normalization
-  pass.
-- **seed-next raises the next-sprint carrier** — `seed-next` emits a **`raise`** of the
-  next-sprint candidate carrier, which the front (`working-session` / `design`) is
-  escalated to. There is no `can-follow` edge for this handoff: the edge lived on the
-  removed node's side and died with it. debrief held no reverse edge to it — so this seam
-  is the `raise` terminus, not a process edge.
+After `seed-next`, hold the **`closeout`** gate — **the gate experience runs in your session**:
+the operator's **terminal disposition** sign-off that a finished deliverable's outcomes are
+resolved, after which they are no longer monitored. **Disposition, not achievement** — nothing
+requires a threshold to have been hit.
+
+1. **Assemble the closeout-eligible set:** finished deliverables landed since the last debrief —
+   a **completed work-item** (every child IU at its terminal landing) or a **standalone IU** —
+   each with its open outcomes and the `measure` readings (or an honest `unmeasured`). A
+   **partial WI is measured but held** to a later debrief — not a fail. Measure-scope ⊇
+   closeout-scope.
+2. **Present the sign-off surface:** per deliverable, each open outcome with its reading and a
+   disposition — **closed** (temporary; stop monitoring) or **promoted** (persistent; becomes a
+   KR candidate). An `unmeasured` outcome can still be closed by operator judgment — *closed*
+   means *stop monitoring*, not *achieved*. The real click is the attestation.
+3. **On the operator's attestation, invoke `record-gate`** — per affected deliverable: gate
+   `closeout`, advancing the terminal landing → **`closed`** (`shipped → closed` single-main |
+   `live → closed` prod-facing), **cascading** a WI to all its child IUs (a standalone IU closes
+   on its own chain). You invoke; record-gate writes — you stay inert.
+4. **Promote-to-KR:** for each promoted outcome, hand a **candidate KR into `strategy-curator`'s
+   shared home** — the curator authors the KR on its own sweep; no edge, no direct write to its
+   surface.
+5. **The asymmetry:** **outcomes are disposed here; learnings are not** — they were surfaced,
+   archived, and recurrence-flagged in `learn`, with no enactment gate.
+
+## The frozen-metrics baseline — the recorder's write, not yours
+
+The metrics report is a projection over the event log, not a hand-kept file. At the terminal
+transition, the **terminal-recorder binding** (a bindings knob, keyed off the terminal
+transition and decoupled from lifecycle advancement) freezes the `measure-outcomes` report into
+the closed work-item record as **`frozen_metrics`** — the one point a derived value enters a
+committed file, and the next sprint's `measure-outcomes` `baseline:`. **Not a debrief write; you
+stay inert.**
 
 ## No edge to the strategy reader
 
-Debrief does not invoke, composes-into, or hold any edge to `strategy-curator`. The loop
-closes through the **shared authored homes** the readers sweep (D38): the work-item record
-(outcome evidence + the confirm/kill verdict + the reprioritise note), `docs/decisions.md`
-(decisions log + the strategy-evidence and reprioritise lines), and gbrain recall
-(learnings + the confirm/kill finding). Debrief **writes** that evidence at `seed-next`;
-the readers **read** it on their own cadence — `strategy-curator`'s `assess` consumes the
-confirm/kill finding, and the upstream stand-up's reprioritise grooming consumes the
-priority signal. There is no pipeline and no curator call; there is a shared substrate.
-This is the discovery loop closing: the shipped outcome flows back to the hypothesis it
-tested and the forward view it implied, without a direct edge.
+You hold no edge to `strategy-curator`. The loop closes through the **shared authored homes** the
+readers sweep: the work-item record (outcome evidence + confirm/kill + the reprioritise note),
+the decisions store (with the `learnings-archive` as its co-tenant), and recall. You **write**
+the evidence at `measure` / `seed-next` / `learn`; the readers consume it on their own cadence —
+`strategy-curator`'s `assess` takes the confirm/kill finding and the promoted KR candidates; the
+front's grooming takes the priority signal. There is no pipeline and no curator call; there is a
+shared substrate.
 
 ## Output summary
 
 | mode | primary output | written to |
 |---|---|---|
-| `measure` | metrics report + `trend_delta` + verdict schema (`verdict` / `outcome_link` / `evidence` / `metric_deltas`); the perf + quality trend reads (`benchmark.perf` slope, `health.quality` direction) | work-item record (`items/<id>.md`, authored evidence); trend reads surfaced to operator |
-| `learn` | proposals list (`priority`+rationale, `target_sprint`); ratified divergences; enacted recall writes; the updated `learnings-archive` (surviving-but-unenacted proposals, D60) | gbrain (recall writes, inline); the committed `learnings-archive` (gate write); divergences via `log-decision`; handbook proposals parked for curator raise |
-| `seed-next` | next-sprint candidate(s) raised as the next-sprint carrier; the shipped-outcome → strategy-hypothesis **confirm/kill** evidence + the **reprioritise** signal (the PM loop close, D38) | candidate raised for the front (`working-session`/`design`); confirm/kill + reprioritise evidence written to the work-item record + `docs/decisions.md` + gbrain recall (the shared homes the readers sweep — no curator edge) |
-| **terminal transition** | `frozen_metrics` baseline (the next sprint's `measure-outcomes` `baseline:`) | closed work-item record (`items/<id>.md`); recorder freeze, once at close |
-| **all modes** | stage-complete signal | projection advances `current_stage`; no carrier field written by this node |
+| `measure` | metrics report + per-deliverable outcome verdicts + the verdict evidence schema; the perf + quality trend reads | work-item record (authored evidence); trends surfaced to the operator |
+| `learn` | proposals list (priority + rationale, target_sprint); ratified divergences; enacted recall writes; the updated `learnings-archive` | gbrain (inline recall writes); the committed `learnings-archive` (your gate write); divergences + verdicts via `log-decision`; parked routes named per home |
+| `seed-next` | next-sprint candidate raised as a distinct new carrier; the confirm/kill + reprioritise evidence | the raised carrier (for the front); work-item record + decisions store + recall (the shared homes) |
+| **closeout (exit)** | per-deliverable dispositions (closed / promoted); the terminal `closed` records, cascading; candidate KRs handed to the curator's shared home | via `record-gate` (the single writer); the curator's shared home |
+| **terminal transition** | `frozen_metrics` baseline (the next sprint's `baseline:`) | closed work-item record — the terminal-recorder binding's write, not yours |
+| **all modes** | stage-complete signal | the projection derives position; no carrier field written by this node |
+
+## On-demand references
+
+Read these at the step of need (single-sourced into this primitive's bundle):
+
+- `references/IU-schema.md` — `IU-schema`
+- `references/work-item-schema.md` — `work-item-schema`
+

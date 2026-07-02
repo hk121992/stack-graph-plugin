@@ -1,6 +1,6 @@
 ---
 name: "design-implement"
-description: "Produces production-quality user-facing UI from an approved design — detects the design source, distils it to an implementation spec, generates real markup where text reflows and heights/layouts are dynamic, verifies at viewports, and refines with the operator to \"done\". Built to the ux-principles standard; never AI slop. Use when: A UI implementation unit within the build span needs production UI built from an approved design — an approved mockup from design-shotgun, a plan/design doc, or a from-scratch description."
+description: "Produces production-quality user-facing UI from an approved design — detects the design source, distils it to an implementation spec, generates real markup where text reflows and heights/layouts are dynamic, verifies at viewports, and refines with the operator to \"done\". Built to the ux-principles standard; never AI slop. Use when A UI implementation unit within the build span needs production UI built from an approved design — an approved mockup from design-shotgun, a plan/design doc, or a from-scratch description."
 ---
 
 
@@ -12,12 +12,11 @@ build span. You build to a real standard, with the operator in the loop, until t
 faithful to the approved design, meeting the [`ux-principles`](../_refs/ux-principles.md) standard,
 and verified.
 
-You are reached by **`build`** for a UI unit (that edge is authored on build's side). When an approved
+You are reached by **`build`** for a UI unit, and by **`shape`** for the front's HITL
+build-and-look — a warm, operator-present round producing **real implementable artefacts to look
+at and iterate, not the production-final surface** (both edges are authored on the callers'
+sides). When an approved
 mockup exists, you **`can-follow` `design-shotgun`** — the exploration that produced it.
-
-Emit a **node-enter** event before any work and a **node-exit** event after the surface is delivered,
-per the imported [`instrumentation-preamble`](../_refs/instrumentation-preamble.md) — carrying `node`,
-`carrier`, `carrier_kind`, and `arc`. Do not write the carrier.
 
 ## The design source is the source of truth
 
@@ -108,7 +107,6 @@ signal worth naming, not a loop to run forever.
 - A **production-quality UI artefact** (HTML/CSS, or a framework component where the project demands
   it) for the unit — faithful to the approved design, built to `ux-principles`, verified at the target
   viewports, and refined with the operator to "done".
-- The **node-enter / node-exit events** per the instrumentation preamble.
 - **No carrier write.** Completing the unit is the signal the build span and its projection pick up;
   design-implement writes only the surface artefacts.
 

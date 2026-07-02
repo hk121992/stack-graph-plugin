@@ -1,6 +1,6 @@
 ---
 name: "debug"
-description: "The Iron-Law root-cause fix path — investigate, analyse, hypothesise, fix, with no fix applied until one root cause is reproduced and confirmed. Fans out parallel read-only probes to test candidate causes; escalates instead of guess-patching. Use when: A build (or review) hits a failing check, runtime error, or regression that cannot be diagnosed and fixed quickly in-span, and the cause is not yet known."
+description: "The Iron-Law root-cause fix path — investigate, analyse, hypothesise, fix, with no fix applied until one root cause is reproduced and confirmed. Carries the Iron Law inline, fans out parallel read-only probes to test candidate causes, and escalates instead of guess-patching. Use when a build (or review) hits a failing check, runtime error, or regression that cannot be diagnosed and fixed quickly in-span, and the cause is not yet known."
 ---
 
 
@@ -9,19 +9,47 @@ description: "The Iron-Law root-cause fix path — investigate, analyse, hypothe
 You are the root-cause fix path. A stage — `build` (or `review`) — invokes you when a unit
 fails and the cause is not quickly diagnosable: a failing acceptance check, a runtime error, a
 regression that the host could not fix inline. You run **investigate → analyse → hypothesise →
-fix** under the **Iron Law** (imported): no fix is applied until one root cause is reproduced
+fix** under the **Iron Law** (below): no fix is applied until one root cause is reproduced
 and confirmed. You return a confirmed fix and a regression test to the host stage, or you
 escalate — never a guess-patch.
 
-The imported `iron-law` reference carries the constraint and the four-phase discipline. This
-body runs it and owns the runtime mechanics the constraint leaves out: the parallel probe
-fan-out, scope-lock, the 3-strike escalation, the blast-radius gate, and the report.
+The Iron Law section carries the constraint and the discipline; the phases run it and own the
+runtime mechanics the constraint leaves out: the parallel probe fan-out, scope-lock, the
+3-strike escalation, the blast-radius gate, and the report.
 
-## On entry
+You run **inside the host's span**, not as a stage — no preamble and no carrier read of your
+own: your turn-1 context is the host session's (the dispatched build session's bundle when
+`build` hosts), and the failure context arrives from the host, which holds the IU. A
+verify-discovered defect that re-runs `build` as a fresh correction session may reach you
+there — you still return your report to *that* host session; the bounded reopen is
+`verify`/`dispatch`'s, not yours.
 
-Emit a `node-enter` event per the imported `instrumentation-preamble` — `node: debug`, with
-`carrier`, `carrier_kind`, and `arc` from the host stage's context (`null` if none in scope).
-Emit it before any investigation work.
+## The Iron Law
+
+**No fix is applied without a confirmed, reproduced root cause.** A symptom-fix is
+whack-a-mole — fix the reason, never suppress the signal. The discipline, in order — do not
+skip ahead to a fix:
+
+1. **Investigate** — collect the symptom (error text, stack, repro steps); trace the code path
+   back toward candidate causes; check recent changes (a regression means the cause is in the
+   diff).
+2. **Reproduce first** — trigger it deterministically *before* forming any hypothesis. Can't
+   reproduce ⇒ gather more evidence, don't proceed on a guess.
+3. **Hypothesise** — one specific, testable claim. **One hypothesis at a time** — never fan out
+   fixes for several candidate causes at once.
+4. **Confirm** — prove the hypothesis at the suspected cause (a temporary log / assertion /
+   probe) against the reproduction; the evidence must match before any fix is written.
+5. **Fix the cause** — the smallest change that eliminates the confirmed cause; minimal diff;
+   resist refactoring adjacent code; **add a regression test that fails without the fix and
+   passes with it.**
+
+**When the cause won't confirm:** a wrong hypothesis ⇒ back to investigate. Repeated failures ⇒
+**stop and escalate** — never guess-patch (the strike count is the 3-strike gate below). A fix
+you cannot reproduce and verify is not shipped.
+
+**Red flags — slow down:** "quick fix for now" (there is no for-now) · proposing a fix before
+tracing the data flow (you are guessing) · each fix revealing a new problem (wrong layer, not
+wrong code).
 
 ## Phase 1 — Investigate (gather evidence)
 
@@ -73,18 +101,17 @@ against the repro. The evidence must match before you write a single line of fix
 If the cause does not confirm, return to Phase 1 and gather more evidence. Do not patch on a
 hunch.
 
-**Red flags — slow down:** "quick fix for now" (there is no for-now); proposing a fix before
-tracing the data flow (you are guessing); each fix revealing a new problem (wrong layer, not
-wrong code).
-
 ### The 3-strike rule (escalation gate — do not skip)
 
 If **3 hypotheses fail to confirm**, STOP. This is likely architectural, not a simple bug.
-Surface to the operator and let them choose:
+Surface the escalation honestly:
 
-- **Continue** — you have a genuinely new hypothesis; state it.
-- **Escalate** — hand to a human who knows the system.
-- **Instrument and wait** — add logging and catch it on the next occurrence.
+- **Attended session** — the operator chooses: **continue** (you have a genuinely new
+  hypothesis; state it) / **escalate** (hand to a human who knows the system) / **instrument
+  and wait** (add logging and catch it on the next occurrence).
+- **The dispatched AFK build span** — there is no operator to pause for: return **BLOCKED** to
+  the host with the strike evidence, and the host's return envelope routes the escalation out
+  (`dispatch` parks it for the operator's decision). Never wait mid-span.
 
 Guess-patching past a third failed hypothesis is the failure this gate exists to prevent.
 
@@ -121,24 +148,12 @@ Status:          DONE | DONE_WITH_CONCERNS | BLOCKED
 - **DONE_WITH_CONCERNS** — fixed but not fully verifiable (e.g. an intermittent bug needing staging).
 - **BLOCKED** — no cause confirmed after investigation; escalated at the 3-strike gate.
 
-## On exit
-
-Emit a `node-exit` event per the imported `instrumentation-preamble` — same `node`/`carrier`/
-`carrier_kind`/`arc` as entry, `outcome` one of `cause-confirmed-fixed` / `escalated` /
-`aborted`, and `gates` recording the escalation gate touched (e.g. `["3-strike:pass"]` when a
-cause confirmed before the third strike, `["3-strike:fail"]` when it escalated). Emit it after
-the report is returned, never before the work is complete.
-
 ## Output
 
 - A **confirmed fix** + a **regression test** + the **DEBUG REPORT**, handed back to the host
   stage; or
-- an **escalation** at the 3-strike gate (operator decision: continue / escalate / instrument
-  and wait) — never a guess-patch shipped as a fix.
-
-## Imported references
-
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
-
-@references/iron-law.md
-
+- an **escalation** at the 3-strike gate (the operator's decision, in-session or via the host's
+  return envelope) — never a guess-patch shipped as a fix.
+- Control returns to the **host stage** either way — never to a next backbone stage. You write
+  no carrier field and touch no gate; the host owns the unit, and any lifecycle write is
+  `record-gate`'s.

@@ -1,68 +1,107 @@
 ---
 name: "verify"
-description: "Orchestrates the verification panel over the running built thing before it lands — dispatches qa (browser behaviour), design-review (visual), and simulate-users (AI-agent experience), consolidates their verdicts into one ranked finding set, surfaces a single verification gate, and owns the corrective loop back to review. Use when: The review span is complete and the built change must be proven against its running behaviour, visuals, and experience before it advances to reconcile."
+description: "The batch verification stage over the assembled DEV surfaces — after dispatch drains the IU stream, before the promotion gate. Runs the crystallised verify-procedure over the running DEV build, depth-adjusted by judgment: dispatches qa (behaviour), design-review (visual), and simulate-users (experience) — plus benchmark for a perf-relevant change — runs the batch integration-coherence pass, consolidates one ranked verdict, owns the batch fix-loop (reopen via dispatch), opens the integration PR, and fires commit-to-land at its exit. Use when dispatch has handed over the assembled batch and the running build must be proven before promotion."
 ---
 
 
 # Verify
 
-Orchestrate the verification panel over the **running built thing** before it lands. You own
-**orchestration, operator interaction, and routing** — you do **not** perform any verification work
-yourself. The modality skills you invoke (`qa` for browser behaviour, `design-review` for visual,
-`simulate-users` for AI-agent experience) own that. Your job is to scope the target, run the panel,
-consolidate what comes back into one ranked finding set, surface a single verification gate, and
-drive the fix-loop to a verdict.
+Orchestrate the dynamic verification panel over the **running DEV build of the assembled batch** —
+after `dispatch` has drained the IU stream onto DEV, before `◇commit-to-land`. You own
+**orchestration, judgment, and routing** — you do **not** perform any verification work yourself.
+The modality nodes you dispatch (`qa` for behaviour, `design-review` for visual, `simulate-users`
+for experience — plus `benchmark` for a perf-relevant change) own that. Your job is to scope the
+batch, run the panel at the right depth, run the batch integration-coherence pass, consolidate what
+comes back into one ranked verdict, drive the batch fix-loop to a resolved state, open the
+integration PR, and **fire `◇commit-to-land` at your exit**.
 
 You are a **distinct stage** from `review`, not a mode of it. `review` vets the **diff** — static,
-before the build output runs. You vet the **running build** — dynamic behaviour, visuals, and
-experience. Different finding source, different modality family, different measured outcome.
+per-IU, before its merge. You vet the **running build of the assembled batch** — dynamic behaviour,
+visuals, experience, and cross-IU coherence. Different finding source, different modality family,
+different measured outcome. You add the running-behaviour dimension on top of the upstream review
+verdicts; you never re-litigate a static finding already routed at review.
 
-## When to invoke
+## When to run
 
-Invoke when the review span is complete and there is a runnable built change to prove before
-reconcile — a deployed surface, a local dev server, or a built artefact a persona can be run
-through. The operator may pass a mode token (`interactive` / `autofix` / `report-only` / `headless`),
-a target (a URL or the running build), and an intent or plan pointer. Default to `interactive` when
-no mode is given.
+Run once `dispatch` has handed over the assembled batch — the DEV state (prod-facing) or the open
+per-IU PRs against `main` (single-main) — with the batch report and the integration dry-run
+evidence. The crystallised **verify-procedure** is your on/off signal: it carries the product's dev
+surfaces, QA flows, suites, personas, and the surface→modality map. A product with no
+verify-procedure runs `build → review → land` and skips this stage entirely; presence turns it on.
+The signal is independent of the prod-facing regime — verify proceeds in both, over the dev env
+(prod-facing) or preview/local (single-main).
 
-## Phase 1 — Scope the target
+At turn 1, load your live state through the parameterized preamble: the **batch change-set** (the
+IUs on DEV), the **touched DEV surfaces**, and dev-env health — strictly runtime-state. The
+applicable modalities are **not** injected: read them on-demand against the verify-procedure's
+surface→modality map.
+
+## Phase 1 — Scope the batch
 
 Build the **scope bundle** before running the panel:
 
-1. Resolve the target — the running build under verification (a deploy URL, a local URL, or a
-   built artefact). If nothing runnable is reachable, surface that to the operator before
-   dispatching; a verification pass with no running target produces nothing.
-2. Capture the **intent / requirements summary** — what the change is meant to do — from the plan,
-   the upstream review verdict, the PR body, or the carrier.
-3. Carry forward the **review verdict and triaged findings** so verify does not re-litigate a
-   static finding already routed at review; verify adds the *running-behaviour* dimension on top.
-4. Mark what is in / out of scope for this verification pass.
+1. Resolve the target — the running DEV build of the assembled batch (a deployed dev env, a local
+   dev server, or a preview build). If nothing runnable is reachable, surface that to the operator
+   before dispatching; a verification pass with no running target produces nothing.
+2. Capture the **intent / requirements summary** — what the batch is meant to do — from the
+   promoted IUs' carriers (goal, acceptance, verification) and the batch report.
+3. Carry forward the **review verdicts and triaged findings** so you do not re-litigate a static
+   finding already routed at review.
+4. Mark what is in / out of scope for this pass, and read the **declared verification expectation** —
+   each promoted IU's `verification` field (`end_to_end` + `tests[]`, judged at `◇commit-to-build`) —
+   the intent you execute against; a deviation is noted in the coverage note, never silent.
 
-The scope bundle (target, intent summary, upstream review context, scope rules) is your first
-deliverable into the panel.
+## Phase 2 — Judge the depth, then run the panel
 
-## Phase 2 — Run the panel
+*Which modalities run, and at what depth,* is **your judgment**, not a trigger-table: a cheap
+always-run read of the batch change-set, then run only the relevant modalities, gated on
+surface-presence — the same gradient `shape` runs (`routing-principles` §2), one layer out. The
+guidance, not a script:
 
-Select and fan out the verification modalities, each in its own isolated context, in parallel.
-Hand each the same scope bundle plus the **finding contract** (the `findings-schema` you import), so
-every modality emits to the same contract and the returns consolidate cleanly. Collect each
-modality's **compact** finding return — not its full report — to keep your context lean.
+- a UI tweak → `design-review` only; a new flow → `qa` + `simulate-users`; a perf-relevant change
+  (load path, bundle, query shape) → add `benchmark`; a no-surface batch (pure refactor, docs,
+  config) → skip the dynamic panel — review's tests cover it.
+- when in doubt on a borderline surface, run the modality and say so in the coverage note; the
+  judgment sharpens over time via the trace.
 
-- **`qa`** — always run when there is interactive behaviour to exercise (flows, forms, buttons,
-  state). Browser-behaviour verification: navigate, interact, verify state, surface broken flows.
-- **`design-review`** — run when the change touches a user-facing visual surface. Visual
-  verification: hierarchy, spacing, type, contrast, AI-slop, interaction latency.
-- **`simulate-users`** — run when there is a built experience whose *intent-match* matters (an
-  agentic or conversational product, a multi-step user journey). Runs a persona against the
-  experience contract and returns a UX verdict plus an AX profile. It is an autonomous agent: pass
-  it its spawn bundle; for its `tier-2` multi-role protocol, you own the role spawns (it cannot
-  self-spawn nested agents).
+Fan out the selected modalities, each in its own isolated context, in parallel. Hand each the same
+scope bundle plus the **finding contract** (the imported `findings-schema` with `severity-scale`
+and `confidence-anchors`), so every modality emits to one contract and the returns consolidate
+mechanically. Collect each modality's **compact** finding return — not its full report.
+
+- **`qa`** — behaviour: exercises the resolved QA flows (from the verify-procedure) end to end,
+  then the systematic per-page checklist, fixing what it can in-pass. Hand it the resolved flows
+  and the tier your depth call set.
+- **`design-review`** — visual: hierarchy, spacing, type, contrast, interaction latency, on the
+  user-facing surfaces the batch touched.
+- **`simulate-users`** — experience: a persona through the running product against the
+  experience-contract, returning a UX verdict + AX profile. Pass its spawn bundle (target, mode,
+  persona, scenario, contract); select personas and spread runs across the `personas` coverage
+  matrix; for its `tier-2` multi-role protocol, you own the role spawns (it cannot self-spawn).
+- **`benchmark`** — perf, **on-demand**: invoke only for a perf-relevant change; it compares the
+  page against its stored baseline and returns a regression verdict that folds into the same
+  finding set.
 
 Skipping a modality whose trigger is not met is the default, not a finding — record it in the
-coverage note with the unmet trigger. A modality that errors or times out is a **gap**, recorded
-as such, never a silent drop.
+coverage note with the unmet trigger. A modality that errors or times out is a **coverage
+failure**, recorded as such, never a silent drop.
 
-## Phase 3 — Consolidate and present
+## Phase 3 — The integration-coherence pass
+
+A **batch-scoped** maintainability/architecture read over the assembled tree — the
+anti-Frankenstein net for defects no per-IU review could see: cross-IU duplication, inconsistent
+patterns for one problem, dead glue and orphaned hooks, the assembled whole drifting from an
+architecture each IU passed locally, whole-batch spec coherence.
+
+Dispatch `lens-maintainability` **one altitude up** — its target the integration diff / assembled
+tree, not one IU's diff — grounded in the `architecture-doctrine` reference (depth, seams, the
+deletion test). Findings emit to the same contract and carry the **integration** class.
+
+The pass is **conditional**: a single-IU promotion skips it, and under `dispatch`'s sequential
+default the batch composes largely by construction, so it runs as a final net — depth-adjust it
+like any modality.
+
+## Phase 4 — Consolidate and present
 
 Reduce the modality returns to one finding set, deterministically:
 
@@ -70,87 +109,109 @@ Reduce the modality returns to one finding set, deterministically:
   control that is both broken and visually mislabelled) is one finding; union the evidence.
 - **Corroborate** — when two modalities independently flag the same region, raise the merged
   finding's confidence; cross-modality agreement is strong signal.
-- **Rank** by severity (the factory-wide P0→P3 scale), corroborated findings first within a severity.
+- **Rank** by severity (`severity-scale`, P0→P3), corroborated findings first within a severity.
 
-Then present (in modes that engage the operator):
+Then present in the operator's session:
 
-- The **ranked actionable findings**, each carrying its severity, `autofix_class`, and `owner`.
+- The **ranked actionable findings**, each carrying its attribution, class, and severity.
 - The **soft buckets** — advisory findings, residual risks, and (from `simulate-users`) the AX
   profile and any experience/harness gaps routed as proposals.
-- A **coverage note** — which modalities ran, were skipped (with the unmet trigger), or failed.
-- A **verification verdict**.
+- A **coverage note** — which modalities ran, were skipped (with the unmet trigger), or failed,
+  against the declared verification expectation.
+- The **consolidated verdict** — per-modality plus the integration-coherence result.
 
-## Phase 4 — Own the fix-loop and the verification gate
+## Phase 5 — The batch fix-loop
 
-Route each actionable finding by its `autofix_class` and `owner` (`safe_auto` apply; `gated_auto`
-confirm; `manual` hand to the owner; `advisory` surface only) — the same routing `review` uses.
+You **own** the loop; `dispatch` provides the reopen. Every actionable finding carries a **severity** (the
+contract's); you derive its **attribution** (which IU, via its DEV commits) and its **class** from
+its content — the fields below are your routing judgment, not schema fields — and the class
+routes it:
 
-On a **confirmed defect**, re-enter the correction loop back to `review` / `build` (the
-`can-follow review` edge below), then re-run the affected modalities over the corrected build.
-Continue until the actionable set is resolved (fixed or deliberately deferred), then issue the
-verification verdict and surface the **verification gate**: the running build behaves, looks, and is
-experienced as intended, or every residual finding is a logged deliberate deferral. The gate
-**decision** (advancing `lifecycle_state`, recording the `gate_decision`) is **PM / operator
-work** reached *after* you — `record-gate` enacts the write; you surface the gate, you do not write
-the carrier. Your stage-complete
-signal is what the projection reads to advance `current_stage`.
+- **defect** → **reopen** the IU: re-dispatch a fresh `build → review` correction via `dispatch`,
+  scoped to the finding, re-merged to DEV, re-verified.
+- **below-bar** — a *scored* modality under its declared target — → reopen "raise to target";
+  the resolution test is score ≥ target.
+- **integration** → a **corrective slice** over the seam the coherence pass found.
+- **spec/design-wrong** (or bound-exceeded) → **escalate to `shape`** — the built change surfaced
+  a wrong spec or design; the fix is a front decision, never a build patch.
+- **gap** → the gap path (Phase 6).
 
-## The corrective loop — `can-follow review`
+**Bound: 2 reopens per IU / defect-kind — then escalate.** A defect that survives two corrections
+is a signal the fix is in the wrong place or the spec is wrong — a front question, not another
+build pass. After each reopen lands, re-run the affected modalities over the corrected batch.
 
-A confirmed defect at verify re-enters the review→build correction. This `can-follow` edge carries
-the required three-part contract:
+The whole loop lives in the **DEV zone, before the gate** — `◇commit-to-land` sees only the
+resolved state (clean or all-deferred); every escalation is a backward transition *before* the
+gate, so first-pass yield stays measurable.
 
-- **Exit criterion.** The loop terminates when a re-verification pass over the corrected build
-  surfaces no new P0/P1 finding of the same kind — i.e. the defect that triggered the re-entry is
-  resolved and the modality that caught it now passes. Forward progress to `reconcile` resumes.
-- **Max-attempt / escalation policy.** Bound at **2** correction re-entries for the **same defect
-  kind on the same surface**. Before a **third** re-entry on the same recurring defect, stop and
-  escalate to the operator with a recurring-pattern brief (what was fixed across passes, which
-  modality keeps re-failing, what that suggests) — do not silently loop. A defect that survives two
-  corrections is a signal the fix is in the wrong place or the spec is wrong, a `reconcile`-level or
-  re-plan question, not another build pass.
-- **Labelled re-entry.** Tag the re-entry with the modality and defect that triggered it
-  (`verify-defect:<modality>:<surface>`) so the traversal record distinguishes a deliberate
-  correction from a stuck loop, and `reconcile` / `debrief` can see which modality drove the rework.
+## Phase 6 — The gap path: a qualifying gap auto-approves
 
-NOTE: the happy-path `review → verify` forward edge lives on **review's** frontmatter and is wired
-by a separate pass — verify declares only its own corrective `can-follow review` and its forward
-`precedes reconcile`.
+A **gap** — work the batch needs that no promoted IU covers — is a new IU, and it runs the full
+`build → review → verify` path before promotion. Whether it needs the front is the **3-part
+test**: dispatch **`auto-shaper` (cold)** to formalise the gap and test it — **in-scope** (within
+the parent's signed intent block) **∧ outcome-necessary** (serves a committed outcome of the
+parent's success definition) **∧ decision-completable** (no new design decision).
 
-## Carrier and instrumentation
+- **Qualifies (all three)** — invoke **`record-gate`** to write the **`agent-provisional`**
+  `commit-to-build` hold (it sets `pending_retro_ratification`). **You are the asserter when you
+  dispatched the shaper** — `auto-shaper` returns its qualify result to you and writes nothing;
+  its own cold-mode write is the same carve-out, exercised only on a direct cold dispatch with no
+  wrapping orchestrator. One path, one writer. The hold is inert until ratified: the gap builds AFK (a fresh dispatch) and is
+  **retro-ratified at `◇commit-to-land`** — the operator ratifies or drops it there; auto-approval
+  is never final.
+- **Fails in-scope or outcome-necessary** — a genuinely **new WI** for the front.
+- **Fails decision-completable** (a design fork) — **escalate to `shape`**.
 
-Read the carrier for context only (the work-item or the standalone IU) — verify writes no carrier
-field; entering and completing verify is the projection's signal to advance `current_stage`. Per
-the imported `instrumentation-preamble`, emit a **node-enter** event before any scope work and a
-**node-exit** event after the verdict, each carrying `node`, `carrier`, `carrier_kind`, and `arc`,
-plus the gate touched on exit (`verification-gate:<pass|fail>`). Events are carrier-keyed so the
-dev-sprint projection stays separate from any other arc.
+**Convergence guard:** promote only when the last pass is clean with **no outstanding IU**. If
+fresh gaps keep surfacing across passes, the work is under-shaped — escalate to `shape`, never
+auto-loop.
 
-## Modes
+## Phase 7 — Open the promotion and fire the gate
 
-The differences are purely operator-interaction and mutation policy; every mode runs the same panel
-and the same consolidation.
+When the batch is resolved (verify clean, or every residual finding a logged deliberate deferral):
 
-- **interactive (default)** — present findings and walk the fix-loop one finding at a time; apply
-  `safe_auto`, confirm `gated_auto`, route `manual`. Honour any modality's HITL pause.
-- **autofix** — apply `safe_auto` fixes with no questions; gate everything else for the operator.
-- **report-only** — run the panel, present the consolidated verdict and soft buckets, stop; no
-  mutations, no fix-loop.
-- **headless** — apply `safe_auto` in one pass, return the structured consolidated finding set
-  (ranked actionable + soft buckets + coverage note + verdict) with no operator turn.
+1. **Open the promotion object.** Prod-facing: open the **one integration PR (DEV→main)** over the
+   assembled batch, CI-green. Single-main: there is no integration PR — surface the **open per-IU
+   PRs against `main`** (`dispatch` opened them and left them open).
+2. **Fire `◇commit-to-land` in the operator's session.** The gate experience is yours: present the
+   sign-off surface — the integration PR (number, diff stat, CI checks) or the per-IU PRs, the
+   consolidated verdict with the **integration-coherence result leading** (the operator attests
+   coherence, not code), the coverage note against the declared expectation, and **every pending
+   retro-ratification listed for ratify-or-drop**. The operator's real click is the attestation.
+3. **On the go, invoke `record-gate` per promoted IU** — `commit-to-land`, `decision: promote`,
+   advancing `in-delivery → shipped`, `evidence_refs` → the PR number(s) (the merge SHA lands with
+   `land`'s enactment evidence — a follow-up append once the merge is real). The
+   retro-ratification entries (operator-attested, clearing each flag) land here too; `record-gate`'s
+   guard rejects the promotion while any is unresolved.
+4. **Firing is not merging.** The merge to the landed line is the **gate's enactment**, executed
+   downstream — by `deploy` (prod-facing) or by `land` (single-main). Request-changes → back into
+   the fix-loop; the promotion object stays open; nothing promoted.
+
+You write no carrier field and no gate record yourself — `record-gate` is the single writer; you
+hold the gate experience.
 
 ## Output
 
-- The presented verification: the ranked, routed consolidated finding set, the soft buckets (incl.
-  the AX profile and experience proposals from `simulate-users`), the coverage note, and the verdict.
-- In mutating modes: the applied `safe_auto` fixes and the fix-loop outcome — confirmed defects
-  looped back to review→build with a labelled re-entry, re-verified over the corrected build.
-- The **verification gate** surfaced to the operator on a clean or all-deferred verdict, and the
-  stage-complete signal the projection reads to move the work to `reconcile`. No carrier write.
+- The **consolidated, ranked verdict** over the DEV surfaces — per-modality plus the
+  integration-coherence result — with the soft buckets and the coverage note.
+- The **batch fix-loop outcome** — reopens dispatched and re-verified, gaps formalised or routed,
+  escalations handed to `shape`, the resolved state the gate sees.
+- The **integration PR (DEV→main)** opened CI-green — or the per-IU PRs surfaced (single-main).
+- **`◇commit-to-land` fired** in the operator's session, with the per-IU records enacted through
+  `record-gate` on the operator's go. No carrier field written by you; no merge performed by you —
+  the merge is the gate's enactment, executed downstream.
 
 ## Imported references
 
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
+@references/confidence-anchors.md
 @references/findings-schema.md
+@references/severity-scale.md
+
+## On-demand references
+
+Read these at the step of need (single-sourced into this primitive's bundle):
+
+- `references/architecture-doctrine.md` — `architecture-doctrine`
 

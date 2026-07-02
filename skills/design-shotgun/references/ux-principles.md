@@ -1,12 +1,16 @@
 ---
-kind: reference
-id: ux-principles
+subject: ux-principles
 title: UX principles — the visual-and-interaction standard
-description: >-
-  The shared UX standard for visual hierarchy, spacing, type, colour/contrast (WCAG), consistency,
-  motion restraint, and the anti-AI-slop patterns. Use when grading, designing, or building a
-  user-facing surface (design, design-review, design-implement).
-status: v0.1.0 — 2026-06-05
+provenance: vendored
+level: L2
+cadence: on-demand
+read-when: "Designing or grading a user-facing surface."
+derive-from: [ux-principles]
+reviews-on: ux-principles-source
+last-reviewed: 2026-07-01
+entropy: unmeasured
+status: drafted
+related: [architecture-doctrine, test-discipline, four-risks]
 ---
 
 # UX principles
@@ -93,11 +97,3 @@ Generic patterns that scream "AI-generated" — flag and replace with specific, 
 
 Cards earn their existence: use a card only when the card *is* the interaction, never as a default
 container or a decorative grid.
-
----
-
-**Source.** Distilled from the gstack design methodology (`plan-design-review`, `design-review`,
-`design-html` / `frontend-design`) and the OpenAI "Designing Delightful Frontends" hard rules,
-themselves grounded in Krug (*Don't Make Me Think*), Rams, Norman, and Nielsen. A **rubric** adopting
-the principles, not verbatim text. The rating method and review passes (owned by the consuming node)
-are excluded by design.

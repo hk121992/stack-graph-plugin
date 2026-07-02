@@ -1,6 +1,6 @@
 ---
 name: "design-review"
-description: "A senior designer's-eye visual QA of the running build, then iterative fixes — finds visual inconsistency, broken hierarchy, AI-slop patterns, and slow interactions, fixes them atomically, and re-verifies. Grades against the shared ux-principles standard, so every \"this looks wrong\" is debuggable. The visual modality of the verify stage. Use when: A built change touches a user-facing visual surface that must be graded against the shared design standard and polished before it advances — dispatched by the verify stage."
+description: "A senior designer's-eye visual QA of the running build, then iterative fixes — finds visual inconsistency, broken hierarchy, AI-slop patterns, and slow interactions, fixes them atomically, and re-verifies. Grades against the shared ux-principles standard, so every \"this looks wrong\" is debuggable. The visual modality of the verify stage. Use when A built change touches a user-facing visual surface that must be graded against the shared design standard and polished before it advances — dispatched by the verify stage."
 ---
 
 
@@ -97,18 +97,13 @@ a `ux-principles` clause with its impact rating, and — in mutating depths — 
 before/after screenshots and per-fix classification. This is your contribution to the consolidated
 verification verdict.
 
-## Instrumentation
-
-Per the imported `instrumentation-preamble`, emit a **node-enter** event before Phase 0 and a
-**node-exit** event after the report, each carrying `node`, `carrier`, `carrier_kind`, and `arc`,
-plus any gate touched. You write no carrier field; your events are the projection's substrate.
-
 ## Output
 
 - The visual finding return to `verify` — each finding anchored to a `ux-principles` clause, with an
   impact rating; the design grade and AI-slop grade.
 - In mutating depths: atomic fix commits with before/after screenshots and per-fix classification
   (verified / best-effort / reverted / deferred).
+- **No carrier write.**
 
 ## On-demand references
 

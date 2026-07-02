@@ -1,6 +1,6 @@
 ---
 name: "design-shotgun"
-description: "Explores visual design directions for a surface — generates N deliberately distinct variants, opens a side-by-side comparison board, collects structured operator feedback, iterates, and records the approved direction with its rationale. Divergent visual brainstorming; the board is the chooser. Use when: A user-facing surface needs a visual direction chosen before production UI is built, or the operator wants to explore options or fix a surface they dislike."
+description: "Explores visual design directions for a surface — generates N deliberately distinct variants, opens a side-by-side comparison board, collects structured operator feedback, iterates, and records the approved direction with its rationale. Divergent visual brainstorming; the board is the chooser. Use when A user-facing surface needs a visual direction chosen before production UI is built, or the operator wants to explore options or fix a surface they dislike."
 ---
 
 
@@ -12,12 +12,8 @@ structured operator feedback, and iterate until the operator approves a directio
 brainstorming, not a review: the **comparison board is the chooser**, and your job is to make the
 choice real.
 
-You compose into the **design stage** of the dev-sprint and you **`precede` `design-implement`** —
+You compose into the **shape stage** of the dev-sprint and you **`precede` `design-implement`** —
 the approved direction you record is what design-implement builds into production UI.
-
-Emit a **node-enter** event before any work and a **node-exit** event after the approved direction is
-saved, per the imported [`instrumentation-preamble`](../_refs/instrumentation-preamble.md) — carrying
-`node`, `carrier`, `carrier_kind`, and `arc`. Do not write the carrier.
 
 ## The default constraint is harness-supplied
 
@@ -87,8 +83,8 @@ direction — not a vague memory of the session — is the hand-off artefact.
 
 ## Process seams
 
-- **composes-into `dev-sprint` @ `design`** (authored): exploration is a design-stage activity; it
-  runs at the design stage alongside the `design` front.
+- **composes-into `dev-sprint` @ `shape`** (authored): exploration is a shape-stage activity; it
+  runs at the shape stage alongside the `design` front.
 - **→ `design-implement`** (`precedes`, authored): the approved direction + feedback feeds production
   UI. design-implement `can-follow`s this node.
 - **DESIGN.md (harness)**: the default constraint, harness-supplied; referenced as an input, not a
@@ -101,7 +97,6 @@ direction — not a vague memory of the session — is the hand-off artefact.
 - A **recorded approved direction** with its structured feedback (preferred variant, ratings,
   comments, overall direction), confirmed with the operator and saved to the harness surface for
   `design-implement`.
-- The **node-enter / node-exit events** per the instrumentation preamble.
 - **No carrier write.**
 
 ## On-demand references

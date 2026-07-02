@@ -1,43 +1,69 @@
 ---
-kind: reference
-id: bmc-schema
+subject: bmc-schema
 title: Business Model Canvas — schema
-description: The Business Model Canvas — the nine blocks grouped by desirability / viability / feasibility — the structure the business model is recorded in.
-status: v0.1.0 — 2026-06-01
+provenance: vendored
+level: L2
+cadence: process-reference
+read-when: "Working the business-model canvas (strategy-curator canvas modes)."
+reviews-on: bmc-schema-source
+last-reviewed: 2026-07-01
+entropy: unmeasured
+status: drafted
+related: []
 ---
+<!-- owner: strategy-curator — OPTIONAL canvas surface, sibling of vpc-schema (canvas modes are capability-gated; four-risks-only instances never load it) -->
 
 # Business Model Canvas — schema
 
-The nine blocks describing how the venture creates, delivers, and captures value. Record each block
-as a set of entries, each carrying its **evidence state** (`assumed` / `tested` / `confirmed`) and
-links to supporting hypotheses and findings — the model is a set of bets, not facts.
+The structure for stating how the product creates, delivers, and captures value — nine blocks
+around the value proposition — the shape `strategy-curator`'s canvas modes read and write. An
+**optional** deeper-analysis tier: canvas modes are capability-gated, and a harness that runs its
+strategy on the four-risks scan alone never loads this. The shape is general; the instance values
+are each harness's own canvas. Every block entry is a **claim about the model** and stays a
+*hypothesis* until evidenced.
 
 ## The nine blocks
 
-**Desirability — the market side**
+Grouped by the model question they answer:
 
-- **Customer segments** — the distinct groups served; which segment each value proposition targets.
-- **Value propositions** — the bundles of products/services that create value for a segment (detailed
-  per the `vpc-schema`).
-- **Channels** — how the venture reaches and delivers to segments (awareness → evaluation → purchase
-  → delivery → after-sales).
-- **Customer relationships** — the relationship type per segment (self-serve, community, dedicated …)
-  and how it is established and kept.
+**Desirability — is there a market?**
 
-**Viability — the money side**
+- **Customer segments** — the groups the product serves; which segments matter most.
+- **Value propositions** — the bundle of products and services creating value for each segment.
+  Held here at canvas grain; the per-segment jobs/pains/gains detail is
+  [vpc-schema](vpc-schema.md)'s.
+- **Channels** — how each segment is reached: communicated with, sold to, delivered to.
+- **Customer relationships** — the relationship each segment expects, and how the model acquires,
+  retains, and grows customers.
 
-- **Revenue streams** — how the venture earns from each segment; the pricing mechanism.
-- **Cost structure** — the major costs; fixed vs variable; the most expensive resources/activities.
+**Viability — does it work as a business?**
 
-**Feasibility — the infrastructure side**
+- **Revenue streams** — what value customers actually pay for, and the pricing mechanism.
+- **Cost structure** — the significant costs the model incurs, and what drives them.
 
-- **Key resources** — the assets required (people, technology, IP, capital).
-- **Key activities** — the things the venture must do well.
-- **Key partnerships** — the external parties and what they supply.
+**Feasibility — can we operate it?**
 
-## Coherence and use
+- **Key resources** — the assets the model requires (physical, intellectual, human, financial).
+- **Key activities** — the things the model must do well to deliver the value proposition.
+- **Key partners** — the suppliers and partners the model leans on, and what they de-risk.
 
-The blocks must cohere: segments ↔ value propositions ↔ channels/relationships on the market side;
-resources/activities/partners drive cost; value propositions drive revenue. When one block changes,
-re-check the blocks it touches. A coherent, evidenced canvas is what clearing the **viability** risk
-looks like (see `four-risks`).
+Rank entries by importance to the model — not all carry equal weight. The right-hand blocks
+(segments · value propositions · channels · relationships · revenue) face the customer; the
+left-hand blocks (resources · activities · partners · costs) face the operation — a coherent model
+answers both sides, and the viability blocks are where the four-risks **viability** question lands.
+
+## Recording a block entry
+
+Each entry names its **block**, states one **claim** the model depends on (tied to the specific
+segments or value propositions it concerns), and carries its **evidence state** — `assumed` /
+`tested` / `confirmed` — with links to the hypotheses and findings that support or refute it.
+Unconfirmed items stay explicit; never treat an assumed item as true.
+
+## The canvas view
+
+In a harness with a bound canvas-render artefact, block entries render into `canvas.json`'s `bmc`
+block (regenerated by `strategy-curator refresh-canvas`, never hand-edited). The optional per-entry
+two-axis evidence fields — `strength` (weak / moderate / strong) and `importance_rank` — are
+[four-risks](four-risks.md)' contract; the evidence state above is the lifecycle axis, never a
+proxy for strength. The customer-facing half of the same canvas tier, at per-segment grain, is
+[vpc-schema](vpc-schema.md).

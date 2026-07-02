@@ -1,72 +1,93 @@
 ---
 name: "design"
-description: "Run the shared product + engineering/design front for a work-item — resolve design questions by intended outcome, produce a design doc with a Spec touchpoints table, and author/refine the experience-contract. Use when: A work-item's intent is aligned and you need to resolve its design by outcome before specify/plan/build — frame the solution, vet it with the lens panel over the design doc, and (for an experience-bearing item) author or refine its experience-contract."
+description: "Shape's fork-resolution action — resolve a work-item's load-bearing design questions by intended outcome (including whether the solution serves the confirmed problem and objective), vet the resolution with the lens panel over the design doc, and produce a design doc with a Spec touchpoints table plus, for an experience-bearing item, an authored or refined experience-contract. Use when a unit's design forks must be resolved by outcome before specify/plan/build."
 ---
 
 
 # Design
 
-Run the **shared product + engineering/design front** for a work-item. This is where the product
-lens and the code/design lenses converge over the **same carrier and the same
-experience-contract** to resolve the item's load-bearing design questions **by intended outcome** —
-before specify, plan, and build. You own **the design conversation, the lens dispatch over the
-design doc, operator interaction, and the resolution to a design doc**. You do **not** perform any
-lens dimension yourself (the lens agents own that) and you do **not** decide product strategy
-yourself (the product-lens owns that — see *The product-strategy seam*).
+Resolve the work-item's **solution**. You are **shape's fork-resolution action**: the item's
+load-bearing design questions are resolved **by intended outcome** — before specify, plan, and
+build — and the resolution is vetted with the **lens panel over the design doc**. Discovery (the
+right *problem*) is settled upstream by `shape-product`; you own the solution — including the
+**solution-fit check**: does this solution serve the confirmed problem, the value proposition and
+target user, and the objective it claims? That check is yours, folded into the outcome-driven
+resolution and read against the strategy frame `shape-product` recorded — not delivered by a
+separate lens. You own **the design conversation, the lens dispatch over the design doc, operator
+interaction, and the resolution to a design doc**; you do **not** perform any lens dimension
+yourself (the lens agents own that).
 
-You hold the operator in the loop: design is collaborative by nature, and on a novel problem it can
-take rounds. Your deliverable is a **design doc with an explicit Spec touchpoints table**, ready
-for `specify` — and, when the item bears an experience, an **authored or refined
+You hold the operator in the loop: design is collaborative by nature, and on a novel problem it
+can take rounds. Your deliverable is a **design doc with an explicit Spec touchpoints table**,
+ready for `specify` — and, when the item bears an experience, an **authored or refined
 experience-contract**.
 
 ## When to invoke
 
-Invoke when a work-item's intent is aligned and its
-design must be resolved before it can be specified, planned, and built. The operator may pass a
-**mode token** (`lightweight` / `standard` / `deep` / `experience`), the **carrier** (the work item), and an intent or design-question summary. The mode token is a **suggestion**, not the only
-signal — Phase 1 infers the mode from the carrier and reconciles it with any operator token (below).
-Reach for `experience` (in addition to the others) whenever the item bears a user-facing
-experience whose contract must be authored or refined here.
+`shape` dispatches you when **forks exist** — a work-item's intent is aligned and its design must
+be resolved before it can be specified, planned, and built. The dispatch may pass a **mode token**
+(`lightweight` / `standard` / `deep` / `experience`), the **carrier** (the work item), and an
+intent or design-question summary. The mode token is a **suggestion**, not the only signal —
+Phase 1 infers the mode from the carrier and reconciles it with any supplied token (below). Reach
+for `experience` (in addition to the others) whenever the item bears a user-facing experience
+whose contract must be authored or refined here.
 
 ## What you read, and what you must not write
 
 Read for context; write only to harness surfaces.
 
-- **The carrier** — read it via bindings for its `lifecycle_state`, prior `transition_history`, the
-  objective it serves, and any parent/child decomposition. It is a harness surface, not a node, and
-  you hold no edge to it.
-- **The experience-contract** — for an experience-bearing item, read the harness's current contract
-  through your `experience-contract` reference (external, on-demand); the overlay binds it to this
-  product's contract.
-- **The handbook + decisions** — read settled intent and rationale through your `handbook`
-  reference (external, on-demand); navigate pages at the step of need.
+- **The carrier** — read it via bindings for its `lifecycle_state`, prior `transition_history`,
+  the objective it serves, and any decomposition already recorded. It is a harness surface, not a
+  node, and you hold no edge to it.
+- **The strategy frame** — `shape-product`'s recorded frame (the value proposition + target user
+  the item serves, the objective it moves, the four-risks evidence-state, the success definition):
+  the yardstick your solution-fit resolution reads.
+- **The experience-contract** — for an experience-bearing item, read the harness's current
+  contract through your `experience-contract` reference (external, on-demand); the overlay binds
+  it to this product's contract.
+- **The durable doctrine + decisions** — read settled intent and rationale through your
+  `references` edges and the inlined at-hand-references-index, at the step of need: the decisions
+  store for prior decisions, the glossary for the term senses your resolutions rest on. Cite the
+  doctrine; do not restate or own it.
 
 You **do not write the carrier.** You write the design doc, the touchpoints, and the contract to
 **harness surfaces** (via bindings) — never to the carrier itself. Completing this stage is the
-signal the projection/curator picks up to advance the carrier's `current_stage`; it is projected
-from the observed traversal, not written by you. The **decision** to advance the carrier's
-`lifecycle_state` and record a `gate_decision` is **PM / operator**'s at a gate — not design's job;
+signal the projection picks up to advance the carrier's `current_stage`; it is projected from the
+observed traversal, not written by you. The **decision** to advance the carrier's
+`lifecycle_state` and record a `gate_decision` is the operator's at a gate — not design's job;
 `record-gate` (the single writer) enacts the write.
 
 ## Phase 1 — Frame the design question
 
 **Mode-inference pre-flight.** Before framing, read the carrier and **infer the mode** from its
 `lifecycle_state`, its complexity signals (decomposition depth, blast radius, novelty), and the
-aligned-intent summary. Reconcile the inferred mode with any operator-supplied token: where they
-agree, proceed; where they diverge, **surface the inferred mode and the reason** and let the
-operator confirm or override. The operator's token is a suggestion, not the only signal — this
-keeps a trivial change off the full lens dispatch and a genuinely novel item out of `lightweight`.
-Default to `standard` when neither a token nor a clear carrier signal points elsewhere.
+aligned-intent summary. Reconcile the inferred mode with any supplied token: where they agree,
+proceed; where they diverge, **surface the inferred mode and the reason** and let the operator
+confirm or override. The token is a suggestion, not the only signal — this keeps a trivial change
+off the full lens dispatch and a genuinely novel item out of `lightweight`. Default to `standard`
+when neither a token nor a clear carrier signal points elsewhere.
 
-1. Read the carrier and the aligned intent. State the item's **load-bearing design questions** —
-   the decisions that, left unresolved, would force rework at specify/plan/build.
+1. Read the carrier, the aligned intent, and the strategy frame. State the item's **load-bearing
+   design questions** — the decisions that, left unresolved, would force rework at
+   specify/plan/build.
 2. Fill any context gaps by **invoking `explore`** (scoped, read-only): pass it a scope/mode
    selector (`repo` / `learnings` / `framework-docs` / `web` / `best-practices`), the target
    question, and a scope summary. Consume its distilled digest; do not re-explore ground
    the front already covered — context is gathered once.
 3. Resolve each design question **by intended outcome** — reason from what the item is meant to
-   achieve to the design decision, not from implementation convenience. Surface assumptions and
+   achieve to the design decision, not from implementation convenience. Fold the
+   **solution-fit check** into every load-bearing resolution: does the emerging solution serve
+   the confirmed problem, the value proposition and target user in the strategy frame, and the
+   objective the item claims (`outcome_link`)? A solution that resolves cleanly but serves none
+   of them is a strategy finding, not a design preference — surface it. Surface assumptions and
    take them to the operator where the question is novel or contested.
+
+**Exit discipline — resolve every branch of the decision tree.** Your exit bar: every load-bearing
+question, and every branch a resolution opens, is either resolved by outcome or explicitly
+deferred with its owner named — nothing left implicitly open. This is the same conservatism as
+the front's fork-detection (assume a fork is present until affirmatively shown absent), and it is
+what the cold-handoff bar downstream depends on: a fork design should have closed must never
+reach build.
 
 ### Confirm-framing gate (hard) — affirm or redirect before the lens dispatch
 
@@ -102,17 +123,6 @@ fold the actioned findings back into the design before it advances. A finding th
 item-altitude risk (the four risks at item scope) is the point of this phase: surface it here, not
 at build.
 
-## The product-strategy seam
-
-The design front also checks the solution against **product strategy** — *is this the right
-problem? does it serve the value proposition and the target user? which objective does it serve?* —
-but **you do not perform that check yourself.** It is delivered by the **product-lens**, a separate
-skill (the PM pack) that **composes into the `@design` front from the product-management side**.
-Treat it as a peer that joins this front: where it is present in the harness, the strategy check
-runs alongside your lens dispatch and its findings action into the same design doc. This node holds
-**no edge** to the product-lens — it is built separately and composes in from its own side; name
-the seam, leave the strategy judgement to it.
-
 ## Phase 3 — Author the design doc + touchpoints
 
 Produce the **design doc** to a harness surface:
@@ -134,7 +144,7 @@ Produce the **design doc** to a harness surface:
   This is the experience-axis sibling of the Spec touchpoints table: `plan` reads it to resolve each
   vertical's **column** via `explore`'s `zone` mode and decompose by vertical slice. **Capability-gated
   — omit entirely when no axes are bound.** (Shape and resolution rules: `axis-entry-schema`.)
-- Fold in the actioned lens findings and any product-lens findings so the doc reflects the vetted
+- Fold in the actioned lens findings and the solution-fit findings so the doc reflects the vetted
   design, not the first draft.
 
 ## Phase 4 — Author or refine the experience-contract (experience-bearing items)
@@ -155,10 +165,13 @@ the four parts plus the evidence state:
 - **Evidence state** — mark each invariant / failure-mode / budget `assumed` / `tested` /
   `confirmed`, so the contract matures with the product.
 
-This is the **design-time end of the experience thread**: the contract you author here is the same
-artefact `simulate-users` grades against at verify. Authoring or refining it now is what keeps
-`simulate-users` from running against a missing or stale contract. You author the **shape and
-content discipline**; the harness fills its own invariants, failure modes, budgets, and path.
+Hold the experience content to **`ux-principles`** — the design family's shared UX standard, which
+you hold imported: author invariants and failure modes that meet it (the verify span's UX grading
+reads the same standard). This is the **design-time end of the experience thread**: the contract
+you author here is the same artefact `simulate-users` grades against at verify. Authoring or
+refining it now is what keeps `simulate-users` from running against a missing or stale contract.
+You author the **shape and content discipline**; the harness fills its own invariants, failure
+modes, budgets, and path.
 
 ## Modes
 
@@ -182,7 +195,7 @@ design doc + the Spec touchpoints table. The default front pass.
 ### deep
 
 A novel or contested item. **Multiple operator rounds**, surfacing and testing assumptions; run the
-dispatch with the **adversarial lens on** (and any other conditional lenses the change triggers).
+dispatch with the harness's **adversarial/conditional lenses on** where bound (per lens-dispatch's trigger table).
 Use when the design carries real uncertainty or blast radius.
 
 ### experience
@@ -192,24 +205,29 @@ experience-contract** for an experience-bearing item (Phase 4) — UX invariants
 budgets + intended tool-path, to the harness surface, conforming to the schema. Combine with
 `standard` / `deep` as the item's design complexity demands.
 
-## Process seams (deferred edges)
+## Process seams
 
 - **→ `specify`** (`precedes`, authored): design hands the design doc + touchpoints table to
-  `specify`, which turns it into the canonical spec amendment.
-- **→ `plan`** (deferred — F7): design precedes planning; the edge is authored once `plan` exists.
-  Until then the flow holds in prose — a resolved design doc with touchpoints feeds the plan.
+  `specify`, which turns it into the canonical spec amendment; from there the chain runs
+  `specify → plan`, and `commit-to-build` fires at `shape`'s exit after `plan` returns.
+- **Family kin — the design helpers.** `design-shotgun` (parallel design-exploration on a visual /
+  experience fork) and `design-implement` (the build-and-look: real implementable artefacts, not
+  production) are **`shape`'s dispatches** — shape invokes them alongside you, and your resolution
+  consumes the artefacts they produce (a fork the operator can look at is a fork you can resolve
+  by outcome). `design-review` is a **verify-stage modality** — the UX-grading pass over a built
+  experience (against `ux-principles`) — dispatched by `verify`, not from here.
 
 ## Output
 
 - A **design doc** on a harness surface, recording the outcome-driven design decisions — each with
   its `confidence-anchors` confidence and primary alternative — and carrying an explicit **Spec
   touchpoints** table, ready for `specify`.
-- The **ranked, routed lens findings** over that doc (from the dispatch), surfaced and actioned
-  in-session, folded back into the doc.
+- The **ranked, routed lens findings** over that doc (from the dispatch) and the **solution-fit
+  findings**, surfaced and actioned in-session, folded back into the doc.
 - In `experience` mode: an **authored or refined experience-contract** on the harness surface,
-  conforming to `experience-contract-schema`.
-- **No carrier write.** Completing design is the signal the projection/curator picks up to advance
-  `current_stage`; the lifecycle and gate decisions remain PM/operator calls.
+  conforming to `experience-contract-schema` and held to `ux-principles`.
+- **No carrier write.** Completing design is the signal the projection picks up to advance
+  `current_stage`; the lifecycle and gate decisions remain the operator's.
 
 ## Imported references
 
@@ -218,6 +236,7 @@ The following references are single-sourced into this primitive's bundle and spl
 @references/confidence-anchors.md
 @references/findings-schema.md
 @references/severity-scale.md
+@references/ux-principles.md
 
 ## On-demand references
 

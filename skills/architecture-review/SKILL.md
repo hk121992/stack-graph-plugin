@@ -1,6 +1,6 @@
 ---
 name: "architecture-review"
-description: "Standing, operator-triggered whole-tree review that surfaces architectural friction as deepening candidates (shallow modules → deep ones), grills the operator's pick to a terminal disposition, and — only after a pick — explores alternative interfaces (Design-It-Twice). Read-only; reports and routes, never edits product code. Use when: The operator wants the whole codebase (or a scoped sub-tree) reviewed for architectural deepening — shallow modules, seam leakage, untestable parts — surfaced as candidates to grill to a disposition; not a diff-time review and not a backbone stage."
+description: "Standing, operator-triggered whole-tree review that surfaces architectural friction as deepening candidates (shallow modules → deep ones), grills the operator's pick to a terminal disposition, and — only after a pick — explores alternative interfaces (Design-It-Twice). Read-only; reports and routes, never edits product code. Use when The operator wants the whole codebase (or a scoped sub-tree) reviewed for architectural deepening — shallow modules, seam leakage, untestable parts — surfaced as candidates to grill to a disposition; not a diff-time review and not a backbone stage."
 ---
 
 
@@ -20,14 +20,6 @@ handed to `triage`; rejections are recorded via `log-decision`; nothing else mut
 You carry the **process only**. The deep-module vocabulary, the deletion test, the dependency categories,
 and replace-don't-layer live in the **`architecture-doctrine`** reference — read it at the step of need,
 never restate it here.
-
-## Emit the enter event first
-
-@instrumentation-preamble
-
-Before any work, emit your `node-enter` event per the imported preamble, carrying `node`
-(`architecture-review`), `carrier`, `carrier_kind`, and `arc` — each `null` for a standalone run (this
-capability owns no arc position, so a standalone run carries no carrier).
 
 ## Kick-off (collaborative)
 
@@ -107,12 +99,6 @@ For the **already-picked** candidate only:
 
 Never auto-chain this from the report. It runs **only** on an operator-picked candidate.
 
-## Emit the exit event
-
-After the report (mode `review`) or the interface comparison (mode `interface-design`), emit your
-`node-exit` event per the imported preamble — same `node` / `carrier` / `carrier_kind` / `arc`, plus an
-`outcome` and any `gates`.
-
 ## Output
 
 - **Mode `review`:** the committed report pair (immutable `.html` diagnosis + living `.md` record), each
@@ -120,7 +106,6 @@ After the report (mode `review`) or the interface comparison (mode `interface-de
   id), and any glossary terms added.
 - **Mode `interface-design`:** a framed problem space + 3+ compared interface designs with an opinionated
   recommendation.
-- **Enter/exit events** per the imported `instrumentation-preamble`.
 
 No product fix and no direct routing: a pursued candidate goes to `triage`, a rejection to `log-decision`,
 and the hard read-only gate holds throughout.

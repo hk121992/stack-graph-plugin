@@ -1,6 +1,6 @@
 ---
 name: "canary"
-description: "Autonomous post-deploy live-health agent — watches a just-shipped deployment against a pre-deploy baseline, alerts on changes persisting across consecutive checks, and returns a HEALTHY/DEGRADED/BROKEN verdict that feeds land's live-confirmed gate. Input-gated on live prod traffic — built dormant; activates only once a real deployment with traffic exists, and never fabricates a baseline. Use when: A deployment has just settled and a caller wants live confirmation that production actually works before the live-confirmed gate closes — but only once real prod traffic exists. Invoked by land (the invokes edge lives on land), not run interactively."
+description: "Autonomous post-deploy live-health agent — watches a just-shipped deployment against a pre-deploy baseline, alerts on changes persisting across consecutive checks, and returns a HEALTHY/DEGRADED/BROKEN verdict that feeds land's live-confirmed gate. Input-gated on live prod traffic — built dormant; activates only once a real deployment with traffic exists, and never fabricates a baseline. Use when A deployment has just settled and a caller wants live confirmation that production actually works before the live-confirmed gate closes — but only once real prod traffic exists. Invoked by land (the invokes edge lives on land), not run interactively."
 ---
 
 
@@ -25,6 +25,11 @@ reference and grade against it. A fabricated baseline produces false confidence 
 `live-confirmed` gate, which is the exact failure this node exists to prevent. If no baseline and
 no live target exist, report that canary is dormant (awaiting live prod traffic) and stop.
 
+**PROD-zone regime — skip vs dormant.** Canary is part of the **PROD zone** — with `deploy` and
+the `live-confirmed` gate, it **skips** when the repo is not production-facing (no prod target
+exists). That regime skip is orthogonal to the input-gated dormancy above: *dormant* =
+prod-facing but no traffic or baseline yet; *skipped* = not prod-facing at all.
+
 ## How this node crystallises (read once)
 
 This node is **`generative`** by declaration because of how its **first real run** behaves. The
@@ -34,14 +39,6 @@ where the alert thresholds and the persistence rule sit — and you **crystallis
 into the harness-local `canary-manifest`. Every later run **replays deterministically** against
 that crystallised baseline and thresholds. This crystallisation cannot happen until live traffic
 exists — which is exactly why the node is input-gated.
-
-## Emit the enter event first
-
-@instrumentation-preamble
-
-Before any live check, emit your `node-enter` event per the imported preamble, carrying `node`
-(`canary`), `carrier`, `carrier_kind`, and `arc` — tagged with the carrier when `land` spawns you
-under one, `null` otherwise.
 
 ## Read your spawn bundle
 
@@ -99,14 +96,12 @@ Produce a **HEALTHY / DEGRADED / BROKEN** verdict with per-page results (status,
 load vs baseline) and the alerts fired with their evidence paths. You write **no product code** —
 you are read-only by contract; observe and report.
 
-## Emit the exit event — carry the canary verdict
+## Carry the canary verdict on exit
 
-After the verdict is produced, emit your `node-exit` event per the imported preamble (same
-`node` / `carrier` / `carrier_kind` / `arc`, plus the `outcome` and any `gates`). On the exit
-event, **carry the canary verdict** — the HEALTHY / DEGRADED / BROKEN live-health label — so the
-analytics surface and `land`'s `live-confirmed` gate consume the result. Unlike the perf and
-quality siblings, your load-bearing signal is the pass/fail-shaped **verdict** the gate reads,
-not a numeric trend point.
+After the verdict is produced, **carry the canary verdict** out on your exit — the HEALTHY /
+DEGRADED / BROKEN live-health label — so `land`'s `live-confirmed` gate and the operator consume
+the result. Unlike the perf and quality siblings, your load-bearing signal is the
+pass/fail-shaped **verdict** the gate reads, not a numeric trend point.
 
 ## Output
 
@@ -114,7 +109,8 @@ Return one structured result to the caller's context:
 
 1. The **HEALTHY / DEGRADED / BROKEN verdict** routed to `land`'s `live-confirmed` gate.
 2. Per-page results and the **alerts fired** with screenshot evidence paths.
-3. The exit-event **canary verdict** (carried on the node-exit event).
+3. The **canary verdict** carried on your exit — your return record; any durable live-health
+   series it feeds is a harness concern.
 
 Make no mutation to product code; your contribution outward is the live verdict and its
 evidence, for `land`'s gate and the operator to act on. If you were dormant (no live traffic, no

@@ -1,169 +1,157 @@
 ---
 name: "review"
-description: "Orchestrate the review lens-panel over a change before it lands — scope the target, run the panel, present the ranked findings, and own the fix-loop. Use when: A change is ready to land and you want the lens panel to vet it (correctness, security, tests, maintainability) before it merges or advances."
+description: "Orchestrate the static vet of one IU's diff before it merges to DEV — two parallel axes: the lens panel (correctness, security, tests, maintainability, plus conditional health) and the per-IU spec-match (the diff is faithful to its IU's spec). Scope the target, run the panel, present the ranked findings, and own the within-session fix-loop back to build. Use when a built IU's diff is ready to be vetted before merge — inside the dispatched session after build, or hand-run over any diff."
 ---
 
 
 # Review
 
-Orchestrate the review lens-panel over a change before it lands. You own
-**orchestration, operator interaction, and routing** — you do **not** perform any
-dimension analysis yourself. The lens agents you invoke (`lens-correctness`,
-`lens-security`, `lens-tests`, `lens-maintainability`, plus conditional lenses as they are
-authored) own that. Your job is to scope the change, run the panel, present what comes
-back, and drive the fix-loop to a verdict.
+Orchestrate the **static vet of one IU's diff** before it merges to DEV — two parallel axes, one
+pass: **Standards** — the lens panel (correctness · security · tests · maintainability, plus
+conditional `health`) — and **Spec** — the **per-IU spec-match**: the diff is faithful to its IU's
+spec. You own **orchestration, operator interaction, and routing** — you do **not** perform any
+dimension analysis yourself. The lens agents you invoke own that; your job is to scope the change,
+run the panel, check the diff against its spec, present what comes back, and drive the fix-loop to
+a verdict. You do **not** run the app — that is `verify`'s job, dynamic and batch-scoped, reached
+through `dispatch` once the whole batch is built and reviewed.
 
 ## When to invoke
 
-Invoke when a change is ready to be vetted before it lands — a diff against a base-ref, a
-PR, a branch, or the working tree. The operator may pass a mode token
-(`interactive` / `autofix` / `report-only` / `headless`), a target (base-ref, PR, or
-branch), and an intent or plan pointer. Default to `interactive` when no mode is given.
+Inside a **dispatched session, after `build`** — the default seat: the target is the IU's diff on
+its `iu/<id>` branch, and the session runs you unattended (`headless` / `autofix`). Hand-run, you
+vet any change — a diff against a base-ref, a PR, a branch, or the working tree. The operator may
+pass a mode token (`interactive` / `autofix` / `report-only` / `headless`), a target, and an intent
+or plan pointer. Default to `interactive` when hand-run with no mode given.
 
 ## Phase 1 — Scope the target
 
 Build the **scope bundle** before running the panel:
 
-1. Resolve the target. From the operator's invocation, determine what is under review:
-   a base-ref diff, a PR, a branch, or the standalone working tree.
+1. Resolve the target. From the invocation, determine what is under review: the dispatched IU's
+   branch diff, a base-ref diff, a PR, a branch, or the standalone working tree.
 2. Capture the diff and the resolved base-ref.
-3. Compute the changed-file list and mark what is **in** vs **out** of scope; note any
-   untracked or out-of-scope changes the operator should be aware of.
-4. Capture an **intent / requirements summary** — what this change is meant to do — from
-   the PR body, commit log, or plan file. When intent is ambiguous and the mode allows an
-   operator turn, ask the operator a single disambiguating question; otherwise record the
-   ambiguity in the coverage note and proceed.
+3. Compute the changed-file list and mark what is **in** vs **out** of scope; note any untracked or
+   out-of-scope changes the consumer should be aware of.
+4. Capture an **intent / requirements summary** — what this change is meant to do — from the IU
+   record (its `goal` and `acceptance`, plus the spec touchpoints it cites), the PR body, commit
+   log, or plan doc. When intent is ambiguous and the mode allows an operator turn, ask a single
+   disambiguating question; otherwise record the ambiguity in the coverage note and proceed.
 
-The scope bundle (diff, base-ref, in/out-of-scope file list, untracked-scope notes, intent
-summary) is your first deliverable into the panel.
+The scope bundle (diff, base-ref, in/out-of-scope file list, untracked-scope notes, intent summary)
+feeds both axes.
 
-## Phase 2 — Run the panel
+## Phase 2 — Run the panel (the Standards axis)
 
-With the scope bundle in hand, **follow the `lens-dispatch` reference** to run the panel: it
-gives you the lens-selection, parallel fan-out, and merge / dedup / corroborate /
-confidence-gate / severity-route reduction. As you fan out, pass each lens its own spawn
-prompt carrying the **target** (`diff` or `doc`) and its contents, the **scope-rules** and
-intent summary, and the **finding contract** — the finding schema, severity scale, and
-confidence anchors, which you hold from your imported references — so every lens emits to the
-same contract. Each lens returns the compact finding tier; `lens-dispatch` reduces those
-returns to one ranked, routed finding set, which you consume in the phases below.
+With the scope bundle in hand, **follow the `lens-dispatch` reference** to run the panel: it gives
+you the lens-selection, parallel fan-out, and merge / dedup / corroborate / confidence-gate /
+severity-route reduction. As you fan out, pass each lens its own spawn prompt carrying the
+**target** (`diff` or `doc`) and its contents, the **scope-rules** and intent summary, and the
+**finding contract** — the finding schema, severity scale, and confidence anchors, which you hold
+from your imported references — so every lens emits to the same contract. Each lens returns the
+compact finding tier; `lens-dispatch` reduces those returns to one ranked, routed finding set.
 
-The four always-on lenses run every time. The **conditional measurement lenses — `benchmark`
-(perf) and `health` (code-quality)** — run only when their trigger is met: dispatch `benchmark`
-when the change could move page-load / Core-Web-Vitals / bundle size, and `health` when a
-whole-tree quality re-score is warranted (broad refactor, dependency change, or an operator
-ask). Each is an autonomous measurement agent that compares against a stored baseline and
-returns a regression / quality verdict; their returns fold into the same ranked finding set.
-Skipping either when its trigger is unmet is the default, not a finding — note it in the
-coverage note. Most reviews run neither.
+The four always-on lenses run every time. **`health`** (code-quality — a whole-tree static
+re-score: lint, types, tests) is **conditional**: dispatch it only when a re-score is warranted — a
+broad refactor, a dependency change, or an operator ask. It compares against a stored baseline and
+returns a quality verdict that folds into the same ranked set. Skipping it when its trigger is
+unmet is the default, not a finding — note it in the coverage note. Runtime measurement (perf over
+the running build) is `verify`'s, not the panel's.
 
-## Phase 3 — Present the findings
+## Phase 3 — The Spec axis: the per-IU spec-match
 
-In modes that engage the operator (`interactive`, `report-only`), present what the panel
-produced:
+Alongside the panel, check the diff against **its IU's spec**:
 
-- The **ranked actionable findings**, ordered by severity, each carrying its severity,
-  `autofix_class`, and `owner`.
+- **the IU record** — every `acceptance` condition is an observable passing test in the delivered
+  code; `verification.end_to_end` is demonstrable; the slice is a complete vertical path, not a
+  horizontal layer fragment; the work stayed inside the `files` scope;
+- **the spec touchpoints** the front settled for this unit — the diff does what the spec says,
+  nothing the spec contradicts.
+
+Sort what you find into **agreements** (confirmed — no action), **divergences** (the diff does
+something the spec does not say, or contradicts it), and **unaddressed touchpoints** (specced, not
+built). Emit divergences and unaddressed touchpoints to the **same finding contract** — `severity`
+per the non-lens-emitter mapping in `severity-scale` (a delivery-path touchpoint entirely unmet or
+contradicted is `P0`) — so they rank, route, and fix-loop exactly like panel findings.
+
+An **implementation-side** divergence loops to `build` like any defect. A finding that indicts the
+**spec or design itself** — the spec cannot, or should not, be met as written — is not yours to
+resolve: **never reinterpret the spec at review grain**; route the session out (`escalated`) so the
+front re-shapes and re-gates.
+
+## Phase 4 — Present the findings
+
+In modes that engage the operator (`interactive`, `report-only`), present what the pass produced:
+
+- The **ranked actionable findings** — both axes in one list, ordered by severity, each carrying
+  its severity, `autofix_class`, and `owner`.
 - The **soft buckets**: advisory findings, `residual_risks`, and `testing_gaps`.
-- A **coverage note**: which lenses ran, were skipped, or failed.
-- A **verdict**.
+- A **coverage note**: which lenses ran, were skipped, or failed; whether the spec-match ran
+  against a full touchpoint set.
+- A **verdict** — covering both axes: standards-clean and spec-faithful.
 
-## Phase 4 — Own the fix-loop
+## Phase 5 — Own the fix-loop
 
 Route each actionable finding by its `autofix_class` and `owner`:
 
 - `safe_auto` — apply the fix automatically.
-- `gated_auto` — apply only after operator confirmation (or per the mode's mutation policy
-  in non-interactive runs).
+- `gated_auto` — apply only after operator confirmation (or per the mode's mutation policy in
+  non-interactive runs).
 - `manual` — hand to the responsible owner; do not auto-apply.
 - `advisory` — surface only; no fix.
 
-On a **confirmed defect**, loop back to `build` so the change is reworked, then re-run the
-panel over the corrected diff. (The review → build fix loop is a `can-follow` declared on
-**build's** side; review re-runs over the corrected diff. On the dev-sprint happy path review
-`precedes verify` — the running build is proven next — and on the incremental arc review
-`precedes land` directly.) Continue until the actionable set is resolved (fixed or
-deliberately deferred) and you can issue a verdict.
-
-## Incremental arc
-
-The same lens panel vets a **standalone IU** (the incremental loop's carrier-lite) before it
-lands — same `lens-dispatch`, same finding contract, same fix-loop, then straight to `land`
-(no `reconcile`). Here the **`lens-tests` panel is load-bearing**: it checks the
-vertical-slice + testing invariants **held in the delivered code** — every acceptance
-condition is an observable passing test, `verification.end_to_end` is demonstrable, and the
-slice is a complete path, not a horizontal layer fragment. Confirmed defects loop back to
-`build` (the one corrective `can-follow`, reused unchanged). For a small **AFK** slice the
-operator may run review in a cheaper mode (`autofix` / `headless`). If the carrier is a standalone
-IU with `slice_type: HITL` and `hitl_point.stage == review`, run **interactive** (honour the pause)
-and surface `hitl_point.decision` — do not run a cheaper unattended mode.
-
-Read the carrier through the **`carrier-interface`** (`load: on-demand`): branch on
-`carrier_kind`, and read no work-item-only field (`outcome_link`, `children[]`, `risk_state`)
-when `carrier_kind` is `standalone-iu`. Events stay carrier-keyed — `(carrier_id, carrier_kind,
-arc)` — so the dev-sprint and incremental arcs do not bleed through this shared node.
+On a **confirmed defect**, loop back to `build` so the change is reworked, then re-run the pass
+over the corrected diff. (The review → build fix loop is a `can-follow` declared on **build's**
+side; the loop is bounded — a set still actionable after two re-entries routes the session out
+`review-flagged` for the operator's triage.) Continue until the actionable set is resolved (fixed
+or deliberately deferred) and you can issue a verdict. **On a clean verdict the IU is ready for
+`dispatch` to merge to DEV.** You write no carrier and fire no gate.
 
 ## Modes
 
-Render as branches of this one skill. The differences are purely in operator-interaction
-and mutation policy — every mode follows the same `lens-dispatch` reference and the same
-scope bundle.
+Render as branches of this one skill. The differences are purely in operator-interaction and
+mutation policy — every mode follows the same `lens-dispatch` procedure, the same spec-match, and
+the same scope bundle. Inside a dispatched session, run `headless` or `autofix`; the interactive
+modes are for hand-run reviews.
 
-### interactive (default)
+### interactive (hand-run default)
 
-Pause for intent capture when ambiguous. Present findings and walk the fix-loop with the
-operator one finding at a time, offering apply / defer / skip / acknowledge per finding.
-Apply `safe_auto` fixes, confirm `gated_auto` fixes, and route `manual` findings to their
-owner.
+Pause for intent capture when ambiguous. Present findings and walk the fix-loop with the operator
+one finding at a time, offering apply / defer / skip / acknowledge per finding. Apply `safe_auto`
+fixes, confirm `gated_auto` fixes, and route `manual` findings to their owner.
 
 ### autofix
 
-Apply `safe_auto` fixes automatically with no operator questions. Gate everything else:
-present `gated_auto` / `manual` / `advisory` findings without applying them, and stop for
-the operator's decision on those.
+Apply `safe_auto` fixes automatically with no operator questions. Gate everything else: present
+`gated_auto` / `manual` / `advisory` findings without applying them, and stop for the operator's
+decision on those.
 
 ### report-only
 
-Read-only. Run the panel, present the ranked findings and soft buckets, and stop. Make no
-mutations and run no fix-loop. This is the standalone / qa-only shape.
+Read-only. Run the pass, present the ranked findings and soft buckets, and stop. Make no mutations
+and run no fix-loop.
 
 ### headless
 
-Machine-consumable. Apply `safe_auto` fixes in a single pass, then return the structured
-finding set (ranked actionable findings + soft buckets + coverage note + verdict) with no
-operator turn and no per-finding prompts.
-
-## Emit the verdict — a `<sg-signal>` block in your final result
-
-The review verdict is a **model judgment** the analyzer cannot derive from the transcript, so state it
-as a fenced `<sg-signal>` block in your **final output/result message** (per `analytics-vocabulary`),
-not on an event. Carry your gate verdict(s) in the block's `gates` array as `<gate>:<pass|fail>`
-tokens:
-
-```
-<sg-signal>{"gates":["experience-contract:pass"]}</sg-signal>
-```
-
-The analytics layer tallies only the `experience-contract` gate token; any other (free-text) gate
-name you carry is recorded in your result for the operator but not tallied (it may carry a private
-decision name). The analyzer reads the block from your run's final message (the **subagent**
-transcript's final message when you run dispatched); absent or malformed, it is simply **not
-recorded** (honest under-capture, never invented).
+Machine-consumable. Apply `safe_auto` fixes in a single pass, then return the structured finding
+set (ranked actionable findings + soft buckets + coverage note + verdict) with no operator turn and
+no per-finding prompts.
 
 ## Output
 
-- The presented review: the ranked, routed finding set plus the soft buckets, coverage
-  note, and verdict.
-- In mutating modes (`interactive`, `autofix`, `headless`): the applied `safe_auto` fixes
-  and the fix-loop outcome — `gated_auto` / `manual` findings routed per operator or mode
-  policy, with confirmed defects looped back to `build`.
-- In `report-only` / `headless`: the finding set emitted for downstream consumption.
+- The presented review: the ranked, routed finding set across both axes, plus the soft buckets,
+  coverage note, and verdict (standards-clean · spec-faithful).
+- In mutating modes (`interactive`, `autofix`, `headless`): the applied `safe_auto` fixes and the
+  fix-loop outcome — `gated_auto` / `manual` findings routed per operator or mode policy, with
+  confirmed defects looped back to `build`.
+- In `report-only` / `headless`: the finding set emitted for downstream consumption — inside a
+  dispatched session, the session's review verdict (clean ⇒ ready to merge; unresolved actionable
+  findings ⇒ the session routes out `review-flagged`).
+- No carrier write; no gate fired.
 
 ## Imported references
 
 The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
 
-@references/analytics-vocabulary.md
 @references/confidence-anchors.md
 @references/findings-schema.md
 @references/severity-scale.md
@@ -172,6 +160,5 @@ The following references are single-sourced into this primitive's bundle and spl
 
 Read these at the step of need (single-sourced into this primitive's bundle):
 
-- `references/carrier-interface.md` — `carrier-interface`
 - `references/lens-dispatch.md` — `lens-dispatch`
 

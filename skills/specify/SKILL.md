@@ -1,29 +1,29 @@
 ---
 name: "specify"
-description: "Turn a settled design doc and its Spec touchpoints into a canonical spec amendment — scan for drift, author the amendment, and open a labelled PR. Modes — spec-layout (the handbook-author path), null (no spec layout — record inline, no PR), amend-existing (revise a section). Use when: A design doc with Spec touchpoints is settled and the work needs the spec made canonical before plan/build — either by raising a labelled amendment PR (spec-layout) or by recording touchpoints inline when the product has no spec layout (null)."
+description: "Turn a settled design doc and its Spec touchpoints into a canonical spec amendment — in the front, before build: scan the touchpoints for drift and collisions, author the amendment by the entropy test, graduate it per the git-policy for its repo/path, and take the operator's in-session approval. Modes — spec-layout (the spec-surface path), null (no spec layout — record inline), amend-existing (revise a section). Use when a design doc with Spec touchpoints is settled and the work needs the spec made canonical before plan/build."
 ---
 
 
 # Specify
 
-You are the third collaborative front stage of the dev-sprint. You take a **settled design doc**
-— the upstream `design` deliverable, with its **Spec touchpoints** — and turn it into a
-**canonical spec amendment**, so that build implements against settled spec rather than a moving
-target. You own **orchestration, operator interaction, and the decision to raise**; the
-autonomous work — scanning the handbook for drift, composing the PR body — is done by the agents you
-invoke (`drift-detector`, `pr-author`), not by you.
+You are the front's **spec** action — dispatched by `shape`, after `design`. You take a **settled
+design doc** — the upstream `design` deliverable, with its **Spec touchpoints** — and turn it into
+a **canonical spec amendment, in the front, before build**, so that build implements an
+already-settled spec rather than a moving target. You own **orchestration, operator interaction,
+and the authoring**; the collision scan over the touchpoints is done by the agent you invoke
+(`drift-detector`), and the PR body — where one is raised — you compose **inline** to
+`pr-description-shape`.
 
-You are a **primary handbook author**, but you are not the integrator. You author the amendment and
-open a **labelled PR into the shared handbook queue**; the curator's `integrate` mode — in a
-separate, operator-cadence session — gates the cross-PR checks and the merge. Many raisers
-(you, reconcile, the curators), **one queue, one integrate gate**. The queue *is* the set of open
-labelled PRs; there is no separate store.
+The amendment is **authored and approved in-session**: the operator is warm in the shaping
+session, so the sign-off happens here — drift pass, review, merge — not in a queue. In-session
+approval is the norm for the front's spec amendments; the curator's async `integrate` gate is a
+different path (it merges **background-agent reference PRs** against the local doc layer), and
+the front's amendment does not queue for it.
 
-You are the **vendored, general** stage. A harness configures you by **overlay** — the **handbook
-root and page index** (your `handbook` reference, resolved to this product's own spec and
-decisions home), the graduation **repo** and **queue label**, the **carrier** home, and whether a
-**spec layout exists** at all are supplied to you, never hardcoded. You carry no product's spec
-paths, section names, or codes.
+You are the **vendored, general** stage. A harness configures you by **overlay** — the **spec
+surface** (this product's spec home + its index; your `spec-surface` reference), the graduation
+target, and whether a **spec layout exists** at all are supplied to you, never hardcoded. You
+carry no product's spec paths, section names, or codes.
 
 ## You do not write the carrier
 
@@ -31,25 +31,36 @@ Read the carrier (the work item) for **context** — its `lifecycle_state`, its 
 `transition_history` — and read the design doc it points at. You **do not write the carrier**.
 Completing this stage is the **signal** the projection picks up: it advances the carrier's
 `current_stage` from the observed traversal; you write no carrier field. Advancing the work's
-`lifecycle_state` and recording the gate decision is **gate-2 (commit-to-build)** — a PM/operator
-decision, reached *after* you, **not your job**. Your completion is what moves the item toward
-that gate; the call is the operator's.
+`lifecycle_state` and recording the gate decision is **`commit-to-build`**'s — fired at `shape`'s
+exit after `plan` returns, recorded by `record-gate` — **not your job**. Your completion is what
+moves the item toward that gate with its spec settled.
 
 ## When to invoke
 
 Invoke when a design doc with Spec touchpoints is settled and the work needs the spec made
-canonical before plan/build. The operator may pass a **mode** token (`spec-layout` / `null` /
+canonical before plan/build. The dispatch may pass a **mode** token (`spec-layout` / `null` /
 `amend-existing`) and a pointer to the **design doc**. Default to **`spec-layout` when a spec
 layout exists** for this product, and to **`null`** when none does — read the overlay to tell
-which.
+which. (A fast-track IU's spec change is not yours: `auto-shaper` authors it and the main session
+raises it for the same in-session approval.)
 
 ## The touchpoints are your input
 
 The **Spec touchpoints** come from the design doc — read them there. You do not reconstruct them
-and you do not depend on a separate touchpoints table. Each touchpoint names a handbook page (or
+and you do not depend on a separate touchpoints table. Each touchpoint names a spec page (or
 section) the design intends to change; that set is the `read_set` you hand the drift scan and the
 target of the amendment you author. If the design doc carries no touchpoints, surface that to the
 operator before proceeding — an amendment with no touchpoints is the signal design left a gap.
+
+## What you make canonical — the entropy test
+
+Draw the canonical-vs-code line with the **entropy test** (follow your `context-principles`
+reference): *will this survive the next refactor?* What survives — the **why** (goals, principles,
+constraints; L1) and the **how** (journeys, state-machines, contracts; L2) — is canonicalised in
+the amendment. What churns with implementation — file paths, function names, the **what** (L3) —
+stays in source. An amendment that bloats with churn detail goes stale on the next refactor; a
+spec that omits the load-bearing contract leaves build a moving target. Apply the test as
+authoring judgment on every touchpoint.
 
 ## Phase 1 — Scope the amendment
 
@@ -57,12 +68,12 @@ Build the **amendment scope** before authoring:
 
 1. **Read the design doc and the carrier context.** Take in what the design settled and the Spec
    touchpoints it carries. Read the carrier's state for context only.
-2. **Resolve the touchpoint pages.** Map each touchpoint to its handbook page-slug via your
-   `handbook` reference (the overlay binds it to this product's handbook root + page index). This
-   slug set is the `read_set`.
+2. **Resolve the touchpoint pages.** Map each touchpoint to its page/section on the spec surface
+   via your `spec-surface` reference (the overlay binds it to this product's spec home + index).
+   This slug set is the `read_set`.
 3. **Capture the trigger and the intended change.** From the design doc, summarise — in one or
    two sentences per touchpoint — what the amendment should make canonical and why (the moment in
-   the design that surfaced it). This is the input both `drift-detector` and `pr-author` need.
+   the design that surfaced it). This is the input the drift scan and the PR body both need.
 
 ## Phase 2 — Scan for drift and collisions (spec-layout / amend-existing)
 
@@ -77,97 +88,95 @@ It returns a structured candidate list (or `no_drift_found`). Consume it:
   the operator and resolve it before raising: fold it into this amendment, redirect to the
   existing PR, or hold. Do not open a second PR over pages an open PR already touches.
 - A **drift / stale / broken-xref** candidate on a touchpoint page — fold the fix into the
-  amendment where it is in scope, or note it for the curator where it is not.
+  amendment where it is in scope, or note it for the context-curator where it is not.
 - `no_drift_found` — proceed to author.
 
-drift-detector gives you **collision-safety**; it does not gate the merge. The merge is still
-gated at the curator's `integrate`.
+drift-detector gives you **collision-safety**; it does not approve the amendment. The approval is
+the operator's, in-session (Phase 4).
 
 ## Phase 3 — Author the amendment (spec-layout / amend-existing)
 
 With the operator, **author the spec amendment** against the touchpoint pages — the canonical
-prose that makes the design's decisions settled spec. Write to the handbook's voice and shape; keep
-it to the touchpoints (do not let the amendment sprawl beyond what design settled). In
-`amend-existing`, revise the existing section in place rather than adding a parallel one. This is
-the judgment core of the stage: you are turning a *decided design* into *canonical spec*, and the
-operator confirms what it should say.
+prose that makes the design's decisions settled spec. Write to the spec surface's voice and shape;
+keep it to the touchpoints (do not let the amendment sprawl beyond what design settled), and hold
+the entropy line as you write (above). In `amend-existing`, revise the existing section in place
+rather than adding a parallel one. This is the judgment core of the stage: you are turning a
+*decided design* into *canonical spec*, and the operator confirms what it should say.
 
-## Phase 4 — Graduate the amendment (spec-layout / amend-existing)
+## Phase 4 — Graduate and approve in-session (spec-layout / amend-existing)
 
-**Graduate per `git-policy` for the `handbook` surface.** In `spec-layout` / `amend-existing` the
-amendment writes a **handbook page**, so its graduation rides the **`handbook`** surface — resolve
-the mode against `git-policy` for `handbook` (the surface enum + resolution rule + canon-fail-closed
-live in `git-policy`; do not restate them), **not** hardcoded here. When the resolved mode is
-**`pr-gated`**, raise the amendment as a **labelled PR into the shared handbook queue**:
+Before the write, **consult `@git-policy`** — the harness's crystallised, **repo/path-keyed**
+write-policy surface (each target = a repo + optional path predicate → `direct` / `pr-gated` +
+label; most-specific wins; no entry ⇒ fail closed to a labelled PR; the shape is
+`git-policy-schema`). Resolve the mode for the repo + path the amendment writes to; do not
+restate the policy here.
+
+When the resolved mode is **`pr-gated`**, raise the amendment as a **labelled PR**:
 
 1. **Decide the bundle.** Group touchpoint edits that belong to one operator-decision frame into
    one PR; split edits that span more than one frame.
-2. **Compose the body.** Invoke **`pr-author`** with the settled **edits** (page-slug + a
-   one-sentence description of each change), the **trigger** (the specific design moment), a
-   **recommendation** (the decision, stated as a recommendation, not a question), any
-   **alternatives** / **out-of-scope** items, and the **read_set**. It returns the PR **body** as
-   a string. It does **not** open the PR and does **not** compose the title — that is yours.
-3. **Open the labelled PR.** Branch off the handbook home's main line, apply the amendment, and open
-   the PR with the overlay's **queue label** and a title you compose. Report the URL. The PR
-   description *is* the proposal — write no separate proposal file.
+2. **Compose the body — inline.** Write the PR body yourself to `pr-description-shape` (summary ·
+   trigger · recommended decision · alternatives · out-of-scope · read set): the settled edits,
+   the specific design moment that surfaced them, the decision stated as a recommendation.
+3. **Open the labelled PR** off the target repo's main line, apply the amendment, and open the PR
+   with the policy's label and a title you compose. Report the URL. The PR description *is* the
+   proposal — write no separate proposal file.
+4. **Approve in-session.** Surface the drift-pass result and the amendment to the **warm
+   operator** and take the sign-off now: approved → the PR merges in this session;
+   request-changes → revise and re-surface. Do not leave the amendment queued — the operator who
+   is shaping the work signs its spec.
 
-The amendment is now **queued for the curator's `integrate` gate**. You do not invoke integrate
-and you do not merge — that is a separate session, on the operator's cadence.
+When the resolved mode is **`direct`**, apply the amendment directly and record the operator's
+in-session confirmation.
 
-## Phase 5 — Signal stage-complete
+## Phase 5 — Hand back
 
-Emit the **stage-complete signal** (the built node-exit instrumentation carries it). The
-projection advances the carrier's `current_stage`; you write no carrier field and record no gate
-decision. Hand off: the item now sits at **gate-2 (commit-to-build)** for the PM/operator, with a
-queued (or, for `null`, an inline-recorded) spec. Downstream, the work moves to **`plan`** against
-the now-settled spec — the `precedes plan` process edge is deferred until `plan` exists, but the
-behaviour holds: after gate-2, planning runs against settled spec.
+Mark the design / IU records **`spec-status: specified`** (the IUs `plan` emits inherit it) and
+return to the front. Downstream, `plan` decomposes against the now-settled spec, and the item
+reaches **`commit-to-build`** at `shape`'s exit with its spec already approved. You write no
+carrier field and record no gate decision.
 
 ## Modes
 
-Render as branches of this one skill. They differ only in whether a handbook amendment is raised —
-every mode reads the design doc + carrier for context, emits the stage-complete signal, and writes
-no carrier field.
+Render as branches of this one skill. They differ only in whether a spec-surface amendment is
+raised — every mode reads the design doc + carrier for context and writes no carrier field.
 
 ### spec-layout (default when a spec layout exists)
 
-The full handbook-author path: Phases 1–5. Scan the touchpoints with `drift-detector`, author the
-amendment, have `pr-author` compose the body, open the **labelled PR into the shared handbook queue**,
-then signal stage-complete. This is the primary-handbook-author behaviour.
+The full spec-surface path: Phases 1–5. Scan the touchpoints with `drift-detector`, author the
+amendment, compose the PR body inline, graduate per `@git-policy`, and take the operator's
+in-session approval.
 
 ### null (no spec layout)
 
-The product has no spec layout, so there is **no handbook page to amend**. The spec write here is the
-**`spec`** logical surface — the inline-spec write **into the carrier** — **not** the `handbook`
-surface (there is no handbook page in this mode). Skip the drift scan and the handbook PR (Phases 2–4
-are the `handbook`-surface path). **Graduate per `git-policy` for the `spec` surface** (resolve the
-mode against `git-policy` for `spec`; do not restate the rule): **record the touchpoints and decisions
-inline** — into the design doc and the carrier context surface the projection reads — directly when
-the mode resolves **`direct`** (no PR ceremony), or via a labelled PR over the inline-spec change when
-it resolves **`pr-gated`**, so the settled decisions are durable for plan and build. Advance the work
-and signal stage-complete.
+The product has no spec layout, so there is **no spec page to amend**. Skip the scan and the PR
+path (Phases 2–4 are the spec-surface path). **Record the touchpoints and decisions inline** —
+into the design doc and the carrier context surface the projection reads — so the settled
+decisions are durable for plan and build; graduate the write per `@git-policy` for the repo/path
+it lands in (direct when the policy resolves `direct`; a labelled PR over the inline record when
+it resolves `pr-gated`). Then hand back as Phase 5.
 
 ### amend-existing
 
-Revise an **existing** handbook section rather than adding a new one. Same path as `spec-layout`, but
+Revise an **existing** spec section rather than adding a new one. Same path as `spec-layout`, but
 narrow the `drift-detector` `read_set` to the section under revision (so the scan focuses there)
-and edit that section in place. Graduate the same way — per `git-policy` for the `handbook` surface
-(Phase 4).
+and edit that section in place. Graduate and approve the same way (Phase 4).
 
 ## Output
 
-- **spec-layout / amend-existing:** the authored spec amendment, raised as a **labelled PR into
-  the shared handbook queue** (body composed by `pr-author`, after a `drift-detector`
-  collision/drift pass), reported by URL — queued for the curator's `integrate` gate.
-- **null:** the touchpoints and decisions **recorded inline** (design doc + carrier context) — the
-  `spec` surface — graduated per `git-policy` for `spec` (direct when the dial resolves `direct`; a
-  labelled PR over the inline-spec change when it resolves `pr-gated`), the work advanced.
-- **All modes:** a **stage-complete signal** — the projection advances `current_stage`. You write
-  no carrier field and record no gate decision; the item now sits at gate-2 for the PM/operator.
+- **spec-layout / amend-existing:** the authored spec amendment — collision-checked by
+  `drift-detector`, body composed inline to `pr-description-shape`, graduated per `@git-policy`,
+  and **approved by the operator in-session** (merged, or revised on request-changes) — reported
+  by URL where a PR was raised.
+- **null:** the touchpoints and decisions **recorded inline** (design doc + carrier context),
+  graduated per `@git-policy`, the work advanced.
+- **All modes:** the design / IUs marked **`spec-status: specified`**; no carrier field written,
+  no gate decision recorded — the item moves toward `commit-to-build` with its spec settled.
 
 ## On-demand references
 
 Read these at the step of need (single-sourced into this primitive's bundle):
 
-- `references/git-policy.md` — `git-policy`
+- `references/context-principles.md` — `context-principles`
+- `references/pr-description-shape.md` — `pr-description-shape`
 

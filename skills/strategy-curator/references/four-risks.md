@@ -1,11 +1,16 @@
 ---
-kind: reference
-id: four-risks
+subject: four-risks
 title: The four product risks — discovery lens
-description: The four risks every product idea must clear before it is worth building (value, usability, feasibility, viability), as a discovery checklist.
-status: v0.2.1 — 2026-06-06
-changelog:
-  - v0.2.1 (2026-06-06): tie two-axis rule to the canvas.json contract (strength + importance_rank fields); name the two axes the dashboard rollup must honour
+provenance: vendored
+level: L2
+cadence: on-demand
+read-when: "Assessing an idea's product risk (value/usability/feasibility/viability)."
+derive-from: [four-risks]
+reviews-on: four-risks-source
+last-reviewed: 2026-07-01
+entropy: unmeasured
+status: drafted
+related: [okr-schema, ux-principles, architecture-doctrine]
 ---
 
 # The four product risks
@@ -61,10 +66,9 @@ discipline:
 **These are the two axes the rollup must honour** (the lifecycle state axis is not a proxy for
 strength, and the strength rung is not a lifecycle stage).
 
-### `canvas.json` contract fields the adapter carries
+### `canvas.json` contract fields
 
-The canvas adapter (`refresh-canvas.ts`) must carry two fields per entry into `canvas.json` so the
-dashboard rollup can honour both axes:
+`canvas.json` carries two fields per entry so the dashboard rollup can honour both axes:
 
 | field | type | meaning |
 |---|---|---|
@@ -73,4 +77,4 @@ dashboard rollup can honour both axes:
 
 When both are absent the bets rollup degrades gracefully — state-axis only, no ranking. When present,
 the rollup shows the full two-axis stacked evidence bar and can apply riskiest-first ordering
-(important-and-unevidenced first, per Strategyzer). Coordinate the field names with the canvas chip.
+(important-and-unevidenced first, per Strategyzer).

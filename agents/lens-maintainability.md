@@ -1,6 +1,6 @@
 ---
 name: "lens-maintainability"
-description: "Autonomously hunt structural and change-cost defects in a target and return structured findings. Use when: A review/design/plan stage's dispatch fans out a maintainability pass over a diff or a design/plan doc."
+description: "Autonomously hunt structural and change-cost defects in a target and return structured findings. Use when A review/design/plan stage's dispatch fans out a maintainability pass over a diff or a design/plan doc."
 ---
 
 
@@ -102,7 +102,7 @@ You are one member of a lens family. Your lane is **structure and change-cost on
 
 - **Correctness** (logic, edge-case, state, swallowed-error, race) → `lens-correctness`.
 - **Security** (injection, authz, secrets, exploit paths) → `lens-security`.
-- **Performance** (runtime cost, allocations, N+1) → `lens-performance`.
+- **Performance** (runtime cost, allocations, N+1) → the harness's performance lens where one is bound, else `verify`'s `benchmark` modality.
 - **Test coverage and gaps** → `lens-tests`.
 
 Many regions are both structurally messy and (say) buggy, slow, or untested. Keep **only**

@@ -1,9 +1,16 @@
 ---
-kind: reference
-id: axis-entry-schema
-title: Axis entry — schema (the zone-matrix lens)
-description: The shape of a single axis entry in the zone matrix — a vertical (a product-owned customer experience) or a horizontal (an eng-owned architecture layer) — plus how a zone rule attaches to the matrix and how a coordinate resolves. The harness authors concrete entries; this schema fixes the shape. A zone is the derived intersection of one vertical and one horizontal over the code-map; it is never authored.
-status: v0.1.0 — 2026-06-05
+subject: axis-entry-schema
+title: Axis-entry schema — the zone-matrix shape
+provenance: vendored
+level: L2
+cadence: on-demand
+read-when: "Authoring the zone matrix or a zone rule."
+derive-from: [axis-entry-schema]
+reviews-on: axis-entry-schema-source
+last-reviewed: 2026-07-01
+entropy: unmeasured
+status: drafted
+related: [experience-contract-schema, IU-schema, bindings-contract]
 ---
 
 # Axis entry — schema
@@ -16,15 +23,14 @@ of one **axis entry** and the rules by which a coordinate resolves; the **harnes
 concrete experience or layer is product-specific and lives only in the harness, under the `axis-root`
 binding.
 
-An axis entry is a **`kind: reference`** — it owns no control flow, declares no goals and no process
-edges. It is **not a node**. This keeps the matrix inside *one node ⟷ one primitive*: the lens is
+An axis entry is a reference file whose `axis` field declares its membership — it owns no control flow,
+declares no goals and no process edges. It is **not a node**. This keeps the matrix inside *one node ⟷ one primitive*: the lens is
 built from references and edges, not a new node kind.
 
 ## The axis-entry shape
 
 | field | required | meaning |
 |---|---|---|
-| `kind` | yes | `reference` — an axis entry is a reference, not a node. |
 | `id` | yes | Stable slug, unique in the harness `axis-root`. Zone rules and coordinates name it. |
 | `axis` | yes | **`vertical` \| `horizontal`** — the discriminator. The resolver bins entries by this and reads it to classify a zone rule (below). |
 | `title` | yes | Short human label (the experience or the layer). |
@@ -36,7 +42,6 @@ built from references and edges, not a new node kind.
 A vertical (`axis: vertical`):
 
 ```yaml
-kind: reference
 id: <vertical-id>                 # a customer experience
 axis: vertical
 title: <experience name>
@@ -52,7 +57,6 @@ status: v0.1.0 — <date>
 A horizontal (`axis: horizontal`):
 
 ```yaml
-kind: reference
 id: <horizontal-id>               # an architecture layer
 axis: horizontal
 title: <layer name>
@@ -67,8 +71,8 @@ status: v0.1.0 — <date>
 ## The `scope` field — vertical vs horizontal
 
 `scope` is how an axis value maps onto the **code-map** (the deterministically-extracted code
-structure; see `06-analytics` and `docs/knowledge-substrate.md`). The two axes scope differently
-because a layer is structural and an experience is behavioural:
+structure). The two axes scope differently because a layer is structural and an experience is
+behavioural:
 
 - **Horizontal scope ≈ structural** — a set of **path globs** (`globs: [...]`) naming the layer's
   footprint. A layer is usually a region of the tree, so globs express it directly.
@@ -109,7 +113,6 @@ cell. Specificity ranks **cell > column > row > global**, with the declared tieb
 A zone rule (a cell rule referencing one vertical + one horizontal):
 
 ```yaml
-kind: reference
 id: <rule-id>
 title: <rule name>
 references:
@@ -117,6 +120,35 @@ references:
   - { id: <horizontal-id> }    # constrains the horizontal axis  ⇒ a CELL rule
 # body: the rule guidance the agent loads in that zone
 ```
+
+## Zone-principle briefs — the four-facet body
+
+The common zone rule is a **per-surface operating brief** — the standing answer to *"what must I know to
+work correctly here?"* for a surface, resolved by the coordinate rather than re-derived each session. Its
+body is **prose under four headings**, plus an optional thin frontmatter the staleness engine reads:
+
+- **constraints** — the surface's hard limits: cross-platform / target-runtime compatibility, security &
+  privacy invariants, performance budgets.
+- **stack** — allowed languages / frameworks, available and forbidden dependencies, the add-a-dependency
+  policy.
+- **conventions** — the per-surface coding doctrine: idioms, patterns, structure held to here.
+- **pointers** — the governing specs the surface answers to (the horizontal's layer spec, the vertical's
+  experience contract).
+
+```yaml
+id: <brief-id>
+title: <surface> operating brief
+references:
+  - { id: <horizontal-id> }        # the layer this brief governs (a row/column brief; add a vertical for a cell)
+deps: [<name>, ...]                 # optional — named facts the staleness engine drift-checks
+runtimes: [<name>, ...]             # optional
+# body: ## constraints / ## stack / ## conventions / ## pointers
+```
+
+The brief states the **policy**, not instance values — "available: X, Y; adding a dependency is gated,"
+never a lock-file's exact pins (those live in the code). It **specialises**, and never restates, the
+global-tier doctrine a consumer already carries (`architecture-doctrine` · `test-discipline`), which stays
+directly imported, not resolved through the zone.
 
 ## Resolving a coordinate — cell and column queries
 
@@ -142,7 +174,7 @@ higher-specificity rule to resolve it is **surfaced, never silently merged**.
 
 - **A zone is derived, never authored.** No zone-map file exists; the intersection is computed on read
   from the two axes' scopes over the code-map. (A hand-maintained zone grid would drift the moment
-  either scope or the code changed — the authored-traceability discipline, D38/D39: structure is
+  either scope or the code changed — the authored-traceability discipline: structure is
   extracted, the V/H *labels* are authored, the intersection is derived.)
 - **Axis membership is read from the target's `axis` field**, not declared on the edge. A `references`
   target carrying an `axis` field is an axis constraint; one without is ordinary content.

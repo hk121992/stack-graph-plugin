@@ -1,13 +1,16 @@
 ---
-kind: reference
-id: architecture-doctrine
+subject: architecture-doctrine
 title: Architecture doctrine — deep modules, seams, dependency categories
-description: >-
-  The deep-module vocabulary and seam discipline: module / interface / implementation, depth
-  (deep/shallow), seam, adapter, leverage, locality; the deletion test; the four dependency
-  categories and replace-don't-layer testing. Use when judging structural depth, deepening a
-  module, or designing across a seam. The test-quality slice lives in test-discipline.
-status: v0.1.0 — 2026-06-10
+provenance: vendored
+level: L2
+cadence: on-demand
+read-when: "Judging structural depth, a seam, or a deepening."
+derive-from: [architecture-doctrine]
+reviews-on: architecture-doctrine-source
+last-reviewed: 2026-07-01
+entropy: unmeasured
+status: drafted
+related: [test-discipline, ux-principles, four-risks]
 ---
 
 # Architecture doctrine
@@ -102,13 +105,3 @@ What makes an individual test good or bad — behaviour-through-public-interface
 system boundaries, one logical assertion — is `test-discipline`'s contract; this reference owns
 the structural question (what shape the module and its seam should take), not the test-quality
 rubric.
-
----
-
-**Source.** Synthesised from Matt Pocock's `engineering/improve-codebase-architecture` skill —
-github.com/mattpocock/skills, `skills/engineering/improve-codebase-architecture/` at commit
-`aaf2453f`, MIT © 2026 Matt Pocock (LANGUAGE.md + DEEPENING.md; the review *process* lives in
-the `architecture-review` node, the report template in that node's body). A **rubric** adopting
-ideas/patterns, not substantial verbatim text; verbatim copies of LANGUAGE.md and HTML-REPORT.md
-are separately vendored at `tooling/sg-language-reviewer/source-material/pocock-ica-*.md` for
-the language standard. Import rationale: `docs/architecture-review-import.md`.
