@@ -95,7 +95,7 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    update added a key), **add the missing required keys** — infer + confirm each — before
    `validate`; never leave a stale key set that `validate` will then reject. This is how an existing
    harness adopts a plugin that introduced a new required binding (the plugin-update migration path).
-3b. **Materialize the crystallised `@git-policy` surface** into `<org-root>/.claude/` — the
+3b. **Materialize the crystallised `@git-policy` surface** into `<org-root>/.claude/always-on/` — the
    per-repo/path write-policy map every git-writing agent reads off the floor. Author it **from the
    harness's git topology** (walk the repos the org root carries; propose an entry per repo, with
    path predicates where a repo's sub-tree wants a different mode) to the shape in
@@ -114,8 +114,8 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    family inline, §Reference index → `@at-hand-references-index`, §Git-write → `@git-policy`) plus
    the three crystallised identity surfaces (`@product-definition` · `@product-principles` ·
    `@constitution`, Step 4b). **Vend the floor:** copy your bundled `sg-root-instructions` reference
-   to the harness-local `<org-root>/.claude/sg-root-instructions.md` and have the `CLAUDE.md`
-   template carry `@.claude/sg-root-instructions.md`, so the floor is reliably **inlined every
+   to the harness-local `<org-root>/.claude/always-on/sg-root-instructions.md` and have the `CLAUDE.md`
+   template carry `@.claude/always-on/sg-root-instructions.md`, so the floor is reliably **inlined every
    session** — a static `@`-ref, not a pointer the agent must choose to follow, and not a dynamic
    plugin path a `CLAUDE.md` cannot resolve. The floor stays **terse by discipline** — do not inline
    a fat operating-instructions block; the live per-turn work-state is loaded just-in-time by the
@@ -137,7 +137,7 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    its right home per `context-principles` (an identity surface, a local reference, a binding) —
    **never silently drop it**. This re-vend is otherwise **non-interactive** — it does not re-run
    the Step 2 binding confirmation.
-4b. **Seed the three crystallised identity surfaces** into `<org-root>/.claude/` —
+4b. **Seed the three crystallised identity surfaces** into `<org-root>/.claude/always-on/` —
    `product-definition` (what the product is: why · who · value), `product-principles` (the bar:
    the standing quality non-negotiables), `constitution` (how work runs here: autonomy posture ·
    non-skippable invariants · operating constraints) — each seeded from its vendored guidance ref
@@ -145,7 +145,7 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    the guidance, write a skeleton that names what belongs and what is mis-homed) and `@`-ref'd from
    `CLAUDE.md` as part of the always-on band. The operator and curators fill and maintain them; you
    leave valid seeded shells. **Idempotent** — seed only what is absent.
-4c. **Generate the `at-hand-references-index`** into `<org-root>/.claude/` — the always-on ref map,
+4c. **Generate the `at-hand-references-index`** into `<org-root>/.claude/always-on/` — the always-on ref map,
    assembled as a **pure function of the on-demand reference set**: one entry per ref (its
    `subject` + terse `read-when`), **vendored and local alike** — only the harness can assemble the
    full set, because only it knows its local refs. `@`-ref'd from `sg-root-instructions`
@@ -153,7 +153,7 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    it on every plugin bump). The index is floor cost — keep each entry to the ref's `read-when`
    hint, nothing more.
 4d. **Generate the `decisions-index`** into the local-reference home
-   (`<org-root>/.claude/spec/decisions-index/README.md`) — the on-demand lookup over the **bound
+   (`<org-root>/.claude/on-demand/decisions-index/README.md`) — the on-demand lookup over the **bound
    decisions store**, assembled as a **pure function of the store**: one row per settled entry
    (its id + a terse gist + its locator in the store); pointers, never conclusions. Frontmatter
    carries `read-when` (so the at-hand index lists it) and `reviews-on: decisions-store`. Never
@@ -161,7 +161,7 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    fresh between updates. An empty store yields an empty-but-valid index — generate it anyway;
    the slot must exist.
 4e. **Seed the `strategy-page` skeleton** into the local-reference home
-   (`<org-root>/.claude/spec/strategy-page/README.md`) — the **stable** strategy + top-level
+   (`<org-root>/.claude/on-demand/strategy-page/README.md`) — the **stable** strategy + top-level
    objectives reference (stable → reference; the runtime KRs stay on `objectives.md`). Seed the
    frontmatter (incl. `read-when`, so the at-hand index lists it) + empty section headings for the
    kernel synthesis and the top-level objectives; **`strategy-curator` authors and owns the
@@ -237,7 +237,7 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    either resolve or are explicitly marked not-yet. Report each missing/dangling key by name.
 3. **The org-root `CLAUDE.md` is present, wired, and vended-shaped** — it exists at the org root,
    reaches the bindings reference, carries the **always-on band `@`-refs**: the vended floor
-   (`@.claude/sg-root-instructions.md`, that file present + non-empty), the three identity surfaces,
+   (`@.claude/always-on/sg-root-instructions.md`, that file present + non-empty), the three identity surfaces,
    and — via the floor — the generated `at-hand-references-index` and the `@git-policy` surface,
    each resolving to a present, non-empty file; and **matches the vended template shape** (an
    SG-managed surface — inline non-template content is drift, flagged for re-vend + migration; the

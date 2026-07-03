@@ -108,13 +108,13 @@ does not run.
 ### 3b. Ambient-surface sync (every run, state-based)
 
 Independently of the contract check, **always** reconcile the harness's **ambient surface** — the
-always-on band `@`-ref'd from the org-root `CLAUDE.md` (`@.claude/sg-root-instructions.md` and its
+always-on band `@`-ref'd from the org-root `CLAUDE.md` (`@.claude/always-on/sg-root-instructions.md` and its
 companions) that loads every session. The `@`-refs are **not binding keys**, so the Contract-drift
 check above never sees them; without this step a harness whose band never got wired — or drifted —
 never picks it up on update.
 
 - **Run `harness-init validate`** (read-only — it already asserts that `CLAUDE.md` `@`-refs the vended
-  `@.claude/sg-root-instructions.md` and that the band files are present + non-empty) on **every**
+  `@.claude/always-on/sg-root-instructions.md` and that the band files are present + non-empty) on **every**
   update, not only on a contract move.
 - **On a flagged ambient-surface gap** (an `@`-ref line missing, a vended band file absent / stale,
   or the `CLAUDE.md` drifted from the vended shape), invoke **`harness-init scaffold`** in its
