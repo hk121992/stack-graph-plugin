@@ -146,15 +146,17 @@ any per-change `raise`.
 ### `refresh-index` — regenerate the surface's index (idempotent)
 
 The managed surface's index is a **generated artifact** — projected deterministically from each
-doc's frontmatter (its discovery line), never hand-curated. Run the surface's own bound index
-generator over the bound root — a vendored generator resolves through the plugin-root
-substitution (`${CLAUDE_PLUGIN_ROOT}`, how a vendored node reaches its bundled files), a
-harness-supplied one through its binding — never a hardcoded path. Where the harness renders a
-viewer / graph record over the layer, its regeneration rides this mode too.
+doc's frontmatter (its discovery line), never hand-curated. Re-derive it in place: walk the bound
+root and project one entry per doc from its discovery line. This is a **by-hand re-derivation**, a
+pure function of the frontmatter — the same regeneration `harness-init`/`harness-update` run for the
+reference index and `log-decision` for the decisions index; no generator ships, the determinism is
+the procedure, not a bundled tool. The one exception is a **rendered view**: where the harness binds
+a viewer / graph-record renderer over the layer, run that bound renderer through its binding (never a
+hardcoded path) and let its regeneration ride this mode.
 
-Pass `--check` to verify freshness without writing (exit 1 on drift, exit 0 when fresh). If
-unchanged, say so and stop; if changed, report the changed entries (or, when called from
-`raise`, surface only the count — the diff is in the PR).
+Run it **check-only** to verify freshness without writing — report drift rather than rewrite. If
+unchanged, say so and stop; if changed, report the changed entries (or, when called from `raise`,
+surface only the count — the diff is in the PR).
 
 ## Hard constraints
 
