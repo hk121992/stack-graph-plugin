@@ -53,4 +53,6 @@ free-text; nothing to flag → no tag:
 - `<sg-conflict>` `{kind, target}` — the **context contradicts / confuses**
 - `<sg-operator-action>` `{id, status: open|closed}` — an **operator-only obligation**
 
+`<sg-decision>` is the **signal, not the record**: a settled load-bearing decision is also recorded durably by **`log-decision`**, the decisions store's sole writer (`decisions-schema`) — the tag flags it for the loop, `log-decision` records it.
+
 `<sg-open-item>` & `<sg-operator-action>` paired-close on an identical `id`; only an attended turn may close.
