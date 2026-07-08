@@ -127,9 +127,9 @@ decision-completable** (formalisable with no new design decision).
 1. **Qualifies (all three)** — emit the formalised IU **with the qualify result to your
    dispatching context; when a wrapping orchestrator (`verify`) dispatched you, IT asserts the hold
    and you write nothing.** Only on a direct cold dispatch with no wrapping orchestrator do you
-   **invoke `record-gate`** yourself to write the
-   **`agent-provisional`** `commit-to-build` hold: a *hold*, not an approval — inert until the
-   operator's **retro-ratification at `commit-to-land`**; record-gate sets the
+   **dispatch the `record-gate` runner** (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`)
+   yourself to write the **`agent-provisional`** `commit-to-build` hold: a *hold*, not an approval —
+   inert until the operator's **retro-ratification at `commit-to-land`**; record-gate sets the
    `pending_retro_ratification` flag the promotion guard checks. The gap then builds AFK.
 2. **Fails in-scope or outcome-necessary** — it is genuinely **new work**: return it as a new-WI
    candidate for the front; do not formalise it onto the parent.

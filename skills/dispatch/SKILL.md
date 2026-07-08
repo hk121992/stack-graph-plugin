@@ -69,10 +69,11 @@ the derived projection), and the per-IU `zone` coordinate.
    **`git merge-base --is-ancestor iu/<id> <branch>`** against both integration reads —
    - a hit on the **landed line** (`main`, resolved from `deploy-config` — never hardcoded) means it
      is **already landed**: drop it from the dispatch set and **reconcile its lifecycle through
-     `record-gate`** — invoke the single mechanical writer to append the retroactive
-     `commit-to-land` entry with `decision: reconciled` **naming the out-of-band merge**. You do not
-     write the fields directly; `record-gate` admits this as a reconcile of an already-established
-     merge, never a fresh product-gate decision.
+     the `record-gate` runner** — dispatch the single mechanical writer
+     (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`, with `--context unattended`) to
+     append the retroactive `commit-to-land` entry with `decision: reconciled` **naming the
+     out-of-band merge**. You do not write the fields directly; `record-gate` admits this as a
+     reconcile of an already-established merge, never a fresh product-gate decision.
    - a hit on the **DEV branch** only means it is **already integrated this span**: drop it from
      the dispatch set (no lifecycle write — the batch's promotion records at the gate) and note it
      in the batch report.

@@ -38,9 +38,10 @@ route back to `verify`'s exit. Fail closed: never execute an unauthorized promot
 
 Read the carriers for context (the promotion records are per-IU per `IU-schema`; a grouping
 work-item aggregates per `work-item-schema`). You **write no carrier field**. When your gate
-settles, you invoke **`record-gate`** — the single mechanical writer — with the settled decision.
-The gate *experience* is yours: the sign-off surface, the evidence walk, the operator's real
-click. The *record* is record-gate's.
+settles, you dispatch the **`record-gate` runner**
+(`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) — the single mechanical writer — with
+the settled decision. The gate *experience* is yours: the sign-off surface, the evidence walk, the
+operator's real click. The *record* is record-gate's.
 
 ## The regime read — prod-facing or single-main
 
@@ -55,8 +56,9 @@ names the fields, the harness supplies the values — never hardcode a branch or
   PRs to `main` (the PRs `dispatch` opened and left open; the merge **is** `commit-to-land`'s
   enactment, per-IU). `deploy`, `canary`, and `live-confirmed` **skip** — there is no prod
   target to release to or confirm; the **terminal landing state is `shipped`**. Once each merge is real,
-  record its enactment evidence (the real merge SHA) through `record-gate` per its
-  commit-to-land contract. `verify` ran in both regimes; the landing is equally deliberate.
+  record its enactment evidence (the real merge SHA) by dispatching the `record-gate` runner
+  (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) per its commit-to-land contract.
+  `verify` ran in both regimes; the landing is equally deliberate.
 
 ## Step 1 — Deploy (prod-facing)
 
@@ -66,8 +68,8 @@ version/tag bump, triggers the prod pipeline, waits for it to settle, and runs i
 single-pass smoke check (HTTP 200 · console-error scan · content-present · screenshot). It
 reports `smoke_health`; **you consume that result** — the live-confirmed gate never fires on a
 URL that returns 200 over a blank or broken page. Once the promotion's merge is real, its
-enactment evidence (the `merge_sha`) is recorded through `record-gate` per its commit-to-land
-contract.
+enactment evidence (the `merge_sha`) is recorded by dispatching the `record-gate` runner
+(`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) per its commit-to-land contract.
 
 If deploy fails at any phase, surface its failure output and ask:
 
@@ -105,8 +107,9 @@ Pass-when (the operator attests):
    hold (keep watching), confirm (accept the degradation, on the record), or revert;
 4. **live & clean** — the operator's own confirmation it is actually working on prod.
 
-On confirmation, invoke **`record-gate`** — **per-IU** on each promoted carrier: gate
-`live-confirmed`, `decision: confirmed`, advancing `shipped → live`, `evidence_refs →
+On confirmation, dispatch the **`record-gate` runner**
+(`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) — **per-IU** on each promoted carrier:
+gate `live-confirmed`, `decision: confirmed`, advancing `shipped → live`, `evidence_refs →
 deploy_url + smoke screenshot + canary verdict`. On decline (not live, or BROKEN): nothing
 advances to `live`; go to the revert seam.
 

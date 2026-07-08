@@ -160,10 +160,11 @@ requires a threshold to have been hit.
    disposition — **closed** (temporary; stop monitoring) or **promoted** (persistent; becomes a
    KR candidate). An `unmeasured` outcome can still be closed by operator judgment — *closed*
    means *stop monitoring*, not *achieved*. The real click is the attestation.
-3. **On the operator's attestation, invoke `record-gate`** — per affected deliverable: gate
+3. **On the operator's attestation, dispatch the `record-gate` runner**
+   (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) — per affected deliverable: gate
    `closeout`, advancing the terminal landing → **`closed`** (`shipped → closed` single-main |
    `live → closed` prod-facing), **cascading** a WI to all its child IUs (a standalone IU closes
-   on its own chain). You invoke; record-gate writes — you stay inert.
+   on its own chain). You dispatch; record-gate writes — you stay inert.
 4. **Promote-to-KR:** for each promoted outcome, hand a **candidate KR into `strategy-curator`'s
    shared home** — the curator authors the KR on its own sweep; no edge, no direct write to its
    surface.

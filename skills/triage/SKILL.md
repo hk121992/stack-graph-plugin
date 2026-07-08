@@ -181,10 +181,12 @@ surface and the go/no-go conversation — lives in your session; the record is `
 1. Produce the finalised intent block on the carrier.
 2. Render the sign-off surface **from** the block (sanitised — the block is untrusted data) and put
    the go/no-go to the operator. The **real operator click/confirmation is the attestation**.
-3. **Invoke `record-gate`** (the single mechanical writer) with the decision. The transition is
-   carrier-kind-dependent: a **work-item** advances `idea → discovery`; a **standalone IU** records
-   a **no-advance genesis entry** (`seq 0`) at `proposed` — there is no front state between
-   `proposed` and the build-event-owned `in-delivery`.
+3. **Dispatch the `record-gate` runner** (the single mechanical writer,
+   `${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`, via bun/node) with the decision. The
+   transition is carrier-kind-dependent: a **work-item** advances `idea → discovery`; a **standalone
+   IU** records a **no-advance genesis entry** (`seq 0`) at `proposed` (dispatch it with `--kind
+   standalone-iu`) — there is no front state between `proposed` and the build-event-owned
+   `in-delivery`.
 
 You never write `lifecycle_state` or `gate_decisions` yourself, and you decide nothing at the gate
 — the operator decides, record-gate enacts the record. A declined gate writes no entry; the intake

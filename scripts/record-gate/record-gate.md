@@ -34,6 +34,30 @@ invoking context is attended or unattended (dispatcher-run), plus `owner`, `evid
 `confidence`, and any `conditions` / `override`. Read the current chain head (`seq`, `hash`) from the
 carrier file.
 
+## Invocation — you are an executable runner, dispatched
+
+You are a deterministic runner (`primitive: script`), not a session procedure. A firing node enacts
+a gate write by **dispatching** you over Bash — never by hand-executing the precondition-check and
+the chain append in its own session:
+
+```
+bun ${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts \
+  --carrier <path> --gate <gate-id> --decision <decision> \
+  --decision-provenance <operator-attested|agent-auto|agent-provisional> \
+  --owner <owner> --context <attended|unattended> [--kind standalone-iu] \
+  [--evidence <ref> …] [--confidence <level>] [--conditions <text>] [--override <text>] \
+  [--timestamp <iso8601>]
+```
+
+You read the carrier's frontmatter (the chain head via the vendored YAML parser), check the five
+preconditions in code, compute the next link with the pinned `canonical.ts`, and write the appended
+`gate_decisions[]` entry plus the advanced `lifecycle_state` — surgically, touching only those two
+regions of the frontmatter and no other line or the body. On a refused write you exit non-zero,
+surface the reason, and leave the carrier byte-for-byte unchanged; on an enacted write you exit zero
+and print the record. `--kind standalone-iu` selects the no-advance genesis for `intent-to-build`.
+The single-writer boundary is thereby held by an actual separate writer — this runner plus the
+pinned `canonical.ts` and the `generate:check` guard — not by the firing session writing on itself.
+
 ## The five gates
 
 Every gate id is a **product gate** (⇒ operator-attested, below). Each writes at its own grain:

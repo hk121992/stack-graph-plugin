@@ -51,8 +51,8 @@ Run this spine once per input. Each routing call emits a trace (decision + signa
    On a **full-intent-at-raise** continuation it arrived signed (triage's block) — do not
    re-litigate it. On an **idea-shaped** continuation *you* finalise it: shape the statement /
    in-scope / out-of-scope + objective ladder with the operator in-session, then **fire
-   `intent-to-build`** (`idea → discovery`, via `record-gate` — you are the gate's other
-   fire-site) before the spine work proceeds. Thereafter the **alignment re-check fires on a
+   `intent-to-build`** (`idea → discovery`, by dispatching the `record-gate` runner — you are the
+   gate's other fire-site) before the spine work proceeds. Thereafter the **alignment re-check fires on a
    material pivot, not at every depth**: when the worked solution moves materially from the signed
    premise, re-confirm it still serves that premise — the deep tier applies the full
    intent-alignment rigor contract (the four-class rigor-gap taxonomy, the integration check, the
@@ -111,10 +111,12 @@ dependent AFK work.
 - **Fire `commit-to-build` at exit.** After your last dispatched action (`plan`) returns, your
   session holds the operator turn: present the decomposition + the decision-complete evidence (the
   gate's sign-off surface, generated from the plan/IUs — sanitised, the real click is the
-  attestation), and **invoke `record-gate`** — **once on the WI grouping** (advancing `committed`;
-  the N IUs inherit the commitment by reference), or on a **standalone IU's own chain**.
-  Request-changes → back to shaping; no gate entry. You hold the gate experience; you never write
-  `lifecycle_state` / `gate_decisions` yourself.
+  attestation), and **dispatch the `record-gate` runner**
+  (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`, via bun/node) — **once on the WI
+  grouping** (advancing `committed`; the N IUs inherit the commitment by reference), or on a
+  **standalone IU's own chain**. Request-changes → back to shaping; no gate entry. You hold the gate
+  experience; `record-gate` is the single writer — you never write `lifecycle_state` /
+  `gate_decisions` yourself.
 - **No-IU terminal disposition.** An input you resolve as not worth an IU gets a terminal
   disposition on its carrier — **park / kill / defer** — producing no IU rather than a dangling
   open state. Follow `product-dashboard-conventions` for the carrier content + the write-boundary.

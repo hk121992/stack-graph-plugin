@@ -152,7 +152,8 @@ test**: dispatch **`auto-shaper` (cold)** to formalise the gap and test it — *
 the parent's signed intent block) **∧ outcome-necessary** (serves a committed outcome of the
 parent's success definition) **∧ decision-completable** (no new design decision).
 
-- **Qualifies (all three)** — invoke **`record-gate`** to write the **`agent-provisional`**
+- **Qualifies (all three)** — dispatch the **`record-gate` runner**
+  (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) to write the **`agent-provisional`**
   `commit-to-build` hold (it sets `pending_retro_ratification`). **You are the asserter when you
   dispatched the shaper** — `auto-shaper` returns its qualify result to you and writes nothing;
   its own cold-mode write is the same carve-out, exercised only on a direct cold dispatch with no
@@ -178,9 +179,11 @@ When the batch is resolved (verify clean, or every residual finding a logged del
    consolidated verdict with the **integration-coherence result leading** (the operator attests
    coherence, not code), the coverage note against the declared expectation, and **every pending
    retro-ratification listed for ratify-or-drop**. The operator's real click is the attestation.
-3. **On the go, invoke `record-gate` per promoted IU** — `commit-to-land`, `decision: promote`,
-   advancing `in-delivery → shipped`, `evidence_refs` → the PR number(s) (the merge SHA lands with
-   `land`'s enactment evidence — a follow-up append once the merge is real). The
+3. **On the go, dispatch the `record-gate` runner
+   (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) per promoted IU** —
+   `commit-to-land`, `decision: promote`, advancing `in-delivery → shipped`, `evidence_refs` → the
+   PR number(s) (the merge SHA lands with `land`'s enactment evidence — a follow-up append once the
+   merge is real). The
    retro-ratification entries (operator-attested, clearing each flag) land here too; `record-gate`'s
    guard rejects the promotion while any is unresolved.
 4. **Firing is not merging.** The merge to the landed line is the **gate's enactment**, executed
