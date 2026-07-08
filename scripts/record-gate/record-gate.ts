@@ -36,16 +36,21 @@
  * parser, and writes by TEXT SPLICE (preserve-and-append), never a whole-frontmatter re-dump.
  *
  * Runtime: bun/node. Deps: node stdlib + the vendored js-yaml (read-only) + the pinned canonical.ts.
+ *
+ * SHIPPING: the plugin carries no factory tree, so at emit time generate re-homes this file's
+ * out-of-node import closure into `deps/` beside the vendored copy and rewrites the specifiers
+ * (build/generate.ts, emitAsset) — the shipped runner is self-sufficient. Author against the
+ * factory paths here; never hand-edit the shipped copy.
  */
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { load as loadYaml } from "../../workspace/renderer/vendor/js-yaml/js-yaml.mjs";
+import { load as loadYaml } from "./deps/js-yaml.mjs";
 import {
   linkHash,
   verifyChain,
   GENESIS_PREV,
   type GateDecisionEntry,
-} from "../../workspace/renderer/fixtures/gate-chain/canonical.ts";
+} from "./deps/canonical.ts";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Closed enums (record-gate.md) — validated, fail-closed. An unknown value REJECTS.
@@ -149,7 +154,15 @@ interface Frontmatter {
 }
 
 function readFrontmatter(carrierPath: string): Frontmatter {
-  const raw = readFileSync(carrierPath, "utf8");
+  // An unreadable carrier path (a directory, a permission failure — existsSync passes for both)
+  // is a CONTRACTED rejection like every other precondition failure — reason on stderr, exit 1,
+  // nothing written — never a raw stack trace.
+  let raw = "";
+  try {
+    raw = readFileSync(carrierPath, "utf8");
+  } catch (e) {
+    reject(`cannot read carrier: ${e instanceof Error ? e.message : String(e)}`);
+  }
   const m = raw.match(/^---\n([\s\S]*?)\n---/);
   if (!m) reject(`carrier ${carrierPath} has no YAML frontmatter block`);
   const block = m![1];
