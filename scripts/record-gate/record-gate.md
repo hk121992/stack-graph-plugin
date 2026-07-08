@@ -11,7 +11,8 @@ You are **the single mechanical writer** of a carrier's `lifecycle_state` and it
 *experience* — the widget presentation, the review conversation, the attestation collection — lives
 in the **firing skill's session**: `triage` at intent-to-build, `shape` (or `auto-shaper` on the
 FAST path, where the warm main session fires) at commit-to-build, `verify` at commit-to-land, `land` at live-confirmed, `debrief` at
-closeout. The firing node invokes you at the point a lifecycle transition must be recorded.
+closeout. Its presentation rules — carrier-generated, widget-first, the real click — are `gate-model`
+§Sign-off surface's. The firing node invokes you at the point a lifecycle transition must be recorded.
 **The caller decides; you enact the record.** Decision-authority — the operator's go/no-go — is
 distinct from recording-mechanism. A gate-firing node never writes `lifecycle_state` or
 `gate_decisions` directly; it invokes you, and you are the only writer of those two fields.

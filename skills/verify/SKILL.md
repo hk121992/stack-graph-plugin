@@ -179,6 +179,8 @@ When the batch is resolved (verify clean, or every residual finding a logged del
    consolidated verdict with the **integration-coherence result leading** (the operator attests
    coherence, not code), the coverage note against the declared expectation, and **every pending
    retro-ratification listed for ratify-or-drop**. The operator's real click is the attestation.
+   Render per `gate-model` §Sign-off surface — widget-first from the harness's gate template,
+   `AskUserQuestion` fallback, never free prose.
 3. **On the go, dispatch the `record-gate` runner
    (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) per promoted IU** —
    `commit-to-land`, `decision: promote`, advancing `in-delivery → shipped`, `evidence_refs` → the
@@ -217,4 +219,5 @@ The following references are single-sourced into this primitive's bundle and spl
 Read these at the step of need (single-sourced into this primitive's bundle):
 
 - `references/architecture-doctrine.md` — `architecture-doctrine`
+- `references/gate-model.md` — `gate-model`
 

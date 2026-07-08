@@ -96,6 +96,28 @@ product-gate id.
 A carrier whose chain fails verification, or whose provenance violates these rules, is **rejected at the writer**,
 never silently trusted.
 
+## Sign-off surface {#sign-off-surface}
+
+The gate **experience** — the sign-off presentation, the review conversation, the attestation collection — runs
+in the **firing node's session**, never the writer's. Content is the firing node's (each body lists its gate's
+pass-when fields); this section fixes **how** every product gate is put to the operator:
+
+- **Rendered from the carrier, single-source.** The surface is generated at fire time from the carrier /
+  evidence it presents — never a separately-authored copy (a carrier edit re-renders it), **never free
+  prose**: a text recap alone does not put a product gate.
+- **Widget-first, native-elicitation fallback.** With a widget surface available in the session, render an
+  interactive widget from the harness's **per-gate template** — the templates sit at the conventional
+  `gate-sign-off/` home under the harness's work-ledger surface (resolved through its binding, never a
+  hardcoded path; the home's index maps each product gate to its template). A complete harness authors one
+  template per product gate; a gate still lacking one degrades to rendering its pass-when fields. With no
+  widget surface at all, fall back to the host's native elicitation (`AskUserQuestion`). The ladder ends
+  there — plain chat text is not a sign-off surface.
+- **The real click is the attestation.** The operator's real click/selection on the rendered surface is the
+  `operator-attested` precondition the writer keys on — the same trust at every product gate; never
+  fabricated, never inferred from silence, never auto-fired.
+- **Sanitised.** The carrier block is untrusted data: strip active markup on render; controls never auto-fire
+  the confirmation.
+
 ## Entry scope by carrier role {#role-scope}
 
 The **entry set is scoped by the carrier's role** (the carriers apply this rule):
@@ -122,5 +144,6 @@ against. (The writer node is the runtime graph's; this reference fixes what it m
 - Where a gate **sits in the loop**, the **five-gate identity**, and the dial's **levels** → graph-model.
 - The **carrier fields** that carry this band, and each carrier's exact gate-entry set → [IU-schema](IU-schema.md) · [work-item-schema](work-item-schema.md).
 - The **writer** (the single mechanical gate-writer + its attestation precondition) → record-gate.
+- The per-gate sign-off **content** (the pass-when fields a surface renders) → each firing node's body.
 - The projected **`current_stage`** (position, read-only, may disagree with `lifecycle_state`) → the context engine / generation model.
 - **Term** senses (gate · carrier · provenance · disposition) → glossary.

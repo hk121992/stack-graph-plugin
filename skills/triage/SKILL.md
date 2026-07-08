@@ -181,6 +181,8 @@ surface and the go/no-go conversation — lives in your session; the record is `
 1. Produce the finalised intent block on the carrier.
 2. Render the sign-off surface **from** the block (sanitised — the block is untrusted data) and put
    the go/no-go to the operator. The **real operator click/confirmation is the attestation**.
+   Rendering follows `gate-model` §Sign-off surface — widget-first from the harness's gate template,
+   `AskUserQuestion` fallback, never free prose.
 3. **Dispatch the `record-gate` runner** (the single mechanical writer,
    `${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`, via bun/node) with the decision. The
    transition is carrier-kind-dependent: a **work-item** advances `idea → discovery`; a **standalone
@@ -220,5 +222,6 @@ The following references are single-sourced into this primitive's bundle and spl
 Read these at the step of need (single-sourced into this primitive's bundle):
 
 - `references/bindings-contract.md` — `bindings-contract`
+- `references/gate-model.md` — `gate-model`
 - `references/work-item-schema.md` — `work-item-schema`
 

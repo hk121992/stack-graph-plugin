@@ -159,7 +159,9 @@ requires a threshold to have been hit.
 2. **Present the sign-off surface:** per deliverable, each open outcome with its reading and a
    disposition — **closed** (temporary; stop monitoring) or **promoted** (persistent; becomes a
    KR candidate). An `unmeasured` outcome can still be closed by operator judgment — *closed*
-   means *stop monitoring*, not *achieved*. The real click is the attestation.
+   means *stop monitoring*, not *achieved*. The real click is the attestation. Render per
+   `gate-model` §Sign-off surface — widget-first from the harness's gate template, `AskUserQuestion`
+   fallback, never free prose.
 3. **On the operator's attestation, dispatch the `record-gate` runner**
    (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) — per affected deliverable: gate
    `closeout`, advancing the terminal landing → **`closed`** (`shipped → closed` single-main |
@@ -206,5 +208,6 @@ shared substrate.
 Read these at the step of need (single-sourced into this primitive's bundle):
 
 - `references/IU-schema.md` — `IU-schema`
+- `references/gate-model.md` — `gate-model`
 - `references/work-item-schema.md` — `work-item-schema`
 

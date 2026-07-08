@@ -95,7 +95,8 @@ hold the **`live-confirmed`** gate — **the gate experience runs in your sessio
 sign-off surface showing **what was deployed** (the promotion set + `merge_sha` + `deploy_url`),
 **what signals were checked** (deploy's smoke + canary's verdict, or its honest DORMANT), and the
 question the operator alone answers: is it **actually live and clean on prod**? The real click is
-the attestation.
+the attestation. Render per `gate-model` §Sign-off surface — widget-first from the harness's gate
+template, `AskUserQuestion` fallback, never free prose.
 
 Pass-when (the operator attests):
 
@@ -152,5 +153,6 @@ silently continue, never auto-revert.
 Read these at the step of need (single-sourced into this primitive's bundle):
 
 - `references/IU-schema.md` — `IU-schema`
+- `references/gate-model.md` — `gate-model`
 - `references/work-item-schema.md` — `work-item-schema`
 

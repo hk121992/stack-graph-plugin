@@ -32,6 +32,7 @@ value-spaces (lifecycle-state names, gate fields) — those live in the schema r
 - **reference** — shared content as a **single-source native artefact** (not an injected block); owns no control flow, so it is **not a node**. → graph-spec
 - **carrier** — the live work-state file for **one unit of work**. Two kinds share the runtime band: the **build carrier** (an IU) and the **grouping carrier** (a work-item). → IU-schema · work-item-schema
 - **gate** — a recorded go/no-go transition on a carrier at a stage boundary — an **attested decision**, not a node or edge, gathering no context of its own. → graph-spec
+- **sign-off surface** — the rendered, interactive presentation a firing node puts a gate to the operator with — generated from the carrier, widget-first; the operator's real click on it is the attestation. → gate-model
 - **arc** — a named, possibly-cyclic **traversal** over nodes — the unit of work an operator invokes; derived from process edges (and **not** graph-theory's "arc" = a directed edge). → graph-model
 
 ## The carrier model {#carrier-model}

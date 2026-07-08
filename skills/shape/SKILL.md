@@ -110,7 +110,8 @@ dependent AFK work.
   carrier content + the write-boundary).
 - **Fire `commit-to-build` at exit.** After your last dispatched action (`plan`) returns, your
   session holds the operator turn: present the decomposition + the decision-complete evidence (the
-  gate's sign-off surface, generated from the plan/IUs — sanitised, the real click is the
+  gate's sign-off surface, generated from the plan/IUs — rendered per `gate-model` §Sign-off surface,
+  sanitised, the real click is the
   attestation), and **dispatch the `record-gate` runner**
   (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`, via bun/node) — **once on the WI
   grouping** (advancing `committed`; the N IUs inherit the commitment by reference), or on a
@@ -161,6 +162,7 @@ The following references are single-sourced into this primitive's bundle and spl
 
 Read these at the step of need (single-sourced into this primitive's bundle):
 
+- `references/gate-model.md` — `gate-model`
 - `references/lens-dispatch.md` — `lens-dispatch`
 - `references/product-dashboard-conventions.md` — `product-dashboard-conventions`
 
