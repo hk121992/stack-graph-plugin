@@ -10,7 +10,7 @@ reviews-on: product-principles-guidance-source
 last-reviewed: 2026-06-30
 entropy: unmeasured
 status: drafted
-related: [product-definition-guidance, constitution-guidance]
+related: [product-definition-guidance]
 ---
 
 # Product-principles — authoring guidance
@@ -23,10 +23,10 @@ template.
 **Contains** — a closed, terse set of standing quality standards, each a bar a design is vetted against and a bar
 verify / review won't let through (a durable "we always X / never Y" the product commits to).
 
-**Does not contain** — identity (→ `product-definition`), operating rules (→ `constitution`), stage-specific
-quality logic (lives on the stage node), or vendored cross-product standards (`ux-principles` · `test-discipline`
-· `architecture-doctrine` stay vendored, read at the stage that needs them). A growing standards dump is
-mis-homed.
+**Does not contain** — identity (→ `product-definition`), operating rules (→ `sg-root-instructions` /
+`git-policy`), stage-specific quality logic (lives on the stage node), or vendored cross-product standards
+(`ux-principles` · `test-discipline` · `architecture-doctrine` stay vendored, read at the stage that needs
+them). A growing standards dump is mis-homed.
 
 Each item is a **standing bar, not a to-do** — an on-spec item that violates one is caught here, not waved
 through at land.

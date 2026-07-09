@@ -34,7 +34,11 @@ so and stop rather than fabricate.
 
 ## The two dimensions you grade — UX and AX
 
-Grade **both** on every run; following only the output is half the picture.
+On an **experience run** (`tier-1` / `tier-2`) grade **both** dimensions; following only the
+output is half the picture. The **`regression` mode is the exception** — it grades a
+deterministic **conformance** verdict against a recorded corpus, **persona-optional and with no
+AX profile required** (its cost is the closed-vocabulary assertion, not a traversal profile); it
+runs its own grading, defined in its branch below.
 
 - **UX — the output the product produces.** Does the result the user gets match intent? Grade it
   against the experience contract's **invariants** and named **failure modes** (pass / fail /
@@ -55,8 +59,10 @@ Your spawn prompt carries everything you need — the caller resolved the scope 
 change-set and the depth state live on the caller's side; you have no preamble of your own).
 Parse it first:
 
-1. **Mode selector** — `tier-1` or `tier-2`. Run the matching branch below. Default to
-   `tier-1` if unspecified (the cheaper gap-finder).
+1. **Mode selector** — `tier-1`, `tier-2`, or `regression`. Run the matching branch below.
+   Default to `tier-1` if unspecified (the cheaper gap-finder). `regression` is
+   caller-orchestrated, like `tier-2`: the caller owns the Workflow and passes the
+   `checkpoint-manifest`; this node specifies the protocol.
 2. **The running target** — the DEV build (a dev env, a preview, or a local URL) the caller
    points you at; you drive the product inline.
 3. **Experience contract** — the harness-supplied **UX intent** (session-shape invariants +
@@ -81,9 +87,13 @@ Use read tools to consult the contract and personas; do not mutate any artefact.
 contribution you make outward is a **proposed** route for a surfaced gap (below) — stated in
 your verdict, never written by this run.
 
-## The shared method (both tiers)
+## The shared method (the experience tiers)
 
-Every run, regardless of tier, obeys the same contract:
+Every **experience run** (`tier-1` / `tier-2`) obeys the same contract. The **honesty and
+faithful-evidence disciplines below are universal** — the `regression` mode obeys them too (its
+own analogues are faithful-state and clean-room, in its branch) — but the **UX-grading /
+AX-profiling / hole-splitting / verdict-plus-profile** points are experience-specific: the
+`regression` mode grades a conformance verdict against a recorded corpus instead, per its branch.
 
 - **Honesty rule — do not paper over gaps.** When you play the product/assistant side, be
   honest about what the product's instructions *actually* enable. Do **not** invent plausible
@@ -186,9 +196,53 @@ instructions, and — for the judge — the experience contract with its invaria
 modes, intended tool-path, and AX budgets/baseline). Each role-agent is a leaf: it does no
 further spawning.
 
+### `regression` — deterministic-regression harness (specified here, spawned by the caller)
+
+The cheap, per-change/per-batch **conformance** gate: replay a **harness-supplied recorded
+scenario corpus** through a **Claude Workflow**, assert each replayed turn against a **closed
+vocabulary** plus one example-anchored `judge`, and return per-scenario **PASS / FAIL / XFAIL /
+XPASS** with a **`pass_rate`**. Unlike the experience tiers this is **persona-optional** — it
+grades whether a pinned turn conforms, not how a believable user feels — and it emits **no AX
+profile**. The method is product-agnostic; only the manifest's content differs per consumer.
+
+**You cannot self-spawn the Workflow.** As with `tier-2`, an agent cannot reliably run the
+nested driver loop + subagents itself, so this node **specifies the protocol** and the **caller
+owns the Workflow** — the invoking orchestrator (`verify`, or the operator) launches the
+Workflow from an interactive/cloud surface (so its subagents escape the metered pool) and
+passes the `checkpoint-manifest`. "Running simulate-users in `regression`" means *the
+orchestrator runs the process specified below*.
+
+Run the **identical product-agnostic process** the `checkpoint-driver` reference fixes, against
+the **config** the harness fills on its `checkpoint-manifest` (the vendored
+`checkpoint-manifest-schema` fixes that shape). The protocol the caller orchestrates, by
+pointer — do not restate it here:
+
+- **The process** — the Workflow driver pattern (`meta` + the three phases
+  preconditions → driver-loop → aggregate, `pipeline()`, the `pyStep()` glue seam, the
+  `stream-json` per-turn subagent, the schema'd `judge` subagent), the **5-member core assertion
+  vocabulary** (`skill_invoked`, `state_file_written`, `reply_excludes_secret`, `judge`, `not`)
+  plus the manifest-registered domain operators, and the **safety invariants at full fidelity**
+  (INPUT-GATED preconditions → `BLOCKED` never a silent skip / never a FAIL; burn-in leak-rate
+  surfaced per scenario; the judge sees anchors only *after* the clean turn; faithful-state;
+  clean-room — a bare-host run is forbidden; scrub-before-anchor) → follow your
+  **`checkpoint-driver`** reference (on-demand).
+- **The config** — the harness-supplied `checkpoint-manifest` (external, pointer-only, the
+  harness binds it) whose shape — `scenarios[]`, the state-builder binding, the launch-surface /
+  clean-room config, domain-operator registration, judge anchors, version/SHA pins, live-dep
+  wiring (broker / secret-reference handles only — **no secret literals**), and the
+  `pass_rate_target` — is fixed by your **`checkpoint-manifest-schema`** reference (on-demand).
+
+The verdict, the per-FAIL `findings-schema` records, the committed run-log, and the node-exit
+`simulate-users.pass_rate` are the `## Output` contract below. A **`BLOCKED` or absent
+`pass_rate` never satisfies a target** — the gate is inconclusive, never a silent pass.
+
 ## Output
 
-Return one structured result to the caller's context — a **UX verdict** and an **AX profile**:
+Return one structured result to the caller's context. Its **shape is mode-dependent**: an
+experience run (`tier-1` / `tier-2`) returns a **UX verdict** and an **AX profile**; the
+`regression` mode returns a **conformance verdict** with a **`pass_rate`**.
+
+### Experience modes (`tier-1` / `tier-2`)
 
 1. **UX — graded findings** — every contract invariant and named failure mode as
    **pass / fail / n-a + one-line evidence**. The **experience-contract verdict** — `pass` only
@@ -208,9 +262,32 @@ Return one structured result to the caller's context — a **UX verdict** and an
 5. **Any durable gap routed as a proposal** for the downstream routing — never written by this
    run.
 
-Produce no operator-facing chatter and make no mutation; you write no carrier field and fire no
-gate. Your contribution outward is the UX verdict, the AX profile, and any flagged proposals,
-for the caller and the downstream loop to act on.
+### `regression` mode
+
+1. **Per-scenario conformance verdict** — **PASS / FAIL / XFAIL / XPASS**, each with its
+   **version snapshot** (agent-CLI version · pinned product SHA · materialised-state hash · any
+   upstream-data SHA) and the deciding assertion(s). A **`BLOCKED`** scenario (a precondition
+   miss) is a distinct exit — never a silent PASS and never coerced to a FAIL. Reduce to a run
+   outcome: **Fail** on any assertion FAIL · **Partial** on an XPASS or a per-scenario block ·
+   **Pass** otherwise.
+2. **A `findings-schema` record per FAIL** — each failure emitted in the `findings-schema` shape
+   (severity · the failed assertion as evidence · the scenario as owner-locus) so it consolidates
+   at the caller's panel and routes through verify's fix-loop; the `checkpoint-driver` reference
+   fixes what each record carries.
+3. **The node-exit `simulate-users.pass_rate` measurement** — the share of gating scenarios that
+   PASS, carried with the version snapshot as a comparable trend point (sibling to the experience
+   modes' AX trend point), so the analytics surface projects a regression trend and the caller
+   consumes the gate signal against the manifest's `pass_rate_target`. A **`BLOCKED` or absent
+   `pass_rate` does not satisfy the target** — the gate is inconclusive, never a silent pass.
+4. **The committed run-log line** — the version snapshot + each scenario's verdict + the
+   `pass_rate`, appended to the committed run history (the one artifact that survives across runs;
+   the full result + per-scenario stream dumps land in a gitignored run dir — scrub before lifting
+   any of it into an anchor).
+
+Produce no operator-facing chatter and make no mutation beyond the committed run-log the
+`regression` mode appends; you write no carrier field and fire no gate. Your contribution outward
+is — per mode — the UX verdict + AX profile, or the conformance verdict + `pass_rate` + findings
+records, and any flagged proposals, for the caller and the downstream loop to act on.
 
 ## A consistently-failing persona is a PM signal, routed via `debrief`
 
@@ -226,5 +303,7 @@ substrate — not a typed edge, not a curator write from this node — closes th
 
 Read these at the step of need (single-sourced into this primitive's bundle):
 
+- `../references/simulate-users/checkpoint-driver.md` — `checkpoint-driver`
+- `../references/simulate-users/checkpoint-manifest-schema.md` — `checkpoint-manifest-schema`
 - `../references/simulate-users/experience-contract-schema.md` — `experience-contract-schema`
 

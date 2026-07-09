@@ -9,14 +9,13 @@ reviews-on: sg-root-instructions-source
 last-reviewed: 2026-07-02
 entropy: unmeasured
 status: drafted
-related: [bindings-contract, git-policy-schema, constitution-guidance, product-dashboard-conventions]
+related: [bindings-contract, git-policy-schema, product-dashboard-conventions]
 ---
 
 # Stack-graph root instructions
 
 @product-definition
 @product-principles
-@constitution
 
 ## Operating rules
 

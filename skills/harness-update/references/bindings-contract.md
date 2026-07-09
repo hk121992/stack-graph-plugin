@@ -15,7 +15,7 @@ related: [okr-schema, work-item-schema, local-node-schema, git-policy-schema, sg
 
 # Bindings contract — the harness instantiation seam
 
-**Contract version: v0.12.0** (adds the decisions-store key). The version the harness records in its
+**Contract version: v0.13.0** (adds the decisions-index-path key). The version the harness records in its
 `bindings.yaml` header and `harness-update`'s drift check compares — bump it on any key-set or
 file-format change. (Distinct from this file's `status:`, a lifecycle word.)
 
@@ -48,7 +48,7 @@ property**, not a per-key path (the path is the harness's instance value):
 
 | category | keys (by role) |
 |---|---|
-| **Work-ledger surfaces** | the dashboard surface root · the work-items dir + its manifest · the sprint-records dir · the working-sessions dir · the decisions store (the D-numbered conclusion layer `log-decision` writes and the generated decisions-index projects; per [decisions-schema](decisions-schema.md)) |
+| **Work-ledger surfaces** | the dashboard surface root · the work-items dir + its manifest · the sprint-records dir · the working-sessions dir · the decisions store (the D-numbered conclusion layer `log-decision` writes; per [decisions-schema](decisions-schema.md)) · the decisions-index projection path (the on-demand nav lookup both `harness-init` generates and `log-decision` re-derives — one key, two writers; distinct from the store) |
 | **Improvements surface** | the standalone-IU surface (a **sibling** of the work-ledger, off it) + its manifest |
 | **Outcome / strategy** | the objectives surface (per [okr-schema](okr-schema.md)) · the strategy thesis · the outcome-anchor resolution rule |
 | **Runtime** | the analyzer's derived event-log path (under the gitignored runtime-state root) |

@@ -78,8 +78,8 @@ proceed (do not invent the prior entry).
 ### 2b. Re-derive the decisions-index
 
 After every store write (an append or a supersede back-annotation), **re-derive the harness's
-`decisions-index`** — the on-demand lookup at the local-reference home
-(`<org-root>/.claude/on-demand/decisions-index/README.md`): regenerate its table as the same pure
+`decisions-index`** — the on-demand lookup at the path the **`decisions-index-path`** binding
+resolves (the same file `harness-init` step 4d generates — one bound path, two writers): regenerate its table as the same pure
 function of the store `harness-init` used (one row per settled entry — id + a terse gist + its
 locator), leaving the file's frontmatter intact. The store's sole writer refreshing the store's
 one projection is what keeps the index drift-free by construction. If the index is absent (a

@@ -25,11 +25,14 @@ verdicts; you never re-litigate a static finding already routed at review.
 
 Run once `dispatch` has handed over the assembled batch — the DEV state (prod-facing) or the open
 per-IU PRs against `main` (single-main) — with the batch report and the integration dry-run
-evidence. The crystallised **verify-procedure** is your on/off signal: it carries the product's dev
-surfaces, QA flows, suites, personas, and the surface→modality map. A product with no
-verify-procedure runs `build → review → land` and skips this stage entirely; presence turns it on.
-The signal is independent of the prod-facing regime — verify proceeds in both, over the dev env
-(prod-facing) or preview/local (single-main).
+evidence. **Verify is always-on**: every batch runs at least the **mandatory integration-testing
+floor** — the assembled-tree acceptance / integration-coherence pass that answers *does the assembled
+WI work as a whole?* — before `◇commit-to-land`, even a single-IU batch. So verify always reaches its
+exit and **always fires the gate**; there is no verify-off path and the terminal landing gate can
+never be orphaned. The crystallised **verify-procedure** is **enrichment, not the on/off switch**: it
+carries the product's dev surfaces, QA flows, suites, personas, and the surface→modality map, and its
+**presence declares which dynamic modalities to add ABOVE the floor** (absence = floor-only, never a
+skip). Verify proceeds in both regimes, over the dev env (prod-facing) or preview/local (single-main).
 
 At turn 1, load your live state through the parameterized preamble: the **batch change-set** (the
 IUs on DEV), the **touched DEV surfaces**, and dev-env health — strictly runtime-state. The
@@ -60,7 +63,7 @@ guidance, not a script:
 
 - a UI tweak → `design-review` only; a new flow → `qa` + `simulate-users`; a perf-relevant change
   (load path, bundle, query shape) → add `benchmark`; a no-surface batch (pure refactor, docs,
-  config) → skip the dynamic panel — review's tests cover it.
+  config) → skip the dynamic panel — review's tests cover it; the integration-testing floor still runs.
 - when in doubt on a borderline surface, run the modality and say so in the coverage note; the
   judgment sharpens over time via the trace.
 
@@ -74,10 +77,14 @@ mechanically. Collect each modality's **compact** finding return — not its ful
   and the tier your depth call set.
 - **`design-review`** — visual: hierarchy, spacing, type, contrast, interaction latency, on the
   user-facing surfaces the batch touched.
-- **`simulate-users`** — experience: a persona through the running product against the
-  experience-contract, returning a UX verdict + AX profile. Pass its spawn bundle (target, mode,
-  persona, scenario, contract); select personas and spread runs across the `personas` coverage
-  matrix; for its `tier-2` multi-role protocol, you own the role spawns (it cannot self-spawn).
+- **`simulate-users`** — experience or regression: for an **experience** run (`tier-1` / `tier-2`)
+  a persona through the running product against the experience-contract, returning a UX verdict + AX
+  profile — pass its spawn bundle (target, mode, persona, scenario, contract), select personas and
+  spread runs across the `personas` coverage matrix, and for its `tier-2` multi-role protocol you own
+  the role spawns (it cannot self-spawn). For a **regression** run against a recorded corpus, pass its
+  spawn bundle (**target · mode · manifest** — the harness-supplied `checkpoint-manifest`); the caller
+  owns the Workflow, so you launch it from an interactive/cloud surface (it cannot self-spawn), and it
+  returns a PASS/FAIL/XFAIL/XPASS conformance verdict with the node-exit `simulate-users.pass_rate`.
 - **`benchmark`** — perf, **on-demand**: invoke only for a perf-relevant change; it compares the
   page against its stored baseline and returns a regression verdict that folds into the same
   finding set.
@@ -97,9 +104,11 @@ Dispatch `lens-maintainability` **one altitude up** — its target the integrati
 tree, not one IU's diff — grounded in the `architecture-doctrine` reference (depth, seams, the
 deletion test). Findings emit to the same contract and carry the **integration** class.
 
-The pass is **conditional**: a single-IU promotion skips it, and under `dispatch`'s sequential
-default the batch composes largely by construction, so it runs as a final net — depth-adjust it
-like any modality.
+The **cross-IU** pass is **conditional**: a single-IU promotion skips it, and under `dispatch`'s
+sequential default the batch composes largely by construction, so it runs as a final net —
+depth-adjust it like any modality. The always-on integration-testing floor still runs even then:
+what a single-IU promotion skips is the cross-IU coherence read *above* the floor, never verify
+itself.
 
 ## Phase 4 — Consolidate and present
 
@@ -130,7 +139,11 @@ routes it:
 - **defect** → **reopen** the IU: re-dispatch a fresh `build → review` correction via `dispatch`,
   scoped to the finding, re-merged to DEV, re-verified.
 - **below-bar** — a *scored* modality under its declared target — → reopen "raise to target";
-  the resolution test is score ≥ target.
+  the resolution test is score ≥ target. The `regression` mode's `simulate-users.pass_rate` scores
+  here against the manifest's `pass_rate_target`: a real rate below target reopens "raise to target"
+  (no new class). **Fail-safe: an absent or `BLOCKED`-origin `pass_rate` does not resolve score ≥
+  target** — it is inconclusive, routes to a blocked/coverage-failure outcome (the gate is *not*
+  satisfied), never a silent pass across the dispatch boundary.
 - **integration** → a **corrective slice** over the seam the coherence pass found.
 - **spec/design-wrong** (or bound-exceeded) → **escalate to `shape`** — the built change surfaced
   a wrong spec or design; the fix is a front decision, never a build patch.

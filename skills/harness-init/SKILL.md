@@ -1,6 +1,6 @@
 ---
 name: "harness-init"
-description: "Stands up a harness in a consuming workspace — writes bindings.yaml, materializes the always-on band into .claude/ (the consolidated sg-root-instructions floor, the crystallised @git-policy surface, the generated at-hand-references-index, the three identity surfaces seeded from their guidance refs), crystallises the nav layer at the local-reference home (the generated decisions-index + the seeded strategy-page skeleton), scaffolds the dashboard surface skeleton plus the seeded substrate (objectives / strategy / experience-contract / personas and a thin zone-principle brief per horizontal), writes the analytics env (the SG_* vars), emits the scheduled analyzer-task install runbook, and validates every required binding resolves plus the analyzer dry-run probe. Modes — scaffold (greenfield bootstrap), bind (re-author bindings only), validate (the harness gate before the loop runs). Structure only — content is authored separately. Use when a consuming workspace needs to stand up its harness for the first time (greenfield), re-point its bindings after a path change, or verify the harness is complete before the workflow runs. NOT for authoring work-item content (the front's raise, per product-dashboard-conventions), strategy or objectives values (strategy-curator), or local doctrine (context-curator) — harness-init creates the empty, bound, seeded structure those then fill."
+description: "Stands up a harness in a consuming workspace — writes bindings.yaml, materializes the always-on band into .claude/ (the consolidated sg-root-instructions floor, the crystallised @git-policy surface, the generated at-hand-references-index, the two identity surfaces seeded from their guidance refs), crystallises the nav layer at the local-reference home (the generated decisions-index + the seeded strategy-page skeleton), scaffolds the dashboard surface skeleton plus the seeded substrate (objectives / strategy / experience-contract / personas and a thin zone-principle brief per horizontal), writes the analytics env (the SG_* vars), emits the scheduled analyzer-task install runbook, and validates every required binding resolves plus the analyzer dry-run probe. Modes — scaffold (greenfield bootstrap), bind (re-author bindings only), validate (the harness gate before the loop runs). Structure only — content is authored separately. Use when a consuming workspace needs to stand up its harness for the first time (greenfield), re-point its bindings after a path change, or verify the harness is complete before the workflow runs. NOT for authoring work-item content (the front's raise, per product-dashboard-conventions), strategy or objectives values (strategy-curator), or local doctrine (context-curator) — harness-init creates the empty, bound, seeded structure those then fill."
 ---
 
 
@@ -49,9 +49,8 @@ objectives via `strategy-curator`; the identity surfaces via the operator + cura
   added through `raise`, under its PR gating.
 - **You do NOT author strategy or objectives content** beyond the empty template — `strategy-curator`
   owns and authors both surfaces. You leave a valid, empty shell.
-- **You do NOT fill the identity surfaces** — you seed `product-definition` / `product-principles` /
-  `constitution` from their vendored `*-guidance` refs; the operator and curators fill and maintain
-  them.
+- **You do NOT fill the identity surfaces** — you seed `product-definition` / `product-principles`
+  from their vendored `*-guidance` refs; the operator and curators fill and maintain them.
 - **You never mutate the vendored graph.** Everything you write is **harness-local** (the overlay).
 
 ## Preflight (before any mode)
@@ -59,6 +58,21 @@ objectives via `strategy-curator`; the identity surfaces via the operator + cura
 Load `bindings-contract` for the key set + the surface template. Identify the **org root** — the
 directory Claude launches from, the one carrying `.claude/` (per the harness directory topology;
 bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it unambiguously, ask.
+
+### Band layout — the `.claude/` cadence tiers (declared once; the steps below resolve from here)
+
+The `.claude/` overlay is organised **by cadence** (cadence = home). This is the **single in-node
+declaration** of the band paths (the `harness-topology` reference owns the model; here are the
+concrete homes a step writes to) — the materialization and validate steps **resolve these labels**,
+they do not restate the literals:
+
+- **`<always-on-home>`** = `<org-root>/.claude/always-on/` — the floor `@`-inlined every session:
+  the vended `sg-root-instructions`, the crystallised `@git-policy` surface, the two identity
+  surfaces, and the generated `at-hand-references-index`.
+- **`<nav-home>`** = `<org-root>/.claude/on-demand/` — the local on-demand references, with the
+  crystallised **nav layer** as siblings: the `decisions-index` (its path from the
+  **`decisions-index-path`** binding — a multi-writer path, so bound not restated) and
+  `<nav-home>/strategy-page/README.md` (authored doctrine lives under `<nav-home>/specs/`).
 
 ## Modes
 
@@ -95,7 +109,7 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    update added a key), **add the missing required keys** — infer + confirm each — before
    `validate`; never leave a stale key set that `validate` will then reject. This is how an existing
    harness adopts a plugin that introduced a new required binding (the plugin-update migration path).
-3b. **Materialize the crystallised `@git-policy` surface** into `<org-root>/.claude/always-on/` — the
+3b. **Materialize the crystallised `@git-policy` surface** into `<always-on-home>` (§Band layout) — the
    per-repo/path write-policy map every git-writing agent reads off the floor. Author it **from the
    harness's git topology** (walk the repos the org root carries; propose an entry per repo, with
    path predicates where a repo's sub-tree wants a different mode) to the shape in
@@ -112,9 +126,9 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    fixed-path copies under `.claude/`, `@`-ref'd from `CLAUDE.md`** — never prose inlined into it.
    The band: the consolidated **`sg-root-instructions`** floor (the root set, the `<sg-*>` process
    family inline, §Reference index → `@at-hand-references-index`, §Git-write → `@git-policy`) plus
-   the three crystallised identity surfaces (`@product-definition` · `@product-principles` ·
-   `@constitution`, Step 4b). **Vend the floor:** copy your bundled `sg-root-instructions` reference
-   to the harness-local `<org-root>/.claude/always-on/sg-root-instructions.md` and have the `CLAUDE.md`
+   the two crystallised identity surfaces (`@product-definition` · `@product-principles`,
+   Step 4b). **Vend the floor:** copy your bundled `sg-root-instructions` reference
+   to `<always-on-home>sg-root-instructions.md` (§Band layout) and have the `CLAUDE.md`
    template carry `@.claude/always-on/sg-root-instructions.md`, so the floor is reliably **inlined every
    session** — a static `@`-ref, not a pointer the agent must choose to follow, and not a dynamic
    plugin path a `CLAUDE.md` cannot resolve. The floor stays **terse by discipline** — do not inline
@@ -137,31 +151,31 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    its right home per `context-principles` (an identity surface, a local reference, a binding) —
    **never silently drop it**. This re-vend is otherwise **non-interactive** — it does not re-run
    the Step 2 binding confirmation.
-4b. **Seed the three crystallised identity surfaces** into `<org-root>/.claude/always-on/` —
+4b. **Seed the two crystallised identity surfaces** into `<always-on-home>` (§Band layout) —
    `product-definition` (what the product is: why · who · value), `product-principles` (the bar:
-   the standing quality non-negotiables), `constitution` (how work runs here: autonomy posture ·
-   non-skippable invariants · operating constraints) — each seeded from its vendored guidance ref
-   (`product-definition-guidance` / `product-principles-guidance` / `constitution-guidance`: read
-   the guidance, write a skeleton that names what belongs and what is mis-homed) and `@`-ref'd from
-   `CLAUDE.md` as part of the always-on band. The operator and curators fill and maintain them; you
-   leave valid seeded shells. **Idempotent** — seed only what is absent.
-4c. **Generate the `at-hand-references-index`** into `<org-root>/.claude/always-on/` — the always-on ref map,
+   the standing quality non-negotiables) — each seeded from its vendored guidance ref
+   (`product-definition-guidance` / `product-principles-guidance`: read the guidance, write a
+   skeleton that names what belongs and what is mis-homed) and `@`-ref'd from `CLAUDE.md` as part
+   of the always-on band. The operator and curators fill and maintain them; you leave valid seeded
+   shells. **Idempotent** — seed only what is absent.
+4c. **Generate the `at-hand-references-index`** into `<always-on-home>` (§Band layout) — the always-on ref map,
    assembled as a **pure function of the on-demand reference set**: one entry per ref (its
    `subject` + terse `read-when`), **vendored and local alike** — only the harness can assemble the
    full set, because only it knows its local refs. `@`-ref'd from `sg-root-instructions`
    §Reference index. Never hand-author entries; regenerate on change (`harness-update` regenerates
    it on every plugin bump). The index is floor cost — keep each entry to the ref's `read-when`
    hint, nothing more.
-4d. **Generate the `decisions-index`** into the local-reference home
-   (`<org-root>/.claude/on-demand/decisions-index/README.md`) — the on-demand lookup over the **bound
+4d. **Generate the `decisions-index`** into the path the **`decisions-index-path`** binding
+   resolves (a nav-layer sibling under `<nav-home>`; multi-writer, so bound not restated — `log-decision`
+   re-derives the same file) — the on-demand lookup over the **bound
    decisions store**, assembled as a **pure function of the store**: one row per settled entry
    (its id + a terse gist + its locator in the store); pointers, never conclusions. Frontmatter
    carries `read-when` (so the at-hand index lists it) and `reviews-on: decisions-store`. Never
    hand-list entries; `log-decision` re-derives the index after every store write, so it stays
    fresh between updates. An empty store yields an empty-but-valid index — generate it anyway;
    the slot must exist.
-4e. **Seed the `strategy-page` skeleton** into the local-reference home
-   (`<org-root>/.claude/on-demand/strategy-page/README.md`) — the **stable** strategy + top-level
+4e. **Seed the `strategy-page` skeleton** into the nav home
+   (`<nav-home>/strategy-page/README.md`, §Band layout) — the **stable** strategy + top-level
    objectives reference (stable → reference; the runtime KRs stay on `objectives.md`). Seed the
    frontmatter (incl. `read-when`, so the at-hand index lists it) + empty section headings for the
    kernel synthesis and the top-level objectives; **`strategy-curator` authors and owns the
@@ -237,7 +251,7 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    either resolve or are explicitly marked not-yet. Report each missing/dangling key by name.
 3. **The org-root `CLAUDE.md` is present, wired, and vended-shaped** — it exists at the org root,
    reaches the bindings reference, carries the **always-on band `@`-refs**: the vended floor
-   (`@.claude/always-on/sg-root-instructions.md`, that file present + non-empty), the three identity surfaces,
+   (`@.claude/always-on/sg-root-instructions.md`, that file present + non-empty), the two identity surfaces,
    and — via the floor — the generated `at-hand-references-index` and the `@git-policy` surface,
    each resolving to a present, non-empty file; and **matches the vended template shape** (an
    SG-managed surface — inline non-template content is drift, flagged for re-vend + migration; the
@@ -248,7 +262,7 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
    `objectives-doc`, `strategy-doc`, `sprints-root`, `improvements-root` + a parseable
    `improvements-manifest`, `learnings-archive` (the committed archive file), the
    experience-contract and personas shells, and — when `axis-root` is bound — a zone-principle
-   brief per horizontal. The **crystallised nav layer** is present at the local-reference home:
+   brief per horizontal. The **crystallised nav layer** is present at the nav home (§Band layout):
    the `strategy-page` skeleton (scaffold 4e) and the generated `decisions-index` (scaffold 4d),
    each with `read-when` frontmatter. The `event-log` location is reachable (the
    `.stack-graph/derived/` parent exists or can be created).
@@ -290,7 +304,7 @@ bindings live at `<org-root>/.claude/bindings.yaml`). If you cannot locate it un
   empty or seeded templates.
 - **Harness-local writes only.** You write `bindings.yaml`, the org-root `CLAUDE.md`, the
   materialized always-on band under `<org-root>/.claude/` (the vended `sg-root-instructions`, the
-  `@git-policy` surface, the generated `at-hand-references-index`, the three identity surfaces), the
+  `@git-policy` surface, the generated `at-hand-references-index`, the two identity surfaces), the
   surface skeleton under `surface-root`, the zone briefs under `axis-root`, and the org-root
   `.claude/settings.json` **env block** (the analytics env) — nothing else, and **never** the
   vendored graph, and **never** a crontab / system scheduler (you *emit* the analyzer-task runbook
@@ -318,7 +332,6 @@ The following references are single-sourced into this primitive's bundle and spl
 Read these at the step of need (single-sourced into this primitive's bundle):
 
 - `references/axis-entry-schema.md` — `axis-entry-schema`
-- `references/constitution-guidance.md` — `constitution-guidance`
 - `references/experience-contract-schema.md` — `experience-contract-schema`
 - `references/git-policy-schema.md` — `git-policy-schema`
 - `references/handoff-prompt-convention.md` — `handoff-prompt-convention`

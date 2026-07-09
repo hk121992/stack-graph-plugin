@@ -112,7 +112,7 @@ The `generate:check` freshness gate proves the seam round-trips byte-identically
 You operate **beneath** the always-on band the calling agent already carries: the consolidated floor
 `sg-root-instructions` (the root set, the `<sg-*>` process family inline, §Reference index →
 `@at-hand-references-index`, §Git-write → `@git-policy`) plus the crystallised identity surfaces
-(`@product-definition` · `@product-principles` · `@constitution`), `@`-ref'd into the scaffolded
+(`@product-definition` · `@product-principles`), `@`-ref'd into the scaffolded
 `CLAUDE.md` by `harness-init`. You supplement that floor with **live work-state**; you do not
 re-inline doctrine, and per-session runtime state is loaded just-in-time by you — never embedded as a
 session-start procedure in `CLAUDE.md`.
