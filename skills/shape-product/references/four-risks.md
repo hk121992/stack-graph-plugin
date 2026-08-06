@@ -1,0 +1,80 @@
+---
+subject: four-risks
+title: The four product risks — discovery lens
+provenance: vendored
+level: L2
+cadence: on-demand
+read-when: "Assessing an idea's product risk (value/usability/feasibility/viability)."
+derive-from: [four-risks]
+reviews-on: four-risks-source
+last-reviewed: 2026-07-01
+entropy: unmeasured
+status: drafted
+related: [okr-schema, ux-principles, architecture-doctrine]
+---
+
+# The four product risks
+
+Before an idea is worth building, it must clear four risks. Use this as a discovery lens: for the
+idea in hand, ask each question, name the current evidence and its strength, and flag the weakest.
+An idea is **not** discovery-complete while any risk is unaddressed at the rigour the product's
+maturity stage demands.
+
+| Risk | The question | Owned by | Typical evidence |
+|---|---|---|---|
+| **Value** | Will customers choose, use, or pay for it? Does it relieve a real pain or create a real gain? | discovery / strategy | value-proposition fit, demand signal, simulated or real user reaction |
+| **Usability** | Can users figure out how to use it? | design | prototypes, usability or simulation runs |
+| **Feasibility** | Can we build it with the time, skills, and technology we have? | engineering | a feasibility spike during design/spec |
+| **Viability** | Does it work for the *business* — model, economics, legal, brand, channels? | discovery / strategy | a coherent business model, viability assumptions tested |
+
+Apply it honestly:
+
+- **Value and usability together are "desirability"** — value is *do they want the outcome*,
+  usability is *can they get it from this solution*. Keep them distinct; an idea can pass one and
+  fail the other.
+- **Address the riskiest first.** Spend discovery effort where the evidence is weakest, not where it
+  is easiest. Confidence on three risks and a blind spot on the fourth is not a green light.
+- **Two axes govern each risk — keep them distinct** (conflating them is the classic drift):
+  - **Evidence strength — what *kind* of evidence is this?** Grade every piece by kind, *independent
+    of maturity*:
+    - **weak** — opinions, hypotheticals, "people would love this," a synthetic/simulated run;
+    - **moderate** — *stated* intentions or preferences (a *said*-yes: survey, interview, letter of intent);
+    - **strong** — *observed* behaviour (a *did*-yes: usage, retention, payment, a real conversion).
+    A said-yes is not a did-yes. Weak evidence can *support* a hypothesis but never *clears* a risk on its own.
+  - **Maturity bar — how strong must it be *here*?** The rung a risk must reach to clear, set by the
+    product's maturity stage: pre-launch/founder-led accepts weak→moderate to keep moving; first-users
+    demands moderate→strong; scale demands strong (measured data). The four questions never change —
+    only the bar does.
+- **Output, per risk:** the current evidence, **its strength rung** (weak/moderate/strong), the
+  **maturity bar** it must meet, and whether the risk is *cleared*, *open*, or a *stop*. Record both
+  axes — a low maturity bar must never silently upgrade weak evidence into a cleared risk ("how strong
+  must it be?" is not "how strong is it?"). An open value or viability risk routes back to discovery;
+  an open usability or feasibility risk routes into design.
+
+## The two-axis rule in the dashboard rollup
+
+The dashboard bets rollup (Direction overview + Vision & strategy page) honours the same two-axis
+discipline:
+
+- **Lifecycle state axis** — `assumed | tested | confirmed | killed | superseded` (the
+  hypothesis-lifecycle the canvas carries). This is the *evidence state* of the bet.
+- **Evidence-strength rung** — `weak | moderate | strong` (synthetic / said-yes / did-yes, above).
+  **Separate axis. Never conflated.** A bet that is `confirmed` on `weak` evidence must never render
+  the same as one confirmed on `strong` (observed behaviour) — surfacing both together is what prevents
+  the silent upgrade.
+
+**These are the two axes the rollup must honour** (the lifecycle state axis is not a proxy for
+strength, and the strength rung is not a lifecycle stage).
+
+### `canvas.json` contract fields
+
+`canvas.json` carries two fields per entry so the dashboard rollup can honour both axes:
+
+| field | type | meaning |
+|---|---|---|
+| `strength` | `"weak" \| "moderate" \| "strong"` (optional) | the evidence-strength rung above; absent ⇒ rollup degrades to state-axis only, no strength split |
+| `importance_rank` | `"critical" \| "high" \| "medium" \| "low"` (optional) | a generic importance/criticality rank for riskiest-first ordering; absent ⇒ rollup shows open bets by state and does not assert a riskiness order it cannot compute |
+
+When both are absent the bets rollup degrades gracefully — state-axis only, no ranking. When present,
+the rollup shows the full two-axis stacked evidence bar and can apply riskiest-first ordering
+(important-and-unevidenced first, per Strategyzer).
