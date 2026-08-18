@@ -10,7 +10,7 @@ reviews-on: gate-model-source
 last-reviewed: unset
 entropy: unmeasured
 status: drafted
-related: [IU-schema, work-item-schema, decisions-schema, routing-principles]
+related: [IU-schema, work-item-schema, decisions-schema, routing-principles, operator-interview]
 ---
 
 # Gate model — the gated runtime state

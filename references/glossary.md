@@ -57,3 +57,9 @@ The three orthogonal axes every node and reference carries — kept separate by 
 - **crystallised** — local content **instantiated in the harness** from a (vendored) schema or template and filled with product values — e.g. `bindings.yaml` from `bindings-contract`, the dashboard from its conventions; the counterpart to **vendored** (shipped verbatim). → harness-topology
 - **factory** — where the vendored graph is authored; `generate` projects it into the plugin. → generation-model
 - **generate** — the deterministic function that **places** the authored graph into shipped artifacts (the vendored graph into the plugin, the floor cores into `.claude/`); it places, **never authors**. → generation-model
+
+## The operator interview {#operator-interview}
+
+- **design tree** — a subject modelled as decisions: every decision branches into the decisions that hang off it. → operator-interview
+- **frontier** — every decision whose prerequisites are already settled — the only questions honestly askable now. → operator-interview
+- **round** — one numbered question set putting the whole current frontier to the operator, answered by number. → operator-interview
