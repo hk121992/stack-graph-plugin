@@ -49,10 +49,12 @@ Run this spine once per input. Each routing call emits a trace (decision + signa
 
 2. **Intent alignment — the premise floor.** The premise is signed **once**, at `intent-to-build`.
    On a **full-intent-at-raise** continuation it arrived signed (triage's block) — do not
-   re-litigate it. On an **idea-shaped** continuation *you* finalise it: shape the statement /
-   in-scope / out-of-scope + objective ladder with the operator in-session, then **fire
-   `intent-to-build`** (`idea → discovery`, by dispatching the `record-gate` runner — you are the
-   gate's other fire-site) before the spine work proceeds. Thereafter the **alignment re-check fires on a
+   re-litigate it. On an idea-shaped continuation *you* finalise it by interview: run the
+   premise rounds per `operator-interview` — the statement / in-scope / out-of-scope + objective
+   ladder as the tree. The interview's end-confirmation IS the `intent-to-build` gate — rendered
+   per `gate-model` §Sign-off surface, the real click the attestation; no separate chat
+   confirmation precedes it. Fire it (`idea → discovery`, by dispatching the `record-gate`
+   runner) before the spine work proceeds. Thereafter the **alignment re-check fires on a
    material pivot, not at every depth**: when the worked solution moves materially from the signed
    premise, re-confirm it still serves that premise — the deep tier applies the full
    intent-alignment rigor contract (the four-class rigor-gap taxonomy, the integration check, the
@@ -172,6 +174,7 @@ The following references are single-sourced into this primitive's bundle and spl
 
 @references/confidence-anchors.md
 @references/findings-schema.md
+@references/operator-interview.md
 @references/routing-principles.md
 
 ## On-demand references

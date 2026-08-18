@@ -120,7 +120,7 @@ Repository layout:
 
 ## Node catalogue
 
-Rendered from the build's generate manifest at plugin version **0.16.13** (46 nodes, 81 placed
+Rendered from the build's generate manifest at plugin version **0.16.14** (46 nodes, 82 placed
 files). The catalogue is re-rendered when the tree is regenerated; if it ever lags a newer tree,
 the shipped files win.
 
