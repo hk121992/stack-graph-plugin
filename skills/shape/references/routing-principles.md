@@ -10,7 +10,7 @@ reviews-on: routing-principles-source
 last-reviewed: 2026-07-01
 entropy: unmeasured
 status: drafted
-related: [IU-schema, gate-model, handoff-prompt-convention]
+related: [IU-schema, gate-model, handoff-prompt-convention, operator-interview]
 ---
 
 # Routing principles
@@ -35,10 +35,15 @@ node**, not per-session free judgment.
   trade-offs) → **the operator (HITL)**, never auto-decided. The early, plain-English, outcome-first
   leg.
 - **Engineering / not-product-judgment** (technical decomposition, approach, the plan, the IUs) →
-  **automated + operator sign-off**. Sub-classify each:
+  **automated + operator sign-off** (front-shaping-leg taste: elicited upfront, below).
+  Sub-classify each:
   - **Mechanical** (one right engineering answer) → auto-decide, traced, not surfaced.
-  - **Taste** (engineers could reasonably differ) → auto-decide **with a recommendation**, surfaced
-    at the gate.
+  - **Taste** (engineers could reasonably differ) → auto-analyse; **in the front's shaping leg** (a
+    shape-coordinated session — design fork resolution, premise finalisation) put the residual
+    decision to the operator with the recommendation attached and await it
+    (elicit-with-recommendation; the interview mechanic is `operator-interview`); **at the raise
+    capture and in the AFK leg**, auto-decide with a recommendation, surfaced at the gate. The
+    recommendation is the same would-have-been auto-decision in every leg.
   - **Challenge** (the model thinks the operator's direction should change) → **never auto-decided**;
     surfaced with rich context (what you said / the recommendation / why / what we might miss / the
     cost if wrong); **the operator's direction is the default** — the model makes the case. Add urgent
@@ -97,6 +102,7 @@ Scoped to the engineering side only (mechanical / taste; never the product side)
 stay-in-blast-radius** (bounded by low-maintenance — no new infra, minimal surface) **·
 reuse-over-rebuild** (DRY) **· explicit-over-clever · bias-to-action** (flag, don't block).
 
-**The discipline — auto-decide replaces judgment, not analysis.** The full analysis still runs at
+**The discipline — auto-decide replaces judgment, not analysis — where taste is not
+shaping-leg-elicited (the raise capture and the AFK leg, §1).** The full analysis still runs at
 depth; only *who answers* a residual mechanical/taste decision changes. Premises — what problem to
 solve — are never auto-decided.
