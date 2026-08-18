@@ -74,13 +74,18 @@ when neither a token nor a clear carrier signal points elsewhere.
    selector (`repo` / `learnings` / `framework-docs` / `web` / `best-practices`), the target
    question, and a scope summary. Consume its distilled digest; do not re-explore ground
    the front already covered — context is gathered once.
-3. Resolve each design question **by intended outcome** — reason from what the item is meant to
+3. Interview the load-bearing forks per `operator-interview`: put the frontier to the operator
+   as numbered rounds before resolving anything; log each round under a `Round N` heading in the
+   session record. The interview's mechanics are the reference's — cite, do not restate.
+4. Resolve the **answered tree** by intended outcome — reason from what the item is meant to
    achieve to the design decision, not from implementation convenience. Fold the
    **solution-fit check** into every load-bearing resolution: does the emerging solution serve
    the confirmed problem, the value proposition and target user in the strategy frame, and the
    objective the item claims (`outcome_link`)? A solution that resolves cleanly but serves none
-   of them is a strategy finding, not a design preference — surface it. Surface assumptions and
-   take them to the operator where the question is novel or contested.
+   of them is a strategy finding, not a design preference — surface it. An assumption or new
+   branch that surfaces during resolution re-opens the interview for that branch
+   (`operator-interview`) — put to the operator or explicitly deferred at the interview's ask
+   scope, auto-resolved with a trace below it, never resolved silently.
 
 **Exit discipline — resolve every branch of the decision tree.** Your exit bar: every load-bearing
 question, and every branch a resolution opens, is either resolved by outcome or explicitly
@@ -89,16 +94,16 @@ the front's fork-detection (assume a fork is present until affirmatively shown a
 what the cold-handoff bar downstream depends on: a fork design should have closed must never
 reach build.
 
-### Confirm-framing gate (hard) — affirm or redirect before the lens dispatch
+### Confirm-framing gate (hard) — the interview's end-confirmation
 
-Surface the **load-bearing design questions and the framing/scope** to the operator as one
-affirm-or-redirect summary, and **block on it** via the platform's blocking-question tool. The lens
-fan-out does not run until the operator affirms or redirects. This is a hard gate, not an
-invitation: the lens pass is the expensive step, so the operator confirms the frame *before* it
-fires — a design question or a scope boundary the operator doubts is caught here, not after the
-fan-out. On redirect, re-frame and re-surface; only an affirm advances to Phase 2. `lightweight` is
-one-pass by design and is exempt — it resolves inline without the hard gate. (This mirrors `plan`'s
-Confirm-framing gate so the two front nodes stay consistent.)
+The gate is the interview's **end-confirmation**. It fires when the frontier is empty and
+explorations have returned; the surface is the **resolved-tree summary** — the operator's answers,
+the traced auto-resolutions, and any deferrals — plus the **framing/scope**. **Block on it** via
+the platform's blocking-question tool: this is a hard gate, not an invitation, and the lens
+fan-out does not run until the operator affirms. On redirect, re-frame and **re-interview the
+affected branches**; only an affirm advances to Phase 2. `lightweight` is exempt (one-pass by
+design). `plan` retains its pre-lens affirm-or-redirect form; design's gate is the interview's
+end-confirmation.
 
 ## Phase 2 — Vet the design with the lens panel
 
@@ -188,14 +193,16 @@ hard framing-confirm gate** (the inline pass is the confirmation).
 
 ### standard (default)
 
-`explore` for context gaps; resolve the design questions by outcome; **affirm the framing at the
-hard gate**; **dispatch the lens family over the doc strategy-first then parallel**; author the
-design doc + the Spec touchpoints table. The default front pass.
+`explore` for context gaps; **interview the load-bearing forks** (`operator-interview` §Depth);
+resolve the answered tree by outcome; **affirm at the hard gate — the interview's
+end-confirmation**; **dispatch the lens family over the doc strategy-first then parallel**; author
+the design doc + the Spec touchpoints table. The default front pass.
 
 ### deep
 
-A novel or contested item. **Multiple operator rounds**, surfacing and testing assumptions; run the
-dispatch with the harness's **adversarial/conditional lenses on** where bound (per lens-dispatch's trigger table).
+A novel or contested item. **Multiple operator rounds** — the full tree (`operator-interview`
+§Depth) — surfacing and testing assumptions; run the dispatch with the harness's
+**adversarial/conditional lenses on** where bound (per lens-dispatch's trigger table).
 Use when the design carries real uncertainty or blast radius.
 
 ### experience
@@ -235,6 +242,7 @@ The following references are single-sourced into this primitive's bundle and spl
 
 @references/confidence-anchors.md
 @references/findings-schema.md
+@references/operator-interview.md
 @references/severity-scale.md
 @references/ux-principles.md
 
