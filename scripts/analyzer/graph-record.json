@@ -1,0 +1,3490 @@
+{
+  "generated": "2026-08-18T13:46:02Z",
+  "node_count": 46,
+  "reference_count": 36,
+  "edge_count": 240,
+  "nodes": {
+    "architecture-review": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Architecture review",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "explore"
+          },
+          {
+            "id": "log-decision"
+          }
+        ],
+        "references": [
+          {
+            "id": "architecture-doctrine",
+            "load": "on-demand"
+          },
+          {
+            "id": "domain-glossary",
+            "load": "on-demand",
+            "external": true
+          }
+        ],
+        "escalates": [
+          {
+            "id": "triage"
+          }
+        ]
+      }
+    },
+    "auto-shaper": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Auto-shaper (the fast-track formaliser agent)",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "record-gate"
+          },
+          {
+            "id": "drift-detector"
+          },
+          {
+            "id": "explore"
+          }
+        ],
+        "references": [
+          {
+            "id": "IU-schema",
+            "load": "import"
+          },
+          {
+            "id": "pr-description-shape",
+            "load": "on-demand"
+          },
+          {
+            "id": "context-principles",
+            "load": "on-demand"
+          },
+          {
+            "id": "spec-surface",
+            "load": "on-demand",
+            "external": true
+          }
+        ],
+        "precedes": [
+          {
+            "id": "commit-to-build"
+          }
+        ],
+        "escalates": [
+          {
+            "id": "shape"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "shape"
+          }
+        ]
+      }
+    },
+    "benchmark": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Benchmark",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "verify"
+          }
+        ],
+        "references": [
+          {
+            "id": "benchmark-manifest",
+            "load": "on-demand",
+            "external": true
+          }
+        ]
+      }
+    },
+    "build": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Build",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "debug"
+          },
+          {
+            "id": "design-implement"
+          },
+          {
+            "id": "optimise"
+          },
+          {
+            "id": "explore"
+          }
+        ],
+        "references": [
+          {
+            "id": "test-discipline",
+            "load": "import"
+          },
+          {
+            "id": "architecture-doctrine",
+            "load": "import"
+          },
+          {
+            "id": "IU-schema",
+            "load": "import",
+            "required-state": [
+              "goal",
+              "files",
+              "acceptance",
+              "verification",
+              "finding",
+              "dev_tip"
+            ]
+          }
+        ],
+        "can-follow": [
+          {
+            "id": "review"
+          }
+        ],
+        "precedes": [
+          {
+            "id": "review"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "dispatch"
+          }
+        ]
+      }
+    },
+    "canary": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Canary",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "canary-manifest",
+            "load": "on-demand",
+            "external": true
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "land"
+          }
+        ],
+        "can-follow": [
+          {
+            "id": "deploy"
+          }
+        ]
+      }
+    },
+    "capture-learnings": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Capture learnings",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "learnings-archive",
+            "load": "on-demand",
+            "external": true
+          }
+        ]
+      }
+    },
+    "carrier-arg-hook": {
+      "primitive": "script",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Carrier-arg hook",
+      "status": "v0.1.0 — 2026-07-17",
+      "edges": {
+        "references": [
+          {
+            "id": "bindings-contract",
+            "load": "on-demand"
+          }
+        ]
+      }
+    },
+    "consistency-checker": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Consistency checker",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "pr-description-shape",
+            "load": "on-demand"
+          }
+        ]
+      }
+    },
+    "context-curator": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Context curator",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "drift-detector"
+          },
+          {
+            "id": "queue-checker"
+          },
+          {
+            "id": "consistency-checker"
+          },
+          {
+            "id": "link-validator"
+          }
+        ],
+        "references": [
+          {
+            "id": "context-surface",
+            "load": "on-demand",
+            "external": true
+          },
+          {
+            "id": "context-principles",
+            "load": "on-demand"
+          },
+          {
+            "id": "pr-description-shape",
+            "load": "on-demand"
+          },
+          {
+            "id": "bundling-rules",
+            "load": "on-demand"
+          },
+          {
+            "id": "integrator-checklist",
+            "load": "on-demand"
+          }
+        ]
+      }
+    },
+    "debrief": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Debrief",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "measure-outcomes"
+          },
+          {
+            "id": "capture-learnings"
+          },
+          {
+            "id": "log-decision"
+          },
+          {
+            "id": "record-gate"
+          }
+        ],
+        "references": [
+          {
+            "id": "work-item-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "IU-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "gate-model",
+            "load": "on-demand"
+          }
+        ],
+        "precedes": [
+          {
+            "id": "closeout"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "debrief"
+          }
+        ]
+      }
+    },
+    "debug": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Debug",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "investigate-probe"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "dispatch"
+          }
+        ]
+      }
+    },
+    "deploy": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Deploy",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "deploy-config",
+            "load": "on-demand",
+            "external": true
+          }
+        ],
+        "precedes": [
+          {
+            "id": "canary"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "land"
+          }
+        ]
+      }
+    },
+    "design": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Design",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "explore"
+          }
+        ],
+        "references": [
+          {
+            "id": "lens-dispatch",
+            "load": "on-demand"
+          },
+          {
+            "id": "findings-schema",
+            "load": "import"
+          },
+          {
+            "id": "severity-scale",
+            "load": "import"
+          },
+          {
+            "id": "confidence-anchors",
+            "load": "import"
+          },
+          {
+            "id": "ux-principles",
+            "load": "import"
+          },
+          {
+            "id": "operator-interview",
+            "load": "import"
+          },
+          {
+            "id": "experience-contract-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "experience-contract",
+            "load": "on-demand",
+            "external": true
+          }
+        ],
+        "precedes": [
+          {
+            "id": "specify"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "shape"
+          }
+        ]
+      }
+    },
+    "design-implement": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Design implement",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "ux-principles",
+            "load": "on-demand"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "build"
+          }
+        ],
+        "can-follow": [
+          {
+            "id": "design-shotgun"
+          }
+        ]
+      }
+    },
+    "design-review": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Design review",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "verify"
+          }
+        ],
+        "references": [
+          {
+            "id": "ux-principles",
+            "load": "on-demand"
+          }
+        ]
+      }
+    },
+    "design-shotgun": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Design shotgun",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "ux-principles",
+            "load": "on-demand"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "shape"
+          }
+        ],
+        "precedes": [
+          {
+            "id": "design-implement"
+          }
+        ]
+      }
+    },
+    "dispatch": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Dispatch",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "build"
+          },
+          {
+            "id": "review"
+          },
+          {
+            "id": "record-gate"
+          }
+        ],
+        "references": [
+          {
+            "id": "IU-schema",
+            "load": "import"
+          },
+          {
+            "id": "handoff-prompt-convention",
+            "load": "on-demand"
+          }
+        ],
+        "precedes": [
+          {
+            "id": "verify"
+          }
+        ],
+        "can-follow": [
+          {
+            "id": "verify"
+          }
+        ],
+        "escalates": [
+          {
+            "id": "shape"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "dispatch"
+          }
+        ]
+      }
+    },
+    "drift-detector": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Drift detector",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "context-principles",
+            "load": "on-demand"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "specify"
+          }
+        ]
+      }
+    },
+    "explore": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Explore (context-gathering agent)",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "axis-root",
+            "load": "on-demand",
+            "external": true
+          },
+          {
+            "id": "axis-entry-schema",
+            "load": "on-demand"
+          }
+        ]
+      }
+    },
+    "harness-init": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Harness init",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "bindings-contract",
+            "load": "import"
+          },
+          {
+            "id": "git-policy-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "okr-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "experience-contract-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "axis-entry-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "sg-root-instructions",
+            "load": "on-demand"
+          },
+          {
+            "id": "work-item-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "handoff-prompt-convention",
+            "load": "on-demand"
+          },
+          {
+            "id": "product-definition-guidance",
+            "load": "on-demand"
+          },
+          {
+            "id": "product-principles-guidance",
+            "load": "on-demand"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "initiate",
+            "stage": "harness-init"
+          }
+        ],
+        "precedes": [
+          {
+            "id": "maintain"
+          }
+        ],
+        "can-follow": [
+          {
+            "id": "harness-update"
+          }
+        ]
+      }
+    },
+    "harness-update": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Harness update",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "harness-init"
+          }
+        ],
+        "references": [
+          {
+            "id": "bindings-contract",
+            "load": "import"
+          },
+          {
+            "id": "sg-root-instructions",
+            "load": "on-demand"
+          }
+        ],
+        "can-follow": [
+          {
+            "id": "maintain"
+          }
+        ]
+      }
+    },
+    "health": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Health",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "review"
+          }
+        ],
+        "references": [
+          {
+            "id": "health-manifest",
+            "load": "on-demand",
+            "external": true
+          }
+        ]
+      }
+    },
+    "investigate-probe": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Investigate probe",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {}
+    },
+    "land": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Land",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "deploy"
+          },
+          {
+            "id": "canary"
+          },
+          {
+            "id": "record-gate"
+          }
+        ],
+        "references": [
+          {
+            "id": "deploy-config",
+            "load": "on-demand",
+            "external": true
+          },
+          {
+            "id": "IU-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "work-item-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "gate-model",
+            "load": "on-demand"
+          }
+        ],
+        "can-follow": [
+          {
+            "id": "verify"
+          }
+        ],
+        "precedes": [
+          {
+            "id": "live-confirmed"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "land"
+          }
+        ]
+      }
+    },
+    "lens-correctness": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Correctness lens",
+      "status": "v0.1.0 — 2026-05-30",
+      "edges": {
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "review"
+          },
+          {
+            "id": "dev-sprint",
+            "stage": "design"
+          },
+          {
+            "id": "dev-sprint",
+            "stage": "plan"
+          }
+        ]
+      }
+    },
+    "lens-maintainability": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Maintainability lens",
+      "status": "v0.1.0 — 2026-05-30",
+      "edges": {
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "review"
+          },
+          {
+            "id": "dev-sprint",
+            "stage": "design"
+          },
+          {
+            "id": "dev-sprint",
+            "stage": "plan"
+          }
+        ],
+        "references": [
+          {
+            "id": "architecture-doctrine",
+            "load": "on-demand"
+          }
+        ]
+      }
+    },
+    "lens-security": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Security lens",
+      "status": "v0.1.0 — 2026-05-30",
+      "edges": {
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "review"
+          },
+          {
+            "id": "dev-sprint",
+            "stage": "design"
+          },
+          {
+            "id": "dev-sprint",
+            "stage": "plan"
+          }
+        ]
+      }
+    },
+    "lens-tests": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Tests lens",
+      "status": "v0.1.0 — 2026-05-30",
+      "edges": {
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "review"
+          },
+          {
+            "id": "dev-sprint",
+            "stage": "design"
+          },
+          {
+            "id": "dev-sprint",
+            "stage": "plan"
+          }
+        ],
+        "references": [
+          {
+            "id": "test-discipline",
+            "load": "on-demand"
+          }
+        ]
+      }
+    },
+    "link-validator": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Link validator",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {}
+    },
+    "local-graph-maintainer": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Local graph maintainer",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "local-node-schema",
+            "load": "on-demand"
+          }
+        ]
+      }
+    },
+    "log-decision": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Log decision",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "decisions-schema",
+            "load": "import"
+          }
+        ]
+      }
+    },
+    "measure-outcomes": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Measure outcomes",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "okr-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "work-item-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "event-log",
+            "load": "on-demand",
+            "external": true
+          }
+        ]
+      }
+    },
+    "optimise": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Optimise",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "benchmark"
+          },
+          {
+            "id": "simulate-users"
+          }
+        ],
+        "references": [
+          {
+            "id": "experience-contract",
+            "load": "on-demand",
+            "external": true
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "dispatch"
+          }
+        ]
+      }
+    },
+    "plan": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Plan",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "explore"
+          }
+        ],
+        "references": [
+          {
+            "id": "IU-schema",
+            "load": "import"
+          },
+          {
+            "id": "lens-dispatch",
+            "load": "on-demand"
+          },
+          {
+            "id": "findings-schema",
+            "load": "import"
+          },
+          {
+            "id": "severity-scale",
+            "load": "import"
+          },
+          {
+            "id": "confidence-anchors",
+            "load": "import"
+          }
+        ],
+        "can-follow": [
+          {
+            "id": "specify"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "shape"
+          }
+        ]
+      }
+    },
+    "preamble": {
+      "primitive": "script",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "always-on",
+      "level": "L3",
+      "title": "Preamble — the deterministic turn-1 state loader",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "bindings-contract",
+            "load": "on-demand"
+          },
+          {
+            "id": "IU-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "work-item-schema",
+            "load": "on-demand"
+          }
+        ]
+      }
+    },
+    "qa": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "QA",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "verify"
+          }
+        ],
+        "references": [
+          {
+            "id": "findings-schema",
+            "load": "import"
+          }
+        ]
+      }
+    },
+    "queue-checker": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Queue checker",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {}
+    },
+    "record-gate": {
+      "primitive": "script",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Record gate",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "gate-model",
+            "load": "import"
+          },
+          {
+            "id": "IU-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "work-item-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "product-dashboard-conventions",
+            "load": "on-demand"
+          }
+        ]
+      }
+    },
+    "review": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Review",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "lens-correctness"
+          },
+          {
+            "id": "lens-security"
+          },
+          {
+            "id": "lens-tests"
+          },
+          {
+            "id": "lens-maintainability"
+          },
+          {
+            "id": "health"
+          }
+        ],
+        "references": [
+          {
+            "id": "lens-dispatch",
+            "load": "on-demand"
+          },
+          {
+            "id": "findings-schema",
+            "load": "import"
+          },
+          {
+            "id": "severity-scale",
+            "load": "import"
+          },
+          {
+            "id": "confidence-anchors",
+            "load": "import"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "dispatch"
+          }
+        ]
+      }
+    },
+    "shape": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Shape — the front orchestrator",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "shape-product"
+          },
+          {
+            "id": "design"
+          },
+          {
+            "id": "specify"
+          },
+          {
+            "id": "plan"
+          },
+          {
+            "id": "explore"
+          },
+          {
+            "id": "log-decision"
+          },
+          {
+            "id": "design-shotgun"
+          },
+          {
+            "id": "design-implement"
+          },
+          {
+            "id": "record-gate"
+          }
+        ],
+        "references": [
+          {
+            "id": "routing-principles",
+            "load": "import"
+          },
+          {
+            "id": "product-dashboard-conventions",
+            "load": "on-demand",
+            "required-state": [
+              "lifecycle_state",
+              "stage"
+            ]
+          },
+          {
+            "id": "confidence-anchors",
+            "load": "import"
+          },
+          {
+            "id": "findings-schema",
+            "load": "import"
+          },
+          {
+            "id": "operator-interview",
+            "load": "import"
+          },
+          {
+            "id": "lens-dispatch",
+            "load": "on-demand"
+          },
+          {
+            "id": "gate-model",
+            "load": "on-demand"
+          }
+        ],
+        "can-follow": [
+          {
+            "id": "triage"
+          }
+        ],
+        "precedes": [
+          {
+            "id": "commit-to-build"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "shape"
+          }
+        ]
+      }
+    },
+    "shape-product": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Shape product",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "references": [
+          {
+            "id": "four-risks",
+            "load": "import"
+          },
+          {
+            "id": "okr-schema",
+            "load": "import"
+          },
+          {
+            "id": "strategy-canvas",
+            "load": "on-demand",
+            "external": true
+          },
+          {
+            "id": "strategy-page",
+            "load": "on-demand",
+            "external": true
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "shape"
+          }
+        ]
+      }
+    },
+    "simulate-users": {
+      "primitive": "agent",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Simulate users",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "verify"
+          }
+        ],
+        "references": [
+          {
+            "id": "experience-contract",
+            "load": "on-demand",
+            "external": true
+          },
+          {
+            "id": "experience-contract-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "personas",
+            "load": "on-demand",
+            "external": true
+          },
+          {
+            "id": "checkpoint-manifest-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "checkpoint-driver",
+            "load": "on-demand"
+          },
+          {
+            "id": "checkpoint-manifest",
+            "load": "on-demand",
+            "external": true
+          }
+        ]
+      }
+    },
+    "specify": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Specify",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "drift-detector"
+          }
+        ],
+        "references": [
+          {
+            "id": "spec-surface",
+            "load": "on-demand",
+            "external": true
+          },
+          {
+            "id": "context-principles",
+            "load": "on-demand"
+          },
+          {
+            "id": "pr-description-shape",
+            "load": "on-demand"
+          }
+        ],
+        "can-follow": [
+          {
+            "id": "design"
+          }
+        ],
+        "precedes": [
+          {
+            "id": "plan"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "shape"
+          }
+        ]
+      }
+    },
+    "strategy-curator": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Strategy curator",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "explore"
+          },
+          {
+            "id": "queue-checker"
+          }
+        ],
+        "references": [
+          {
+            "id": "four-risks",
+            "load": "import"
+          },
+          {
+            "id": "okr-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "vpc-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "bmc-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "axis-entry-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "pr-description-shape",
+            "load": "on-demand"
+          }
+        ]
+      }
+    },
+    "triage": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Triage",
+      "status": "v0.2.0 — 2026-07-14",
+      "edges": {
+        "invokes": [
+          {
+            "id": "auto-shaper"
+          },
+          {
+            "id": "record-gate"
+          },
+          {
+            "id": "explore"
+          }
+        ],
+        "references": [
+          {
+            "id": "routing-principles",
+            "load": "import"
+          },
+          {
+            "id": "IU-schema",
+            "load": "import"
+          },
+          {
+            "id": "work-item-schema",
+            "load": "on-demand"
+          },
+          {
+            "id": "bindings-contract",
+            "load": "on-demand",
+            "required-state": [
+              "triage-source-queue",
+              "open-iu-manifest"
+            ]
+          },
+          {
+            "id": "gate-model",
+            "load": "import"
+          }
+        ],
+        "precedes": [
+          {
+            "id": "intent-to-build"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "triage"
+          }
+        ]
+      }
+    },
+    "verify": {
+      "primitive": "skill",
+      "mode": "collaborative",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Verify",
+      "status": "v0.1.0 — 2026-07-01",
+      "edges": {
+        "invokes": [
+          {
+            "id": "qa"
+          },
+          {
+            "id": "design-review"
+          },
+          {
+            "id": "simulate-users"
+          },
+          {
+            "id": "benchmark"
+          },
+          {
+            "id": "lens-maintainability"
+          },
+          {
+            "id": "auto-shaper"
+          },
+          {
+            "id": "record-gate"
+          }
+        ],
+        "references": [
+          {
+            "id": "verify-procedure",
+            "load": "on-demand",
+            "external": true
+          },
+          {
+            "id": "findings-schema",
+            "load": "import"
+          },
+          {
+            "id": "severity-scale",
+            "load": "import"
+          },
+          {
+            "id": "confidence-anchors",
+            "load": "import"
+          },
+          {
+            "id": "architecture-doctrine",
+            "load": "on-demand"
+          },
+          {
+            "id": "gate-model",
+            "load": "on-demand"
+          }
+        ],
+        "precedes": [
+          {
+            "id": "commit-to-land"
+          }
+        ],
+        "can-follow": [
+          {
+            "id": "dispatch"
+          }
+        ],
+        "escalates": [
+          {
+            "id": "shape"
+          }
+        ],
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "verify"
+          }
+        ]
+      }
+    }
+  },
+  "references": {
+    "IU-schema": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Implementation-unit schema — the build carrier",
+      "status": "drafted",
+      "consumed_by": [
+        "auto-shaper",
+        "build",
+        "debrief",
+        "dispatch",
+        "land",
+        "plan",
+        "preamble",
+        "record-gate",
+        "triage"
+      ],
+      "maintained_by": []
+    },
+    "architecture-doctrine": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Architecture doctrine — deep modules, seams, dependency categories",
+      "status": "drafted",
+      "consumed_by": [
+        "architecture-review",
+        "build",
+        "lens-maintainability",
+        "verify"
+      ],
+      "maintained_by": []
+    },
+    "axis-entry-schema": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Axis-entry schema — the zone-matrix shape",
+      "status": "drafted",
+      "consumed_by": [
+        "explore",
+        "harness-init",
+        "strategy-curator"
+      ],
+      "maintained_by": []
+    },
+    "bindings-contract": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Bindings contract — the harness instantiation seam",
+      "status": "drafted",
+      "consumed_by": [
+        "carrier-arg-hook",
+        "harness-init",
+        "harness-update",
+        "preamble",
+        "triage"
+      ],
+      "maintained_by": []
+    },
+    "bmc-schema": {
+      "provenance": "vendored",
+      "cadence": "process-reference",
+      "level": "L2",
+      "title": "Business Model Canvas — schema",
+      "status": "drafted",
+      "consumed_by": [
+        "strategy-curator"
+      ],
+      "maintained_by": []
+    },
+    "bundling-rules": {
+      "provenance": "vendored",
+      "cadence": "process-reference",
+      "level": "L2",
+      "title": "Bundling rules",
+      "status": "drafted",
+      "consumed_by": [
+        "context-curator"
+      ],
+      "maintained_by": []
+    },
+    "checkpoint-driver": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Checkpoint driver — the deterministic-regression process",
+      "status": "drafted",
+      "consumed_by": [
+        "simulate-users"
+      ],
+      "maintained_by": []
+    },
+    "checkpoint-manifest-schema": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Checkpoint-manifest schema",
+      "status": "drafted",
+      "consumed_by": [
+        "simulate-users"
+      ],
+      "maintained_by": []
+    },
+    "confidence-anchors": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Confidence anchors — the findings-confidence contract",
+      "status": "drafted",
+      "consumed_by": [
+        "design",
+        "plan",
+        "review",
+        "shape",
+        "verify"
+      ],
+      "maintained_by": []
+    },
+    "context-principles": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Context principles — the placement oracle",
+      "status": "drafted",
+      "consumed_by": [
+        "auto-shaper",
+        "context-curator",
+        "drift-detector",
+        "specify"
+      ],
+      "maintained_by": []
+    },
+    "decisions-schema": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Decisions-store schema — the durable decision contract",
+      "status": "drafted",
+      "consumed_by": [
+        "log-decision"
+      ],
+      "maintained_by": []
+    },
+    "experience-contract-schema": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Experience-contract schema",
+      "status": "drafted",
+      "consumed_by": [
+        "design",
+        "harness-init",
+        "simulate-users"
+      ],
+      "maintained_by": []
+    },
+    "findings-schema": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Findings schema — the review-lens output contract",
+      "status": "drafted",
+      "consumed_by": [
+        "design",
+        "plan",
+        "qa",
+        "review",
+        "shape",
+        "verify"
+      ],
+      "maintained_by": []
+    },
+    "four-risks": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "The four product risks — discovery lens",
+      "status": "drafted",
+      "consumed_by": [
+        "shape-product",
+        "strategy-curator"
+      ],
+      "maintained_by": []
+    },
+    "gate-model": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Gate model — the gated runtime state",
+      "status": "drafted",
+      "consumed_by": [
+        "debrief",
+        "land",
+        "record-gate",
+        "shape",
+        "triage",
+        "verify"
+      ],
+      "maintained_by": []
+    },
+    "git-policy-schema": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Git-policy schema — the crystallised per-repo/path write policy",
+      "status": "drafted",
+      "consumed_by": [
+        "harness-init"
+      ],
+      "maintained_by": []
+    },
+    "glossary": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L1",
+      "title": "Glossary",
+      "status": "drafted",
+      "consumed_by": [],
+      "maintained_by": []
+    },
+    "handoff-prompt-convention": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Handoff-prompt convention — the delta-only field form for cold handoffs",
+      "status": "drafted",
+      "consumed_by": [
+        "dispatch",
+        "harness-init"
+      ],
+      "maintained_by": []
+    },
+    "integrator-checklist": {
+      "provenance": "vendored",
+      "cadence": "process-reference",
+      "level": "L3",
+      "title": "Integrator checklist",
+      "status": "drafted",
+      "consumed_by": [
+        "context-curator"
+      ],
+      "maintained_by": []
+    },
+    "lens-dispatch": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Lens dispatch — fan-out, merge, triage, route",
+      "status": "drafted",
+      "consumed_by": [
+        "design",
+        "plan",
+        "review",
+        "shape"
+      ],
+      "maintained_by": []
+    },
+    "local-node-schema": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Local-node authoring contract",
+      "status": "drafted",
+      "consumed_by": [
+        "local-graph-maintainer"
+      ],
+      "maintained_by": []
+    },
+    "node-edge-schema": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Node & edge schema",
+      "status": "drafted",
+      "consumed_by": [],
+      "maintained_by": []
+    },
+    "okr-schema": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "OKR / outcome-layer schema",
+      "status": "drafted",
+      "consumed_by": [
+        "harness-init",
+        "measure-outcomes",
+        "shape-product",
+        "strategy-curator"
+      ],
+      "maintained_by": []
+    },
+    "operator-interview": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Operator interview — elicit decisions before resolving them",
+      "status": "drafted",
+      "consumed_by": [
+        "design",
+        "shape"
+      ],
+      "maintained_by": []
+    },
+    "pr-description-shape": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "PR description shape",
+      "status": "drafted",
+      "consumed_by": [
+        "auto-shaper",
+        "consistency-checker",
+        "context-curator",
+        "specify",
+        "strategy-curator"
+      ],
+      "maintained_by": []
+    },
+    "product-dashboard-conventions": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Product-dashboard conventions — authoring work-ledger content",
+      "status": "drafted",
+      "consumed_by": [
+        "record-gate",
+        "shape"
+      ],
+      "maintained_by": []
+    },
+    "product-definition-guidance": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Product-definition — authoring guidance (the identity floor)",
+      "status": "drafted",
+      "consumed_by": [
+        "harness-init"
+      ],
+      "maintained_by": []
+    },
+    "product-principles-guidance": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Product-principles — authoring guidance (the quality bar)",
+      "status": "drafted",
+      "consumed_by": [
+        "harness-init"
+      ],
+      "maintained_by": []
+    },
+    "routing-principles": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Routing principles — decision / depth / tool routing",
+      "status": "drafted",
+      "consumed_by": [
+        "shape",
+        "triage"
+      ],
+      "maintained_by": []
+    },
+    "severity-scale": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Severity scale — the findings-severity contract",
+      "status": "drafted",
+      "consumed_by": [
+        "design",
+        "plan",
+        "review",
+        "verify"
+      ],
+      "maintained_by": []
+    },
+    "sg-root-instructions": {
+      "provenance": "vendored",
+      "cadence": "always-on",
+      "level": "L2",
+      "title": "Stack-graph root instructions — the consolidated always-on floor",
+      "status": "drafted",
+      "consumed_by": [
+        "harness-init",
+        "harness-update"
+      ],
+      "maintained_by": []
+    },
+    "sg-tag-registry": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "sg-tag registry — the closed <sg-*> member contract",
+      "status": "drafted",
+      "consumed_by": [],
+      "maintained_by": []
+    },
+    "test-discipline": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Test discipline — the test-quality standard",
+      "status": "drafted",
+      "consumed_by": [
+        "build",
+        "lens-tests"
+      ],
+      "maintained_by": []
+    },
+    "ux-principles": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "UX principles — the visual-and-interaction standard",
+      "status": "drafted",
+      "consumed_by": [
+        "design",
+        "design-implement",
+        "design-review",
+        "design-shotgun"
+      ],
+      "maintained_by": []
+    },
+    "vpc-schema": {
+      "provenance": "vendored",
+      "cadence": "process-reference",
+      "level": "L2",
+      "title": "Value Proposition Canvas — schema",
+      "status": "drafted",
+      "consumed_by": [
+        "strategy-curator"
+      ],
+      "maintained_by": []
+    },
+    "work-item-schema": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Work-item schema — the grouping carrier",
+      "status": "drafted",
+      "consumed_by": [
+        "debrief",
+        "harness-init",
+        "land",
+        "measure-outcomes",
+        "preamble",
+        "record-gate",
+        "triage"
+      ],
+      "maintained_by": []
+    }
+  },
+  "edges": [
+    {
+      "from": "architecture-review",
+      "to": "explore",
+      "type": "invokes"
+    },
+    {
+      "from": "architecture-review",
+      "to": "log-decision",
+      "type": "invokes"
+    },
+    {
+      "from": "architecture-review",
+      "to": "architecture-doctrine",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "architecture-review",
+      "to": "domain-glossary",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "architecture-review",
+      "to": "triage",
+      "type": "escalates"
+    },
+    {
+      "from": "auto-shaper",
+      "to": "record-gate",
+      "type": "invokes"
+    },
+    {
+      "from": "auto-shaper",
+      "to": "drift-detector",
+      "type": "invokes"
+    },
+    {
+      "from": "auto-shaper",
+      "to": "explore",
+      "type": "invokes"
+    },
+    {
+      "from": "auto-shaper",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "shape"
+    },
+    {
+      "from": "auto-shaper",
+      "to": "IU-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "auto-shaper",
+      "to": "pr-description-shape",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "auto-shaper",
+      "to": "context-principles",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "auto-shaper",
+      "to": "spec-surface",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "auto-shaper",
+      "to": "commit-to-build",
+      "type": "precedes"
+    },
+    {
+      "from": "auto-shaper",
+      "to": "shape",
+      "type": "escalates"
+    },
+    {
+      "from": "benchmark",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "verify"
+    },
+    {
+      "from": "benchmark",
+      "to": "benchmark-manifest",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "build",
+      "to": "debug",
+      "type": "invokes"
+    },
+    {
+      "from": "build",
+      "to": "design-implement",
+      "type": "invokes"
+    },
+    {
+      "from": "build",
+      "to": "optimise",
+      "type": "invokes"
+    },
+    {
+      "from": "build",
+      "to": "explore",
+      "type": "invokes"
+    },
+    {
+      "from": "build",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "dispatch"
+    },
+    {
+      "from": "build",
+      "to": "test-discipline",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "build",
+      "to": "architecture-doctrine",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "build",
+      "to": "IU-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "build",
+      "to": "review",
+      "type": "precedes"
+    },
+    {
+      "from": "build",
+      "to": "review",
+      "type": "can-follow"
+    },
+    {
+      "from": "canary",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "land"
+    },
+    {
+      "from": "canary",
+      "to": "canary-manifest",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "canary",
+      "to": "deploy",
+      "type": "can-follow"
+    },
+    {
+      "from": "capture-learnings",
+      "to": "learnings-archive",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "carrier-arg-hook",
+      "to": "bindings-contract",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "consistency-checker",
+      "to": "pr-description-shape",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "context-curator",
+      "to": "drift-detector",
+      "type": "invokes"
+    },
+    {
+      "from": "context-curator",
+      "to": "queue-checker",
+      "type": "invokes"
+    },
+    {
+      "from": "context-curator",
+      "to": "consistency-checker",
+      "type": "invokes"
+    },
+    {
+      "from": "context-curator",
+      "to": "link-validator",
+      "type": "invokes"
+    },
+    {
+      "from": "context-curator",
+      "to": "context-surface",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "context-curator",
+      "to": "context-principles",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "context-curator",
+      "to": "pr-description-shape",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "context-curator",
+      "to": "bundling-rules",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "context-curator",
+      "to": "integrator-checklist",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "debrief",
+      "to": "measure-outcomes",
+      "type": "invokes"
+    },
+    {
+      "from": "debrief",
+      "to": "capture-learnings",
+      "type": "invokes"
+    },
+    {
+      "from": "debrief",
+      "to": "log-decision",
+      "type": "invokes"
+    },
+    {
+      "from": "debrief",
+      "to": "record-gate",
+      "type": "invokes"
+    },
+    {
+      "from": "debrief",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "debrief"
+    },
+    {
+      "from": "debrief",
+      "to": "work-item-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "debrief",
+      "to": "IU-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "debrief",
+      "to": "gate-model",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "debrief",
+      "to": "closeout",
+      "type": "precedes"
+    },
+    {
+      "from": "debug",
+      "to": "investigate-probe",
+      "type": "invokes"
+    },
+    {
+      "from": "debug",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "dispatch"
+    },
+    {
+      "from": "deploy",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "land"
+    },
+    {
+      "from": "deploy",
+      "to": "deploy-config",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "deploy",
+      "to": "canary",
+      "type": "precedes"
+    },
+    {
+      "from": "design",
+      "to": "explore",
+      "type": "invokes"
+    },
+    {
+      "from": "design",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "shape"
+    },
+    {
+      "from": "design",
+      "to": "lens-dispatch",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "design",
+      "to": "findings-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "design",
+      "to": "severity-scale",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "design",
+      "to": "confidence-anchors",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "design",
+      "to": "ux-principles",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "design",
+      "to": "operator-interview",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "design",
+      "to": "experience-contract-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "design",
+      "to": "experience-contract",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "design",
+      "to": "specify",
+      "type": "precedes"
+    },
+    {
+      "from": "design-implement",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "build"
+    },
+    {
+      "from": "design-implement",
+      "to": "ux-principles",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "design-implement",
+      "to": "design-shotgun",
+      "type": "can-follow"
+    },
+    {
+      "from": "design-review",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "verify"
+    },
+    {
+      "from": "design-review",
+      "to": "ux-principles",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "design-shotgun",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "shape"
+    },
+    {
+      "from": "design-shotgun",
+      "to": "ux-principles",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "design-shotgun",
+      "to": "design-implement",
+      "type": "precedes"
+    },
+    {
+      "from": "dispatch",
+      "to": "build",
+      "type": "invokes"
+    },
+    {
+      "from": "dispatch",
+      "to": "review",
+      "type": "invokes"
+    },
+    {
+      "from": "dispatch",
+      "to": "record-gate",
+      "type": "invokes"
+    },
+    {
+      "from": "dispatch",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "dispatch"
+    },
+    {
+      "from": "dispatch",
+      "to": "IU-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "dispatch",
+      "to": "handoff-prompt-convention",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "dispatch",
+      "to": "verify",
+      "type": "precedes"
+    },
+    {
+      "from": "dispatch",
+      "to": "verify",
+      "type": "can-follow"
+    },
+    {
+      "from": "dispatch",
+      "to": "shape",
+      "type": "escalates"
+    },
+    {
+      "from": "drift-detector",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "specify"
+    },
+    {
+      "from": "drift-detector",
+      "to": "context-principles",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "explore",
+      "to": "axis-root",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "explore",
+      "to": "axis-entry-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "harness-init",
+      "to": "initiate",
+      "type": "composes-into",
+      "stage": "harness-init"
+    },
+    {
+      "from": "harness-init",
+      "to": "bindings-contract",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "harness-init",
+      "to": "git-policy-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "harness-init",
+      "to": "okr-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "harness-init",
+      "to": "experience-contract-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "harness-init",
+      "to": "axis-entry-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "harness-init",
+      "to": "sg-root-instructions",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "harness-init",
+      "to": "work-item-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "harness-init",
+      "to": "handoff-prompt-convention",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "harness-init",
+      "to": "product-definition-guidance",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "harness-init",
+      "to": "product-principles-guidance",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "harness-init",
+      "to": "maintain",
+      "type": "precedes"
+    },
+    {
+      "from": "harness-init",
+      "to": "harness-update",
+      "type": "can-follow"
+    },
+    {
+      "from": "harness-update",
+      "to": "harness-init",
+      "type": "invokes"
+    },
+    {
+      "from": "harness-update",
+      "to": "bindings-contract",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "harness-update",
+      "to": "sg-root-instructions",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "harness-update",
+      "to": "maintain",
+      "type": "can-follow"
+    },
+    {
+      "from": "health",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "review"
+    },
+    {
+      "from": "health",
+      "to": "health-manifest",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "land",
+      "to": "deploy",
+      "type": "invokes"
+    },
+    {
+      "from": "land",
+      "to": "canary",
+      "type": "invokes"
+    },
+    {
+      "from": "land",
+      "to": "record-gate",
+      "type": "invokes"
+    },
+    {
+      "from": "land",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "land"
+    },
+    {
+      "from": "land",
+      "to": "deploy-config",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "land",
+      "to": "IU-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "land",
+      "to": "work-item-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "land",
+      "to": "gate-model",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "land",
+      "to": "live-confirmed",
+      "type": "precedes"
+    },
+    {
+      "from": "land",
+      "to": "verify",
+      "type": "can-follow"
+    },
+    {
+      "from": "lens-correctness",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "review"
+    },
+    {
+      "from": "lens-correctness",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "design"
+    },
+    {
+      "from": "lens-correctness",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "plan"
+    },
+    {
+      "from": "lens-maintainability",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "review"
+    },
+    {
+      "from": "lens-maintainability",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "design"
+    },
+    {
+      "from": "lens-maintainability",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "plan"
+    },
+    {
+      "from": "lens-maintainability",
+      "to": "architecture-doctrine",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "lens-security",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "review"
+    },
+    {
+      "from": "lens-security",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "design"
+    },
+    {
+      "from": "lens-security",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "plan"
+    },
+    {
+      "from": "lens-tests",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "review"
+    },
+    {
+      "from": "lens-tests",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "design"
+    },
+    {
+      "from": "lens-tests",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "plan"
+    },
+    {
+      "from": "lens-tests",
+      "to": "test-discipline",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "local-graph-maintainer",
+      "to": "local-node-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "log-decision",
+      "to": "decisions-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "measure-outcomes",
+      "to": "okr-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "measure-outcomes",
+      "to": "work-item-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "measure-outcomes",
+      "to": "event-log",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "optimise",
+      "to": "benchmark",
+      "type": "invokes"
+    },
+    {
+      "from": "optimise",
+      "to": "simulate-users",
+      "type": "invokes"
+    },
+    {
+      "from": "optimise",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "dispatch"
+    },
+    {
+      "from": "optimise",
+      "to": "experience-contract",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "plan",
+      "to": "explore",
+      "type": "invokes"
+    },
+    {
+      "from": "plan",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "shape"
+    },
+    {
+      "from": "plan",
+      "to": "IU-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "plan",
+      "to": "lens-dispatch",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "plan",
+      "to": "findings-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "plan",
+      "to": "severity-scale",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "plan",
+      "to": "confidence-anchors",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "plan",
+      "to": "specify",
+      "type": "can-follow"
+    },
+    {
+      "from": "preamble",
+      "to": "bindings-contract",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "preamble",
+      "to": "IU-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "preamble",
+      "to": "work-item-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "qa",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "verify"
+    },
+    {
+      "from": "qa",
+      "to": "findings-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "record-gate",
+      "to": "gate-model",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "record-gate",
+      "to": "IU-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "record-gate",
+      "to": "work-item-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "record-gate",
+      "to": "product-dashboard-conventions",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "review",
+      "to": "lens-correctness",
+      "type": "invokes"
+    },
+    {
+      "from": "review",
+      "to": "lens-security",
+      "type": "invokes"
+    },
+    {
+      "from": "review",
+      "to": "lens-tests",
+      "type": "invokes"
+    },
+    {
+      "from": "review",
+      "to": "lens-maintainability",
+      "type": "invokes"
+    },
+    {
+      "from": "review",
+      "to": "health",
+      "type": "invokes"
+    },
+    {
+      "from": "review",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "dispatch"
+    },
+    {
+      "from": "review",
+      "to": "lens-dispatch",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "review",
+      "to": "findings-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "review",
+      "to": "severity-scale",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "review",
+      "to": "confidence-anchors",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "shape",
+      "to": "shape-product",
+      "type": "invokes"
+    },
+    {
+      "from": "shape",
+      "to": "design",
+      "type": "invokes"
+    },
+    {
+      "from": "shape",
+      "to": "specify",
+      "type": "invokes"
+    },
+    {
+      "from": "shape",
+      "to": "plan",
+      "type": "invokes"
+    },
+    {
+      "from": "shape",
+      "to": "explore",
+      "type": "invokes"
+    },
+    {
+      "from": "shape",
+      "to": "log-decision",
+      "type": "invokes"
+    },
+    {
+      "from": "shape",
+      "to": "design-shotgun",
+      "type": "invokes"
+    },
+    {
+      "from": "shape",
+      "to": "design-implement",
+      "type": "invokes"
+    },
+    {
+      "from": "shape",
+      "to": "record-gate",
+      "type": "invokes"
+    },
+    {
+      "from": "shape",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "shape"
+    },
+    {
+      "from": "shape",
+      "to": "routing-principles",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "shape",
+      "to": "product-dashboard-conventions",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "shape",
+      "to": "confidence-anchors",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "shape",
+      "to": "findings-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "shape",
+      "to": "operator-interview",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "shape",
+      "to": "lens-dispatch",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "shape",
+      "to": "gate-model",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "shape",
+      "to": "commit-to-build",
+      "type": "precedes"
+    },
+    {
+      "from": "shape",
+      "to": "triage",
+      "type": "can-follow"
+    },
+    {
+      "from": "shape-product",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "shape"
+    },
+    {
+      "from": "shape-product",
+      "to": "four-risks",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "shape-product",
+      "to": "okr-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "shape-product",
+      "to": "strategy-canvas",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "shape-product",
+      "to": "strategy-page",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "simulate-users",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "verify"
+    },
+    {
+      "from": "simulate-users",
+      "to": "experience-contract",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "simulate-users",
+      "to": "experience-contract-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "simulate-users",
+      "to": "personas",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "simulate-users",
+      "to": "checkpoint-manifest-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "simulate-users",
+      "to": "checkpoint-driver",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "simulate-users",
+      "to": "checkpoint-manifest",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "specify",
+      "to": "drift-detector",
+      "type": "invokes"
+    },
+    {
+      "from": "specify",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "shape"
+    },
+    {
+      "from": "specify",
+      "to": "spec-surface",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "specify",
+      "to": "context-principles",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "specify",
+      "to": "pr-description-shape",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "specify",
+      "to": "plan",
+      "type": "precedes"
+    },
+    {
+      "from": "specify",
+      "to": "design",
+      "type": "can-follow"
+    },
+    {
+      "from": "strategy-curator",
+      "to": "explore",
+      "type": "invokes"
+    },
+    {
+      "from": "strategy-curator",
+      "to": "queue-checker",
+      "type": "invokes"
+    },
+    {
+      "from": "strategy-curator",
+      "to": "four-risks",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "strategy-curator",
+      "to": "okr-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "strategy-curator",
+      "to": "vpc-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "strategy-curator",
+      "to": "bmc-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "strategy-curator",
+      "to": "axis-entry-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "strategy-curator",
+      "to": "pr-description-shape",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "triage",
+      "to": "auto-shaper",
+      "type": "invokes"
+    },
+    {
+      "from": "triage",
+      "to": "record-gate",
+      "type": "invokes"
+    },
+    {
+      "from": "triage",
+      "to": "explore",
+      "type": "invokes"
+    },
+    {
+      "from": "triage",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "triage"
+    },
+    {
+      "from": "triage",
+      "to": "routing-principles",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "triage",
+      "to": "IU-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "triage",
+      "to": "work-item-schema",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "triage",
+      "to": "bindings-contract",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "triage",
+      "to": "gate-model",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "triage",
+      "to": "intent-to-build",
+      "type": "precedes"
+    },
+    {
+      "from": "verify",
+      "to": "qa",
+      "type": "invokes"
+    },
+    {
+      "from": "verify",
+      "to": "design-review",
+      "type": "invokes"
+    },
+    {
+      "from": "verify",
+      "to": "simulate-users",
+      "type": "invokes"
+    },
+    {
+      "from": "verify",
+      "to": "benchmark",
+      "type": "invokes"
+    },
+    {
+      "from": "verify",
+      "to": "lens-maintainability",
+      "type": "invokes"
+    },
+    {
+      "from": "verify",
+      "to": "auto-shaper",
+      "type": "invokes"
+    },
+    {
+      "from": "verify",
+      "to": "record-gate",
+      "type": "invokes"
+    },
+    {
+      "from": "verify",
+      "to": "dev-sprint",
+      "type": "composes-into",
+      "stage": "verify"
+    },
+    {
+      "from": "verify",
+      "to": "verify-procedure",
+      "type": "references",
+      "load": "on-demand",
+      "external": true
+    },
+    {
+      "from": "verify",
+      "to": "findings-schema",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "verify",
+      "to": "severity-scale",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "verify",
+      "to": "confidence-anchors",
+      "type": "references",
+      "load": "import"
+    },
+    {
+      "from": "verify",
+      "to": "architecture-doctrine",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "verify",
+      "to": "gate-model",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "verify",
+      "to": "commit-to-land",
+      "type": "precedes"
+    },
+    {
+      "from": "verify",
+      "to": "dispatch",
+      "type": "can-follow"
+    },
+    {
+      "from": "verify",
+      "to": "shape",
+      "type": "escalates"
+    }
+  ]
+}

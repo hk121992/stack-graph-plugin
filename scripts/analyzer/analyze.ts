@@ -181,10 +181,21 @@ export function loadCarriersManifest(manifestPath: string): Set<string> {
 
 // ── Graph node-id set ───────────────────────────────────────────────────────────────────────────
 
-/** Load the known graph-node id set from graph-record.json. Tries the factory layout
- *  (<repo>/graph-vUnified/graph-record.json) and the vendored-plugin layout (alongside the renderer), then
- *  degrades to an EMPTY set — with no record, no skill maps to a node, so activity rows are simply not
- *  emitted (honest under-capture; the publisher would drop unknown ids anyway). Never throws. */
+/** Load the known graph-node id set from graph-record.json — the gate on every node-id-gated
+ *  derivation (`enter` / `exit` / `node-activity`, and `stall-record` downstream of them).
+ *
+ *  The candidate list is anchored on the analyzer's OWN location, so the id set must be reachable
+ *  from wherever the analyzer is RUN, not only from a factory checkout:
+ *    - the factory checkout resolves `<repo>/graph-vUnified/graph-record.json` (three levels up);
+ *    - the VENDORED plugin asset resolves the ADJACENT candidate, because `generate`'s asset
+ *      registry ships `graph-record.json` beside analyze.ts under `scripts/analyzer/` (build/generate.ts,
+ *      ANALYZER_TREE). That candidate is LOAD-BEARING, not incidental: it is what keeps an installed
+ *      plugin cache — not a git repo, no `graph-vUnified/` above it, `SG_GRAPH_RECORD` unset — at full
+ *      kind-set parity with the checkout run. Guarded by operational-parity.test.ts.
+ *
+ *  With NO source reachable at all it degrades to an EMPTY set — with no record, no skill maps to a
+ *  node, so activity rows are simply not emitted (honest under-capture; the publisher would drop
+ *  unknown ids anyway). Never throws. */
 export function loadNodeIds(explicitPath?: string): Set<string> {
   const here = path.dirname(new URL(import.meta.url).pathname);
   const candidates = [
@@ -192,7 +203,7 @@ export function loadNodeIds(explicitPath?: string): Set<string> {
     process.env.SG_GRAPH_RECORD,
     path.resolve(here, "..", "..", "..", "graph-vUnified", "graph-record.json"), // factory checkout: three levels up from the analyzer dir → repo/graph-vUnified
     path.resolve(here, "..", "graph-record.json"),
-    path.resolve(here, "graph-record.json"),
+    path.resolve(here, "graph-record.json"), // vendored plugin asset: shipped beside analyze.ts by generate
   ].filter((p): p is string => typeof p === "string" && p !== "");
   for (const cand of candidates) {
     try {
