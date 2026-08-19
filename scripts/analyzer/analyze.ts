@@ -37,6 +37,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { execSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 import {
   serializeAllRows,
@@ -197,7 +198,11 @@ export function loadCarriersManifest(manifestPath: string): Set<string> {
  *  node, so activity rows are simply not emitted (honest under-capture; the publisher would drop
  *  unknown ids anyway). Never throws. */
 export function loadNodeIds(explicitPath?: string): Set<string> {
-  const here = path.dirname(new URL(import.meta.url).pathname);
+  // fileURLToPath, NOT `new URL(...).pathname` — the raw pathname is still percent-ENCODED, so an
+  // install path containing a space (or any escapable char) yields a `%20` directory that exists
+  // nowhere, every candidate misses, and the operational fix silently un-does itself. Measured: the
+  // same shipped tree resolves 0 ids under `/tmp/sg op/` vs 46 under `/tmp/sg-op/`.
+  const here = path.dirname(fileURLToPath(import.meta.url));
   const candidates = [
     explicitPath,
     process.env.SG_GRAPH_RECORD,
