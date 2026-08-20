@@ -87,7 +87,11 @@ function expandHome(p: string): string {
 function resolveStackGraphDir(): string {
   const env = process.env.STACK_GRAPH_EVENTS_DIR;
   if (env && env.trim() !== "") return expandHome(env.trim());
-  const start = path.dirname(new URL(import.meta.url).pathname);
+  // fileURLToPath, NOT `new URL(...).pathname` — the raw pathname is still percent-ENCODED, so an
+  // install path containing a space (or any escapable char) yields a `%20` directory that exists
+  // nowhere; `execSync` throws ENOENT on that `cwd`, the catch below swallows it, and an unbound
+  // consumer's derived log silently lands under the invocation cwd instead of the org root.
+  const start = path.dirname(fileURLToPath(import.meta.url));
   try {
     const commonDir = execSync("git rev-parse --git-common-dir", { cwd: start, encoding: "utf8" }).trim();
     if (commonDir) {
