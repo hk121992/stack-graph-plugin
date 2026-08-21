@@ -68,5 +68,5 @@ explicit when an objective's relationship to the vision is non-obvious.
 
 - **The instance** — the harness's filled objectives surface, runtime → the harness surface / bindings-contract.
 - **The authoring owner** — the node that authors the objectives surface to this schema → strategy-curator.
-- **The work-item anchor** that points here — the outcome-link **xor** improves → [work-item-schema](work-item-schema.md) · [IU-schema](IU-schema.md).
+- **The work-item anchor** that points here — the outcome-link **xor** improves → [work-item-schema](../../../references/work-item-schema.md) · [IU-schema](../../../references/IU-schema.md).
 - **The optional bet/canvas layer** `strategy_link` resolves into → the strategy canvas (VPC/BMC), harness-optional.

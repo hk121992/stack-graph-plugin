@@ -44,10 +44,10 @@ feeds both axes.
 
 With the scope bundle in hand, **follow the `lens-dispatch` reference** to run the panel: it gives
 you the lens-selection, parallel fan-out, and merge / dedup / corroborate / confidence-gate /
-severity-route reduction. As you fan out, pass each lens its own spawn prompt carrying the
+severity-route reduction. As you fan out, pass each lens its own invocation prompt carrying the
 **target** (`diff` or `doc`) and its contents, the **scope-rules** and intent summary, and the
 **finding contract** — the finding schema, severity scale, and confidence anchors, which you hold
-from your imported references — so every lens emits to the same contract. Each lens returns the
+from the required references — so every lens emits to the same contract. Each lens returns the
 compact finding tier; `lens-dispatch` reduces those returns to one ranked, routed finding set.
 
 The four always-on lenses run every time. **`health`** (code-quality — a whole-tree static
@@ -148,17 +148,17 @@ no per-finding prompts.
   findings ⇒ the session routes out `review-flagged`).
 - No carrier write; no gate fired.
 
-## Imported references
+## Required references
 
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
+Before taking any action, read these bundled references:
 
-@references/confidence-anchors.md
-@references/findings-schema.md
-@references/severity-scale.md
+- [confidence-anchors](references/confidence-anchors.md)
+- [findings-schema](references/findings-schema.md)
+- [severity-scale](references/severity-scale.md)
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/lens-dispatch.md` — `lens-dispatch`
+- [lens-dispatch](references/lens-dispatch.md)
 

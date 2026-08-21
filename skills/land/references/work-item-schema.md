@@ -17,9 +17,9 @@ related: [IU-schema, gate-model, okr-schema, bindings-contract, product-dashboar
 
 The structured state of a **work-item (WI)** — the **grouping carrier** at the front: the catch-all raise, the
 signed intent and outcome link a group of units ladders to, and the durable record of how the work moved. A WI
-**groups** its [implementation units](IU-schema.md) and is the carrier the front gates fire on; it is **not a build
+**groups** its [implementation units](../../../references/IU-schema.md) and is the carrier the front gates fire on; it is **not a build
 carrier** — `build` reads the unit, not the WI. Its `lifecycle_state` + `gate_decisions[]` are
-[the gate model](gate-model.md)'s, carried and cited. What a WI *is* relationally — a runtime instance, not a node —
+[the gate model](../../../references/gate-model.md)'s, carried and cited. What a WI *is* relationally — a runtime instance, not a node —
 is the **graph model**'s (local, per-consumer); this fixes the **field shapes**, never an instance.
 
 ## Three kinds of state, never crossed {#three-kinds}
@@ -43,7 +43,7 @@ Conflating the three is the core modelling risk; the contract keeps them strictl
 
 ## Gate-entry scope {#gate-scope}
 
-The WI applies [gate-model](gate-model.md)'s **role scope** as the **grouping carrier**: it records the **front** and
+The WI applies [gate-model](../../../references/gate-model.md)'s **role scope** as the **grouping carrier**: it records the **front** and
 **build-readiness** entries and the **closeout cascade** entry — but **not** the per-unit landing entries, which
 sit on each child unit's own chain. The build-readiness gate **fires once on the grouping**; the group's N units
 **inherit it by reference** (their provenance points at this WI + this authorising gate). The closeout disposition
@@ -52,7 +52,7 @@ sit on each child unit's own chain. The build-readiness gate **fires once on the
 ## The children decomposition {#children}
 
 `children[]` are the unit ids the WI groups — the build carriers `build` reads directly, **not** sub-carriers
-holding their own lifecycle. Each child is an [IU](IU-schema.md) whose provenance names this WI as `parent` and
+holding their own lifecycle. Each child is an [IU](../../../references/IU-schema.md) whose provenance names this WI as `parent` and
 inherits its authorising gate; the WI **aggregates** their state for the dashboard. A WI is finished only when
 **every child unit has reached its delivered terminal** (`shipped`, or `live` when prod-facing — gate-model's
 single-main rule).
@@ -62,7 +62,7 @@ single-main rule).
 Not every raised WI yields a unit. A WI the front resolves as **not worth a unit** reaches a terminal
 `lifecycle_state` — **`parked`** or **`killed`** (a *deferred* item is `parked` with intent to revisit) —
 carrying its `disposition`. This is the front's **non-unit exit**, complementing the cold-handoff unit exit
-([IU-schema](IU-schema.md)); the item is **kept as the durable record, never deleted**.
+([IU-schema](../../../references/IU-schema.md)); the item is **kept as the durable record, never deleted**.
 
 ## Invariants {#invariants}
 
@@ -79,8 +79,8 @@ carrying its `disposition`. This is the front's **non-unit exit**, complementing
 
 ## Cite out {#cite-out}
 
-- **`lifecycle_state` · `gate_decisions[]` · the hash-chain · decision provenance · the single writer** → [gate-model](gate-model.md).
-- **The build carrier** the WI groups — the unit shape, its content fields, the provenance discriminator → [IU-schema](IU-schema.md).
+- **`lifecycle_state` · `gate_decisions[]` · the hash-chain · decision provenance · the single writer** → [gate-model](../../../references/gate-model.md).
+- **The build carrier** the WI groups — the unit shape, its content fields, the provenance discriminator → [IU-schema](../../../references/IU-schema.md).
 - **What a WI IS relationally**, the front, where the gates sit → the **graph-model** internals (local, per-consumer — not shipped or linked here).
 - **The relational carrier summary** — one-shape-not-two-kinds, the two substrates, position-is-projected → the **graph-spec** (local, per-consumer).
 - **`current_stage`** — projected, read-only → the context engine / generation model.

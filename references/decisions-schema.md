@@ -82,6 +82,6 @@ layers; the learnings-archive's own shape is its owner's.
 - **The single writer** — the mechanical two-layer write and its receipt → log-decision.
 - **The carrier's gate ledger** `gate_decisions[]` — the hash-chained per-carrier gate log, a different thing → [gate-model](gate-model.md).
 - **The store path** (`decisions_store_path`) the harness binds → [bindings-contract](bindings-contract.md).
-- **The cheap dedup lookup** over the store instance → decisions-index (a crystallised local surface in the consuming harness's `.claude/` — generated at harness-init, re-derived by log-decision on every store write; discovered via the at-hand index).
+- **The cheap dedup lookup** over the store instance → decisions-index (a crystallised harness-local surface — generated at harness-init, re-derived by log-decision on every store write; discovered via the at-hand index).
 - **The crystallised instance** — the live id-numbered corpus, runtime, in the workspace → the decision-store surface / graph-record.
 - **Term** senses (decision · provenance · crystallised) → glossary.

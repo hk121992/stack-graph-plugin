@@ -34,7 +34,8 @@ carries the product's dev surfaces, QA flows, suites, personas, and the surface�
 **presence declares which dynamic modalities to add ABOVE the floor** (absence = floor-only, never a
 skip). Verify proceeds in both regimes, over the dev env (prod-facing) or preview/local (single-main).
 
-At turn 1, load your live state through the parameterized preamble: the **batch change-set** (the
+Before any work, pass the generated carrier-entry preflight by invoking `preamble` with the active
+carrier; continue only on exit zero. Load the **batch change-set** (the
 IUs on DEV), the **touched DEV surfaces**, and dev-env health — strictly runtime-state. The
 applicable modalities are **not** injected: read them on-demand against the verify-procedure's
 surface→modality map.
@@ -68,7 +69,7 @@ guidance, not a script:
   judgment sharpens over time via the trace.
 
 Fan out the selected modalities, each in its own isolated context, in parallel. Hand each the same
-scope bundle plus the **finding contract** (the imported `findings-schema` with `severity-scale`
+scope bundle plus the **finding contract** (the required `findings-schema` with `severity-scale`
 and `confidence-anchors`), so every modality emits to one contract and the returns consolidate
 mechanically. Collect each modality's **compact** finding return — not its full report.
 
@@ -79,11 +80,11 @@ mechanically. Collect each modality's **compact** finding return — not its ful
   user-facing surfaces the batch touched.
 - **`simulate-users`** — experience or regression: for an **experience** run (`tier-1` / `tier-2`)
   a persona through the running product against the experience-contract, returning a UX verdict + AX
-  profile — pass its spawn bundle (target, mode, persona, scenario, contract), select personas and
-  spread runs across the `personas` coverage matrix, and for its `tier-2` multi-role protocol you own
-  the role spawns (it cannot self-spawn). For a **regression** run against a recorded corpus, pass its
-  spawn bundle (**target · mode · manifest** — the harness-supplied `checkpoint-manifest`); the caller
-  owns the Workflow, so you launch it from an interactive/cloud surface (it cannot self-spawn), and it
+  profile — pass its invocation bundle (target, mode, persona, scenario, contract), select personas and
+  spread runs across the `personas` coverage matrix, and for its `tier-2` multi-role protocol you run
+  each role in an isolated child context. For a **regression** run against a recorded corpus, pass its
+  invocation bundle (**target · mode · manifest** — the harness-supplied `checkpoint-manifest`); the caller
+  owns the workflow, so you launch it from a surface that supports isolated child contexts, and it
   returns a PASS/FAIL/XFAIL/XPASS conformance verdict with the node-exit `simulate-users.pass_rate`.
 - **`benchmark`** — perf, **on-demand**: invoke only for a perf-relevant change; it compares the
   page against its stored baseline and returns a regression verdict that folds into the same
@@ -165,8 +166,7 @@ test**: dispatch **`auto-shaper` (cold)** to formalise the gap and test it — *
 the parent's signed intent block) **∧ outcome-necessary** (serves a committed outcome of the
 parent's success definition) **∧ decision-completable** (no new design decision).
 
-- **Qualifies (all three)** — dispatch the **`record-gate` runner**
-  (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) to write the **`agent-provisional`**
+- **Qualifies (all three)** — invoke **`record-gate`** to write the **`agent-provisional`**
   `commit-to-build` hold (it sets `pending_retro_ratification`). **You are the asserter when you
   dispatched the shaper** — `auto-shaper` returns its qualify result to you and writes nothing;
   its own cold-mode write is the same carve-out, exercised only on a direct cold dispatch with no
@@ -193,9 +193,8 @@ When the batch is resolved (verify clean, or every residual finding a logged del
    coherence, not code), the coverage note against the declared expectation, and **every pending
    retro-ratification listed for ratify-or-drop**. The operator's real click is the attestation.
    Render per `gate-model` §Sign-off surface — widget-first from the harness's gate template,
-   `AskUserQuestion` fallback, never free prose.
-3. **On the go, dispatch the `record-gate` runner
-   (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) per promoted IU** —
+   native operator-confirmation fallback, never free prose.
+3. **On the go, invoke `record-gate` per promoted IU** —
    `commit-to-land`, `decision: promote`, advancing `in-delivery → shipped`, `evidence_refs` → the
    PR number(s) (the merge SHA lands with `land`'s enactment evidence — a follow-up append once the
    merge is real). The
@@ -219,18 +218,23 @@ hold the gate experience.
   `record-gate` on the operator's go. No carrier field written by you; no merge performed by you —
   the merge is the gate's enactment, executed downstream.
 
-## Imported references
+## Carrier entry preflight
 
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
+Before taking any workflow action, Invoke `preamble` with `--node verify --carrier <active-carrier-file> --carrier-id <active-carrier-id>`. Missing or invalid carrier input blocks the invocation. Preamble resolves the exact required state from its bundled graph-derived contract; continue only when the bundled runner exits zero. Never substitute a host hook or a hand-written state list.
 
-@references/confidence-anchors.md
-@references/findings-schema.md
-@references/severity-scale.md
+
+## Required references
+
+Before taking any action, read these bundled references:
+
+- [confidence-anchors](references/confidence-anchors.md)
+- [findings-schema](references/findings-schema.md)
+- [severity-scale](references/severity-scale.md)
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/architecture-doctrine.md` — `architecture-doctrine`
-- `references/gate-model.md` — `gate-model`
+- [architecture-doctrine](references/architecture-doctrine.md)
+- [gate-model](references/gate-model.md)
 

@@ -45,11 +45,9 @@ premise is *finalised* and the draft is *sound*, not that the conversation is la
 One shared spine; step 5 routes to the track's own steps. Two exits can occur early —
 resolved-to-existing at step 2, declined at any gate (§Done when).
 
-0. **Run the turn-1 preamble.** Run the deterministic JIT preamble
-   (`${CLAUDE_PLUGIN_ROOT}/scripts/preamble/preamble.py` — invocation shape per the `preamble`
-   node's §Invocation) with triage's declared `required-state`
-   (`--required-state triage-source-queue,open-iu-manifest` — the C2 list on the
-   `bindings-contract` edge) and parse the `KEY: VALUE` emit: the pending candidates awaiting
+0. **Run the generated carrier-entry preflight.** Invoke `preamble`; the generated block identifies
+   this entered skill, and the bundled graph contract resolves the declaration on the
+   `bindings-contract` edge. Parse the `KEY: VALUE` emit: the pending candidates awaiting
    triage and the in-flight IUs. No `--carrier-id` — you create carriers rather than find one.
    **A degraded emit (`absent` / fallback) is a harness defect, not empty state** — an unbound or
    mis-pointed binding, or an emitter gap: fix the binding (or raise the emitter gap) so the next
@@ -60,7 +58,7 @@ resolved-to-existing at step 2, declined at any gate (§Done when).
 1. **Confirm the intake.** The operator may pass the improvement statement and, optionally, the
    `triage-source` it was raised from. A seeded candidate from the queue is a **suggestion, not an
    instruction to create work** — confirm it with the operator first (the auto-feed is input-gated;
-   you read the binding, you never auto-spawn). A cold intake (a queued candidate, no live context)
+   you read the binding, you never invoke it automatically). A cold intake (a queued candidate, no live context)
    that cannot reach decision-complete in this session routes full — there is no parked needs-info
    state.
 2. **Scan the open-IU manifest** — from step 0's emit; the fetch was the preamble's, the scan is
@@ -167,13 +165,13 @@ U4. **Continue into `shape`** — the front owns depth/tool routing from here. *
 
 The gate experience runs in this session; the record is `record-gate`'s. Both gates you fire
 (intent-to-build; the fast re-take's commit-to-build) follow **`gate-model` §Sign-off surface —
-imported above; follow it to the letter**: the surface is rendered FROM the carrier at fire time
+listed as required above; follow it to the letter**: the surface is rendered FROM the carrier at fire time
 (single-source, sanitised), widget-first from the harness's per-gate template — resolve the
 `gate-sign-off/` home through its work-ledger binding, pick this gate's template from the home's
 index (e.g. `intent-to-build-widget.html` / `commit-to-build-widget.html`) — degrading only on
-genuine absence, and ending at `AskUserQuestion`; **plain chat text never puts a gate**. The
-operator's **real click is the attestation**; then dispatch the `record-gate` runner (the single
-mechanical writer, `${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`, via bun/node) with
+genuine absence, and ending at the host's native operator-confirmation control; **plain chat text never puts a gate**. The
+operator's **real click is the attestation**; then invoke `record-gate`, the single
+mechanical writer, with
 the decision. Transitions: a work-item's intent-to-build advances `idea → discovery`; a standalone
 IU's intent-to-build records the no-advance genesis (`seq 0`, `--kind standalone-iu`); the fast
 re-take's commit-to-build advances the standalone IU to `committed` — the build event, not a front
@@ -203,18 +201,23 @@ Triage ends in exactly one of these states:
 Every exit: you wrote **no IU content field** (the shaper's), **no lifecycle or gate field**
 (record-gate's), **no manifest row** (`refresh-manifest`'s).
 
-## Imported references
+## Carrier entry preflight
 
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
+Before taking any workflow action, Invoke `preamble` with `--node triage`; pass no carrier because this is the graph-declared carrier-creating entry. Preamble resolves the exact required state from its bundled graph-derived contract; continue only when the bundled runner exits zero. Never substitute a host hook or a hand-written state list.
 
-@references/IU-schema.md
-@references/gate-model.md
-@references/routing-principles.md
+
+## Required references
+
+Before taking any action, read these bundled references:
+
+- [IU-schema](references/IU-schema.md)
+- [gate-model](references/gate-model.md)
+- [routing-principles](references/routing-principles.md)
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/bindings-contract.md` — `bindings-contract`
-- `references/work-item-schema.md` — `work-item-schema`
+- [bindings-contract](references/bindings-contract.md)
+- [work-item-schema](references/work-item-schema.md)
 

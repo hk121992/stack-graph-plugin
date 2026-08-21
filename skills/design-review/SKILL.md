@@ -107,7 +107,7 @@ verification verdict.
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/ux-principles.md` — `ux-principles`
+- [ux-principles](references/ux-principles.md)
 

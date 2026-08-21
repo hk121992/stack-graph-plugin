@@ -16,7 +16,7 @@ related: [checkpoint-manifest-schema, findings-schema]
 # Checkpoint driver — the deterministic-regression process
 
 The product-agnostic **process** the `simulate-users` deterministic-regression mode runs: replay a
-harness-supplied scenario corpus through a Claude Workflow, assert each replayed turn against a **closed
+harness-supplied scenario corpus through an isolated workflow runner, assert each replayed turn against a **closed
 vocabulary** plus one example-anchored `judge`, and return per-scenario PASS/FAIL/XFAIL/XPASS with a
 `pass_rate`. Every consumer runs this **identical** process against a different app; only its
 [checkpoint-manifest](checkpoint-manifest-schema.md) content differs. This reference fixes the do-this;
@@ -42,7 +42,7 @@ regardless of order. A malformed assertion (unknown operator, a missing required
 
 | operator | asserts | kind |
 |---|---|---|
-| `skill_invoked <id>` | the agent routed into this skill / sub-agent this turn | deterministic |
+| `skill_invoked <id>` | the runtime invoked this skill during the turn | deterministic |
 | `state_file_written <name>` | a tracked state file changed this turn (filesystem diff, or an explicit write-tool path) | deterministic |
 | `reply_excludes_secret [<name>]` | none of the live secret VALUES echoes in the agent's user-visible text ([§secret-guard](#secret-guard)) | deterministic |
 | `judge <criterion>` | LLM-as-judge on a genuinely-semantic criterion — one batched call per scenario ([§judge](#judge)) | model |
@@ -62,11 +62,10 @@ live at run time only; committed config never carries them.
 
 ## The Workflow driver pattern {#driver}
 
-The caller runs the loop as a **Claude Workflow script** — orchestration only, no direct filesystem/Node
-API in the Workflow body. Its two LLM touchpoints (the per-turn run, the per-scenario judge) execute as
-**schema-validated `agent()` subagents**; every deterministic step (the preconditions gate, state
-materialisation, the closed-vocabulary evaluator, burn-in aggregation, the run-log append) is invoked as a
-plain step, not run inline in the body.
+The caller runs the loop as an **isolated workflow**. Its two model touchpoints — the per-turn run and
+the per-scenario judge — each run in an isolated child context and return a schema-validated result.
+The preconditions gate, state materialisation, closed-vocabulary evaluator, burn-in aggregation, and
+run-log append remain deterministic steps.
 
 **`meta` + 3 phases.** Declare `meta` (name · description · `phases`) and drive three phases in order:
 
@@ -74,35 +73,35 @@ plain step, not run inline in the body.
    per-scenario plan (cwd · verbatim input · load-flags · resume-base · judge criteria · the assembled judge
    prompt) **without running any LLM turn**. A gate miss returns `BLOCKED` and the Workflow stops
    ([§preconditions](#inv-preconditions)).
-2. **`driver-loop`** — run every scenario through both stages with `pipeline()` ([§stages](#stages)).
+2. **`driver-loop`** — run every scenario through both stages ([§stages](#stages)).
 3. **`aggregate`** — the deterministic step consumes the per-turn + judge handoffs, runs the assertion
    evaluator + burn-in aggregation, writes the per-scenario verdicts, **appends the committed run-log line**,
    and emits the outcome + `pass_rate`.
 
-### `pipeline()` — the two stages {#stages}
+### The two stages {#stages}
 
-`pipeline(scenarios, perTurn, judge)` runs each scenario through two independent stages:
+Run each scenario through two independent stages:
 
-- **Stage 1 — the per-turn subagent.** Dispatch an `agent()` that performs the turn's REAL actions in the
-  materialised cwd and returns the turn's **`stream-json` transcript** verbatim — the same stream shape the
-  deterministic trace/assertion layer consumes. Emitting that transcript is the whole contract; the
-  deterministic step reconstructs the trace from it. If the subagent dies, record the scenario blocked
+- **Stage 1 — the per-turn isolated child context.** Run the turn's real actions in the materialised
+  working directory and return a complete structured transcript in the shape the deterministic
+  trace/assertion layer consumes. If the child context fails, record the scenario blocked
   downstream (never a silent pass).
-- **Stage 2 — the judge subagent.** Only if stage 1 succeeded and the scenario has judge criteria. Dispatch
-  the pre-assembled judge prompt as a **schema-validated** `agent(prompt, { schema })` ([§judge](#judge)).
+- **Stage 2 — the judge role in an isolated child context.** Only if stage 1 succeeded and the
+  scenario has judge criteria, run the pre-assembled judge prompt in an isolated child context and
+  require the structured result defined in [§judge](#judge).
 
-### The `pyStep()` glue seam {#pystep}
+### The deterministic glue seam {#pystep}
 
-The Workflow touches the filesystem and the deterministic engine through **one** seam: dispatch a low-effort
-`agent()` that runs EXACTLY one shell command and returns its raw stdout verbatim — no preamble, no edits.
-This keeps the Workflow body pure and the deterministic step the source of truth (the per-turn / judge
-handoffs are written and read through this seam). A step that produces no output is `BLOCKED`, not skipped.
+The workflow touches the filesystem and deterministic engine through **one** seam: run the bundled
+driver script with exactly one operation and consume its raw output without interpretation. This keeps
+the workflow body pure and the deterministic step the source of truth. A step that produces no output
+is `BLOCKED`, not skipped.
 
-### The judge subagent's output schema {#judge-schema}
+### The judge role's output schema {#judge-schema}
 
-The judge subagent is dispatched with a **StructuredOutput schema** that forces one `{ passed, reason }`
-object per criterion, in criterion order — a boolean verdict plus a short reason, and nothing else. The
-schema replaces only the OUTPUT contract, not the prompt. Map the validated object back onto the verdict
+The judge role returns one schema-validated `{ passed, reason }` object per criterion, in criterion
+order — a boolean verdict plus a short reason, and nothing else. The schema replaces only the output
+contract, not the prompt. Map the validated object back onto the verdict
 list the evaluator's `judge` operator consumes; a missing / short / non-boolean verdict defaults to **fail**
 (an unparseable judge reply never silently passes).
 

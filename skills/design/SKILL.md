@@ -114,11 +114,11 @@ dedup / corroborate / confidence-gate / severity-route reduction.
 
 - Run the lenses **strategy-first, then parallel**: lead with the design-altitude lenses, then fan
   the remaining active lenses out in parallel.
-- As you fan out, pass each lens its own spawn prompt carrying the **target** (`doc`) and the
+- As you fan out, pass each lens its own invocation prompt carrying the **target** (`doc`) and the
   design doc's contents, the **scope-rules** and intent summary, and the **finding contract** — the
-  finding schema, severity scale, and confidence anchors, which you hold from your imported
+  finding schema, severity scale, and confidence anchors, which you hold from the required
   references — so every lens emits to the same contract.
-- **You do not direct-invoke the lenses.** They declare `composes-into @design` from their own
+- **You do not direct-invoke the lenses.** They declare `composes-into design` from their own
   side; you reach them only through the dispatch reference (exactly as `review` reaches them with
   `target: diff`). Each lens returns the compact finding tier; the dispatch reduces those returns
   to one ranked, routed finding set.
@@ -134,12 +134,12 @@ Produce the **design doc** to a harness surface:
 
 - Record the **resolved design decisions** — each as a structured row: the **design question**, the
   **decision** that settles it (outcome-driven), its **confidence** (a `confidence-anchors` value —
-  the same discrete rubric you hold from the imported finding contract, applied to your own
+  the same discrete rubric you hold from the required finding contract, applied to your own
   resolution), and the **primary alternative** considered. A low-confidence decision recorded as
   such travels with its uncertainty into specify/plan instead of reading as settled; the alternative
   is the record specify needs when a touchpoint supersedes a prior spec section. (This mirrors the
   experience-contract's own evidence discipline; it reuses the `confidence-anchors` reference design
-  already imports — no new reference.)
+  already declares required — no new reference.)
 - Carry an explicit **Spec touchpoints** table — for each touched spec area, the *spec doc*, the
   *section*, and the *relationship* (amend / add / supersede / reference). This table is what
   `specify` turns into the canonical amendment; produce it here so `specify` does not reconstruct
@@ -171,7 +171,7 @@ the four parts plus the evidence state:
   `confirmed`, so the contract matures with the product.
 
 Hold the experience content to **`ux-principles`** — the design family's shared UX standard, which
-you hold imported: author invariants and failure modes that meet it (the verify span's UX grading
+you read before action: author invariants and failure modes that meet it (the verify span's UX grading
 reads the same standard). This is the **design-time end of the experience thread**: the contract
 you author here is the same artefact `simulate-users` grades against at verify. Authoring or
 refining it now is what keeps `simulate-users` from running against a missing or stale contract.
@@ -236,20 +236,20 @@ budgets + intended tool-path, to the harness surface, conforming to the schema. 
 - **No carrier write.** Completing design is the signal the projection picks up to advance
   `current_stage`; the lifecycle and gate decisions remain the operator's.
 
-## Imported references
+## Required references
 
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
+Before taking any action, read these bundled references:
 
-@references/confidence-anchors.md
-@references/findings-schema.md
-@references/operator-interview.md
-@references/severity-scale.md
-@references/ux-principles.md
+- [confidence-anchors](references/confidence-anchors.md)
+- [findings-schema](references/findings-schema.md)
+- [operator-interview](references/operator-interview.md)
+- [severity-scale](references/severity-scale.md)
+- [ux-principles](references/ux-principles.md)
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/experience-contract-schema.md` — `experience-contract-schema`
-- `references/lens-dispatch.md` — `lens-dispatch`
+- [experience-contract-schema](references/experience-contract-schema.md)
+- [lens-dispatch](references/lens-dispatch.md)
 

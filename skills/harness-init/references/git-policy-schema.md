@@ -16,7 +16,7 @@ related: [bindings-contract, sg-root-instructions, product-dashboard-conventions
 # Git-policy schema — the crystallised per-repo/path write policy
 
 The shape of a harness's **crystallised git policy**: the per-write-target graduation map every git-writing
-node reads off the floor (`@git-policy`, carried by `sg-root-instructions`) before any git write. The factory
+node reads from the materialized `git-policy` surface named by `sg-root-instructions` before any git write. The factory
 ships this **schema** (general, no values); each harness **crystallises its instance** — the actual repos,
 paths, and modes — via `harness-init`. Definition (vendored → here) vs instance (crystallised → the local
 `git-policy` surface).
@@ -44,18 +44,18 @@ re-encodes the decision; the crystallised map is the single source.
 ## Crystallisation
 
 `harness-init` authors the instance from the harness's git topology and materializes it to the local
-`git-policy` surface, `@`-ref'd as `@git-policy` from `sg-root-instructions` (so the resolved policy reaches
-the floor, read directly). The instance carries the harness's real repos/paths; this schema carries only the
+`git-policy` surface named by `sg-root-instructions` (so the resolved policy reaches the
+floor and is read directly). The instance carries the harness's real repos/paths; this schema carries only the
 shape. Illustrative instance (not normative):
 
 ```
 - <repo-a>/                 : direct
-- <repo-b>/.claude/**       ⇒ pr-gated (label `<policy-label>`)
+- <repo-b>/<harness-local-root>/** ⇒ pr-gated (label `<policy-label>`)
 - <repo-c>/                 : pr-gated (label `<factory-label>`)
 ```
 
 ## Cite out
 
-- **The floor trigger** an agent reads first → `sg-root-instructions` §Git-operations (carries `@git-policy`).
+- **The floor trigger** the model reads first → `sg-root-instructions` §Git-operations (requires the materialized `git-policy` surface).
 - **The bindings seam** (where a harness declares its instance / inputs) → `bindings-contract`.
 - **Why the dial exists, the taxonomy, the mechanism** → the local `devops-loops` reference.

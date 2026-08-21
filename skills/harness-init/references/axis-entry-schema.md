@@ -87,7 +87,7 @@ behavioural:
 - A **scopeless horizontal** narrows to the vertical's region alone.
 - **Both scopeless** → the zone has **no code region**; rules still apply by authored scope.
 - The **code-map absent** (a fresh clone, tooling missing) → the resolver degrades to running the
-  scope globs directly with Glob/Grep (the same degradation `explore`'s `repo` mode uses). The
+  scope globs directly with file search (the same degradation `explore`'s `repo` mode uses). The
   **rule half of resolution has no code-map dependency at all** — it is pure frontmatter — so the
   most valuable output never degrades; only the code-region narrowing does.
 
@@ -148,7 +148,7 @@ runtimes: [<name>, ...]             # optional
 The brief states the **policy**, not instance values — "available: X, Y; adding a dependency is gated,"
 never a lock-file's exact pins (those live in the code). It **specialises**, and never restates, the
 global-tier doctrine a consumer already carries (`architecture-doctrine` · `test-discipline`), which stays
-directly imported, not resolved through the zone.
+declared required directly, not resolved through the zone.
 
 ## Resolving a coordinate — cell and column queries
 

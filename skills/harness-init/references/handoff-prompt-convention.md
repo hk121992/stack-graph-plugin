@@ -47,10 +47,10 @@ allowlists), so a malformed token degrades to a null attribution at the publishe
   session already has. Padding is the failure mode.
 - **Paths over prose.** A `file:line` or a repo-relative path beats a paragraph describing where
   something lives.
-- **Policy by pointer, never by copy.** Copied policy goes stale between spawn and execution; the
+- **Policy by pointer, never by copy.** Copied policy goes stale between invocation and execution; the
   hooks enforce it anyway at the moment of violation; and the cold session auto-loads the repo
-  `CLAUDE.md`. So name the policy by its on-disk home — never paste it in.
-- **`POL:` refs must resolve cold — on-disk only, never project memory.** A chip-spawned worktree
+  `root instruction projections`. So name the policy by its on-disk home — never paste it in.
+- **`POL:` refs must resolve cold — on-disk only, never project memory.** An isolated worktree
   session may not key the same memory directory, so a `POL:` pointer into project memory may resolve
   to nothing. If a fact's only home is memory, that is a **routing gap to fix first** (give the fact
   an on-disk home), not a reason to inline it.
@@ -72,7 +72,7 @@ PR numbers.
 ## One home for cold-handoff doctrine
 
 The same convention covers **dispatch prompts** and **return envelopes** (both already
-field-shaped): a dispatch prompt is a handoff into a sub-agent, an envelope is a handoff back. This
+field-shaped): a dispatch prompt is a handoff into an isolated child context, an envelope is a handoff back. This
 reference is the **single home** for cold-handoff message doctrine — author all three against this
 field form. The dispatch prompt's `META:` line doubles as the **attribution source** the
 transcript-derived analytics reads (the A↔C convergence): formalising the envelope here makes a

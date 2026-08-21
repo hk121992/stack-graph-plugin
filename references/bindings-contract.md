@@ -30,7 +30,7 @@ the **harness-topology** spec's (local, per-consumer); this fixes the contract t
 
 ## The bindings mechanism {#mechanism}
 
-- A single **flat-key file** at the fixed overlay location (`.claude/bindings.yaml`): top-level keys → workspace
+- A single **flat-key file** at the fixed overlay location (`<bindings-surface>`): top-level keys → workspace
   paths, or small scalars for the dial keys.
 - A node **resolves the key it needs, then reads the value** — it never hardcodes a path or restates the key
   list.
@@ -88,9 +88,9 @@ terminal-recorder: <mechanism>                   # what freezes the final metric
 A node resolves the key and acts on the value; the durable contract is the **key set and each key's role**, never
 the harness's chosen value.
 
-**The git-policy policy is not a dial** — it is a crystallised surface, `@git-policy` (shape:
-[git-policy-schema](git-policy-schema.md)): a per-repo/path map with labels that a git-writing agent reads off the
-floor. `harness-init` materializes it into `.claude/`, `@`-ref'd by `sg-root-instructions`; it is not a
+**The git-policy policy is not a dial** — it is a crystallised `git-policy` surface (shape:
+[git-policy-schema](git-policy-schema.md)): a per-repo/path map with labels that a git-writing runtime reads off the
+floor. `harness-init` materializes it into the harness and `sg-root-instructions` requires it; it is not a
 `bindings.yaml` scalar. This contract fixes only the binding seam that resolves the harness's other surfaces and
 dials.
 

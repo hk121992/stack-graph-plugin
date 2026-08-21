@@ -28,7 +28,7 @@ value-spaces (lifecycle-state names, gate fields) — those live in the schema r
 
 - **node** — a primitive that **owns control flow** (it branches or sequences). Only control-flow-owning primitives are nodes. → graph-model
 - **edge** — a typed, directed relationship between nodes; the type fixes whether it may cycle. → graph-model *(the type taxonomy is graph-spec's)*
-- **inline** — content with no control flow of its own — a small reference, a tool call, an execution surface (a worktree, a headless browser); rides a native primitive, **neither node nor edge**. → graph-model
+- **inline execution** — a skill runs in the invoking context; the sibling policy, **isolated execution**, runs the same skill in a fresh child context and returns a summary. → graph-model
 - **reference** — shared content as a **single-source native artefact** (not an injected block); owns no control flow, so it is **not a node**. → graph-spec
 - **carrier** — the live work-state file for **one unit of work**. Two kinds share the runtime band: the **build carrier** (an IU) and the **grouping carrier** (a work-item). → IU-schema · work-item-schema
 - **gate** — a recorded go/no-go transition on a carrier at a stage boundary — an **attested decision**, not a node or edge, gathering no context of its own. → graph-spec
@@ -46,8 +46,8 @@ value-spaces (lifecycle-state names, gate fields) — those live in the schema r
 The three orthogonal axes every node and reference carries — kept separate by design:
 
 - **entropy (level)** — *how durable*: **L1** (vocabulary) · **L2** (durable doctrine) · **L3** (paths, values, instances). A doc is durable only if **all** of it is — any L3 contaminant demotes the whole (**mixed → L3**). → context-layer
-- **cadence** — *when it reaches the agent* (closed enum): **always-on** (the floor, `@`-inlined) · **on-demand** (viewer-rendered, navigated at need) · **process-reference** (node-carried, read only inside its owning node). → generation-model
-- **provenance** — *who authored it*: **vendored** (factory-authored, shipped **verbatim** to every consumer via the plugin) vs **local** (the harness's own, in its `.claude/`). Picks the placement home. → generation-model
+- **cadence** — *when it reaches the agent* (closed enum): **always-on** (the floor, loaded) · **on-demand** (viewer-rendered, navigated at need) · **process-reference** (node-carried, read only inside its owning node). → generation-model
+- **provenance** — *who authored it*: **vendored** (factory-authored, shipped **verbatim** to every consumer via the plugin) vs **local** (the harness's own, in its local canonical store). Picks the placement home. → generation-model
 
 ## Composition & generation {#composition}
 
@@ -56,7 +56,7 @@ The three orthogonal axes every node and reference carries — kept separate by 
 - **binding** — the indirection by which a vendored node resolves the **logical keys it requires** (paths into its workspace) against the harness's bindings reference, on demand at the step of need. → harness-topology
 - **crystallised** — local content **instantiated in the harness** from a (vendored) schema or template and filled with product values — e.g. `bindings.yaml` from `bindings-contract`, the dashboard from its conventions; the counterpart to **vendored** (shipped verbatim). → harness-topology
 - **factory** — where the vendored graph is authored; `generate` projects it into the plugin. → generation-model
-- **generate** — the deterministic function that **places** the authored graph into shipped artifacts (the vendored graph into the plugin, the floor cores into `.claude/`); it places, **never authors**. → generation-model
+- **generate** — the deterministic function that **places** the authored graph into shipped artifacts (the vendored graph into the plugin; harness lifecycle projects floor cores into each host); it places, **never authors**. → generation-model
 
 ## The operator interview {#operator-interview}
 

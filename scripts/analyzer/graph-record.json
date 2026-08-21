@@ -1,11 +1,12 @@
 {
   "generated": "2026-08-18T13:46:02Z",
-  "node_count": 46,
+  "node_count": 45,
   "reference_count": 36,
-  "edge_count": 240,
+  "edge_count": 246,
   "nodes": {
     "architecture-review": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -40,7 +41,8 @@
       }
     },
     "auto-shaper": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -62,7 +64,7 @@
         "references": [
           {
             "id": "IU-schema",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "pr-description-shape",
@@ -97,7 +99,8 @@
       }
     },
     "benchmark": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -122,6 +125,7 @@
     },
     "build": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -130,6 +134,9 @@
       "status": "v0.1.0 — 2026-07-01",
       "edges": {
         "invokes": [
+          {
+            "id": "preamble"
+          },
           {
             "id": "debug"
           },
@@ -146,15 +153,15 @@
         "references": [
           {
             "id": "test-discipline",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "architecture-doctrine",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "IU-schema",
-            "load": "import",
+            "load": "required",
             "required-state": [
               "goal",
               "files",
@@ -184,7 +191,8 @@
       }
     },
     "canary": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -213,7 +221,8 @@
       }
     },
     "capture-learnings": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -230,25 +239,9 @@
         ]
       }
     },
-    "carrier-arg-hook": {
-      "primitive": "script",
-      "mode": "autonomous",
-      "provenance": "vendored",
-      "cadence": "on-demand",
-      "level": "L3",
-      "title": "Carrier-arg hook",
-      "status": "v0.1.0 — 2026-07-17",
-      "edges": {
-        "references": [
-          {
-            "id": "bindings-contract",
-            "load": "on-demand"
-          }
-        ]
-      }
-    },
     "consistency-checker": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -266,6 +259,7 @@
     },
     "context-curator": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -314,6 +308,7 @@
     },
     "debrief": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -322,6 +317,9 @@
       "status": "v0.1.0 — 2026-07-01",
       "edges": {
         "invokes": [
+          {
+            "id": "preamble"
+          },
           {
             "id": "measure-outcomes"
           },
@@ -338,7 +336,17 @@
         "references": [
           {
             "id": "work-item-schema",
-            "load": "on-demand"
+            "load": "on-demand",
+            "required-state": [
+              "landed_ius",
+              "improves",
+              "work_item_completion",
+              "success_definitions",
+              "objectives",
+              "frozen_metrics",
+              "learnings_archive",
+              "decisions_index"
+            ]
           },
           {
             "id": "IU-schema",
@@ -364,6 +372,7 @@
     },
     "debug": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -386,6 +395,7 @@
     },
     "deploy": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -415,6 +425,7 @@
     },
     "design": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -434,23 +445,23 @@
           },
           {
             "id": "findings-schema",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "severity-scale",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "confidence-anchors",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "ux-principles",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "operator-interview",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "experience-contract-schema",
@@ -477,6 +488,7 @@
     },
     "design-implement": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -505,6 +517,7 @@
     },
     "design-review": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -528,6 +541,7 @@
     },
     "design-shotgun": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -556,6 +570,7 @@
     },
     "dispatch": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -564,6 +579,9 @@
       "status": "v0.1.0 — 2026-07-01",
       "edges": {
         "invokes": [
+          {
+            "id": "preamble"
+          },
           {
             "id": "build"
           },
@@ -577,7 +595,15 @@
         "references": [
           {
             "id": "IU-schema",
-            "load": "import"
+            "load": "required",
+            "required-state": [
+              "iu_queue",
+              "dependencies",
+              "build_review_state",
+              "dev_branch_state",
+              "parked_route_outs",
+              "zone"
+            ]
           },
           {
             "id": "handoff-prompt-convention",
@@ -608,7 +634,8 @@
       }
     },
     "drift-detector": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -631,7 +658,8 @@
       }
     },
     "explore": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -654,6 +682,7 @@
     },
     "harness-init": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -664,7 +693,7 @@
         "references": [
           {
             "id": "bindings-contract",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "git-policy-schema",
@@ -723,6 +752,7 @@
     },
     "harness-update": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -738,7 +768,7 @@
         "references": [
           {
             "id": "bindings-contract",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "sg-root-instructions",
@@ -753,7 +783,8 @@
       }
     },
     "health": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -777,7 +808,8 @@
       }
     },
     "investigate-probe": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -788,6 +820,7 @@
     },
     "land": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -796,6 +829,9 @@
       "status": "v0.1.0 — 2026-07-01",
       "edges": {
         "invokes": [
+          {
+            "id": "preamble"
+          },
           {
             "id": "deploy"
           },
@@ -814,7 +850,15 @@
           },
           {
             "id": "IU-schema",
-            "load": "on-demand"
+            "load": "on-demand",
+            "required-state": [
+              "promotion_set",
+              "deploy_status",
+              "health_status",
+              "canary_status",
+              "commit_to_land_state",
+              "live_confirmed_state"
+            ]
           },
           {
             "id": "work-item-schema",
@@ -844,7 +888,8 @@
       }
     },
     "lens-correctness": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -869,7 +914,8 @@
       }
     },
     "lens-maintainability": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -900,7 +946,8 @@
       }
     },
     "lens-security": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -925,7 +972,8 @@
       }
     },
     "lens-tests": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -956,7 +1004,8 @@
       }
     },
     "link-validator": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -967,6 +1016,7 @@
     },
     "local-graph-maintainer": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -983,7 +1033,8 @@
       }
     },
     "log-decision": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -994,13 +1045,14 @@
         "references": [
           {
             "id": "decisions-schema",
-            "load": "import"
+            "load": "required"
           }
         ]
       }
     },
     "measure-outcomes": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1027,6 +1079,7 @@
     },
     "optimise": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1059,6 +1112,7 @@
     },
     "plan": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1074,7 +1128,7 @@
         "references": [
           {
             "id": "IU-schema",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "lens-dispatch",
@@ -1082,15 +1136,15 @@
           },
           {
             "id": "findings-schema",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "severity-scale",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "confidence-anchors",
-            "load": "import"
+            "load": "required"
           }
         ],
         "can-follow": [
@@ -1107,7 +1161,8 @@
       }
     },
     "preamble": {
-      "primitive": "script",
+      "primitive": "skill",
+      "execution": "inline",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "always-on",
@@ -1133,6 +1188,7 @@
     },
     "qa": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1149,13 +1205,14 @@
         "references": [
           {
             "id": "findings-schema",
-            "load": "import"
+            "load": "required"
           }
         ]
       }
     },
     "queue-checker": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1165,7 +1222,8 @@
       "edges": {}
     },
     "record-gate": {
-      "primitive": "script",
+      "primitive": "skill",
+      "execution": "inline",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1176,7 +1234,7 @@
         "references": [
           {
             "id": "gate-model",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "IU-schema",
@@ -1195,6 +1253,7 @@
     },
     "review": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1226,15 +1285,15 @@
           },
           {
             "id": "findings-schema",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "severity-scale",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "confidence-anchors",
-            "load": "import"
+            "load": "required"
           }
         ],
         "composes-into": [
@@ -1247,6 +1306,7 @@
     },
     "shape": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1255,6 +1315,9 @@
       "status": "v0.1.0 — 2026-07-01",
       "edges": {
         "invokes": [
+          {
+            "id": "preamble"
+          },
           {
             "id": "shape-product"
           },
@@ -1286,27 +1349,31 @@
         "references": [
           {
             "id": "routing-principles",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "product-dashboard-conventions",
             "load": "on-demand",
             "required-state": [
+              "settled_decisions",
+              "signed_intent",
+              "open_ius",
+              "spec_status",
               "lifecycle_state",
               "stage"
             ]
           },
           {
             "id": "confidence-anchors",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "findings-schema",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "operator-interview",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "lens-dispatch",
@@ -1337,6 +1404,7 @@
     },
     "shape-product": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1347,11 +1415,11 @@
         "references": [
           {
             "id": "four-risks",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "okr-schema",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "strategy-canvas",
@@ -1373,7 +1441,8 @@
       }
     },
     "simulate-users": {
-      "primitive": "agent",
+      "primitive": "skill",
+      "execution": "isolated",
       "mode": "autonomous",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1420,6 +1489,7 @@
     },
     "specify": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1467,6 +1537,7 @@
     },
     "strategy-curator": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1485,7 +1556,7 @@
         "references": [
           {
             "id": "four-risks",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "okr-schema",
@@ -1512,6 +1583,7 @@
     },
     "triage": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1520,6 +1592,9 @@
       "status": "v0.2.0 — 2026-07-14",
       "edges": {
         "invokes": [
+          {
+            "id": "preamble"
+          },
           {
             "id": "auto-shaper"
           },
@@ -1533,11 +1608,11 @@
         "references": [
           {
             "id": "routing-principles",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "IU-schema",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "work-item-schema",
@@ -1553,7 +1628,7 @@
           },
           {
             "id": "gate-model",
-            "load": "import"
+            "load": "required"
           }
         ],
         "precedes": [
@@ -1571,6 +1646,7 @@
     },
     "verify": {
       "primitive": "skill",
+      "execution": "inline",
       "mode": "collaborative",
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1579,6 +1655,9 @@
       "status": "v0.1.0 — 2026-07-01",
       "edges": {
         "invokes": [
+          {
+            "id": "preamble"
+          },
           {
             "id": "qa"
           },
@@ -1609,15 +1688,20 @@
           },
           {
             "id": "findings-schema",
-            "load": "import"
+            "load": "required",
+            "required-state": [
+              "batch_change_set",
+              "touched_dev_surfaces",
+              "dev_env_health"
+            ]
           },
           {
             "id": "severity-scale",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "confidence-anchors",
-            "load": "import"
+            "load": "required"
           },
           {
             "id": "architecture-doctrine",
@@ -1706,7 +1790,6 @@
       "title": "Bindings contract — the harness instantiation seam",
       "status": "drafted",
       "consumed_by": [
-        "carrier-arg-hook",
         "harness-init",
         "harness-update",
         "preamble",
@@ -2163,7 +2246,7 @@
       "from": "auto-shaper",
       "to": "IU-schema",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "auto-shaper",
@@ -2209,6 +2292,11 @@
     },
     {
       "from": "build",
+      "to": "preamble",
+      "type": "invokes"
+    },
+    {
+      "from": "build",
       "to": "debug",
       "type": "invokes"
     },
@@ -2237,19 +2325,27 @@
       "from": "build",
       "to": "test-discipline",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "build",
       "to": "architecture-doctrine",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "build",
       "to": "IU-schema",
       "type": "references",
-      "load": "import"
+      "load": "required",
+      "required-state": [
+        "goal",
+        "files",
+        "acceptance",
+        "verification",
+        "finding",
+        "dev_tip"
+      ]
     },
     {
       "from": "build",
@@ -2285,12 +2381,6 @@
       "type": "references",
       "load": "on-demand",
       "external": true
-    },
-    {
-      "from": "carrier-arg-hook",
-      "to": "bindings-contract",
-      "type": "references",
-      "load": "on-demand"
     },
     {
       "from": "consistency-checker",
@@ -2351,6 +2441,11 @@
     },
     {
       "from": "debrief",
+      "to": "preamble",
+      "type": "invokes"
+    },
+    {
+      "from": "debrief",
       "to": "measure-outcomes",
       "type": "invokes"
     },
@@ -2379,7 +2474,17 @@
       "from": "debrief",
       "to": "work-item-schema",
       "type": "references",
-      "load": "on-demand"
+      "load": "on-demand",
+      "required-state": [
+        "landed_ius",
+        "improves",
+        "work_item_completion",
+        "success_definitions",
+        "objectives",
+        "frozen_metrics",
+        "learnings_archive",
+        "decisions_index"
+      ]
     },
     {
       "from": "debrief",
@@ -2448,31 +2553,31 @@
       "from": "design",
       "to": "findings-schema",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "design",
       "to": "severity-scale",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "design",
       "to": "confidence-anchors",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "design",
       "to": "ux-principles",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "design",
       "to": "operator-interview",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "design",
@@ -2540,6 +2645,11 @@
     },
     {
       "from": "dispatch",
+      "to": "preamble",
+      "type": "invokes"
+    },
+    {
+      "from": "dispatch",
       "to": "build",
       "type": "invokes"
     },
@@ -2563,7 +2673,15 @@
       "from": "dispatch",
       "to": "IU-schema",
       "type": "references",
-      "load": "import"
+      "load": "required",
+      "required-state": [
+        "iu_queue",
+        "dependencies",
+        "build_review_state",
+        "dev_branch_state",
+        "parked_route_outs",
+        "zone"
+      ]
     },
     {
       "from": "dispatch",
@@ -2621,7 +2739,7 @@
       "from": "harness-init",
       "to": "bindings-contract",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "harness-init",
@@ -2696,7 +2814,7 @@
       "from": "harness-update",
       "to": "bindings-contract",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "harness-update",
@@ -2721,6 +2839,11 @@
       "type": "references",
       "load": "on-demand",
       "external": true
+    },
+    {
+      "from": "land",
+      "to": "preamble",
+      "type": "invokes"
     },
     {
       "from": "land",
@@ -2754,7 +2877,15 @@
       "from": "land",
       "to": "IU-schema",
       "type": "references",
-      "load": "on-demand"
+      "load": "on-demand",
+      "required-state": [
+        "promotion_set",
+        "deploy_status",
+        "health_status",
+        "canary_status",
+        "commit_to_land_state",
+        "live_confirmed_state"
+      ]
     },
     {
       "from": "land",
@@ -2872,7 +3003,7 @@
       "from": "log-decision",
       "to": "decisions-schema",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "measure-outcomes",
@@ -2931,7 +3062,7 @@
       "from": "plan",
       "to": "IU-schema",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "plan",
@@ -2943,19 +3074,19 @@
       "from": "plan",
       "to": "findings-schema",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "plan",
       "to": "severity-scale",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "plan",
       "to": "confidence-anchors",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "plan",
@@ -2990,13 +3121,13 @@
       "from": "qa",
       "to": "findings-schema",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "record-gate",
       "to": "gate-model",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "record-gate",
@@ -3057,19 +3188,24 @@
       "from": "review",
       "to": "findings-schema",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "review",
       "to": "severity-scale",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "review",
       "to": "confidence-anchors",
       "type": "references",
-      "load": "import"
+      "load": "required"
+    },
+    {
+      "from": "shape",
+      "to": "preamble",
+      "type": "invokes"
     },
     {
       "from": "shape",
@@ -3126,31 +3262,39 @@
       "from": "shape",
       "to": "routing-principles",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "shape",
       "to": "product-dashboard-conventions",
       "type": "references",
-      "load": "on-demand"
+      "load": "on-demand",
+      "required-state": [
+        "settled_decisions",
+        "signed_intent",
+        "open_ius",
+        "spec_status",
+        "lifecycle_state",
+        "stage"
+      ]
     },
     {
       "from": "shape",
       "to": "confidence-anchors",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "shape",
       "to": "findings-schema",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "shape",
       "to": "operator-interview",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "shape",
@@ -3184,13 +3328,13 @@
       "from": "shape-product",
       "to": "four-risks",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "shape-product",
       "to": "okr-schema",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "shape-product",
@@ -3305,7 +3449,7 @@
       "from": "strategy-curator",
       "to": "four-risks",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "strategy-curator",
@@ -3339,6 +3483,11 @@
     },
     {
       "from": "triage",
+      "to": "preamble",
+      "type": "invokes"
+    },
+    {
+      "from": "triage",
       "to": "auto-shaper",
       "type": "invokes"
     },
@@ -3362,13 +3511,13 @@
       "from": "triage",
       "to": "routing-principles",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "triage",
       "to": "IU-schema",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "triage",
@@ -3380,18 +3529,27 @@
       "from": "triage",
       "to": "bindings-contract",
       "type": "references",
-      "load": "on-demand"
+      "load": "on-demand",
+      "required-state": [
+        "triage-source-queue",
+        "open-iu-manifest"
+      ]
     },
     {
       "from": "triage",
       "to": "gate-model",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "triage",
       "to": "intent-to-build",
       "type": "precedes"
+    },
+    {
+      "from": "verify",
+      "to": "preamble",
+      "type": "invokes"
     },
     {
       "from": "verify",
@@ -3445,19 +3603,24 @@
       "from": "verify",
       "to": "findings-schema",
       "type": "references",
-      "load": "import"
+      "load": "required",
+      "required-state": [
+        "batch_change_set",
+        "touched_dev_surfaces",
+        "dev_env_health"
+      ]
     },
     {
       "from": "verify",
       "to": "severity-scale",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "verify",
       "to": "confidence-anchors",
       "type": "references",
-      "load": "import"
+      "load": "required"
     },
     {
       "from": "verify",

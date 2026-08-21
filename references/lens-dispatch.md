@@ -17,31 +17,26 @@ related: [findings-schema, severity-scale, confidence-anchors]
 
 This is the shared lens-panel procedure. The consuming stage (review over a diff; design or
 plan over a doc) follows it to fan out to the active lenses and reduce their returns to one
-ranked, routed finding set. The lenses are autonomous agents that own their own dimension;
+ranked, routed finding set. Each lens is an isolated role that owns one dimension;
 this procedure owns only the orchestration — selection, fan-out, and the deterministic
 merge/triage/route. Keep the orchestrator's context lean: collect compact returns, not full
 analyses.
 
 ## 1. Select the active lenses
 
-Always run the always-on lenses: `lens-correctness`, `lens-security` (lower reporting gate),
-`lens-tests`, `lens-maintainability`. Add a conditional lens only when its trigger is met —
-conditional lenses are **harness-supplied extensions** resolved by name at dispatch (a local
-overlay may add e.g. a performance, UI-design, DX, runtime-resilience, adversarial, or
-cross-model lens with its own trigger); the vendored panel ships the four above. One conditional
-member is an **autonomous measurement agent**, not a diff-judgment lens: `health` (code-quality —
-dispatch when a whole-tree quality re-score is warranted); it compares against a stored baseline
-and returns a quality verdict that folds into the same finding set. Runtime perf measurement
-(`benchmark`) is **`verify`'s dynamic modality, not a panel member**. Skipping a conditional lens
-is the default, not a finding.
+Resolve the panel from the invoking skill's declared lens edges plus harness-supplied overlays.
+Run every unconditional lens. Add a conditional lens only when its declared trigger is met.
+A measurement role may join when a whole-tree re-score is warranted and return a baseline-relative
+verdict into the same finding set. Dynamic verification modalities remain outside this panel.
+Skipping a conditional lens whose trigger is unmet is the default, not a finding.
 
 ## 2. Fan out
 
-Spawn each active lens in its own isolated context, in parallel. Hand each the same bundle:
+Run each active lens in an isolated child context, in parallel. Hand each the same bundle:
 the `target` (`diff` or `doc`) and its contents, the scope-rules (what is in/out of the
 change; base-ref markers; untracked-scope notes), an optional intent/requirements summary,
 and the finding contract (the finding schema, severity scale, and confidence anchors) in the
-spawn prompt. Each lens returns the **compact** tier (no
+invocation prompt. Each lens returns the **compact** tier (no
 `why_it_matters`/`evidence`). A lens that errors or times out is recorded as a gap, not a
 silent drop — note which lens did not return.
 

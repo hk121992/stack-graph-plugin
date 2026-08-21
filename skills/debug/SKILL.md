@@ -84,7 +84,7 @@ repo or scope is unclear, skip the lock and say why.
 ## Phase 2 — Analyse, then fan out parallel probes
 
 Dispatch **`investigate-probe`** — one read-only probe per candidate cause, **in parallel**
-(one message, multiple Agent calls). Each probe gets one hypothesis, the symptom, the affected
+(one message, multiple isolated child contexts). Each probe gets one hypothesis, the symptom, the affected
 files, and the reproduction; it gathers evidence, tests that one cause, and returns a
 confirm / ruled-out finding. Probes **write nothing** — that read-only invariant is what lets
 them run concurrently without colliding.

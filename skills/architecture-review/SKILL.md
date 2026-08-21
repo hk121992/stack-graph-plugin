@@ -112,7 +112,7 @@ and the hard read-only gate holds throughout.
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/architecture-doctrine.md` — `architecture-doctrine`
+- [architecture-doctrine](references/architecture-doctrine.md)
 

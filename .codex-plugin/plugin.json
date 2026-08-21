@@ -1,0 +1,23 @@
+{
+  "name": "stack-graph",
+  "version": "0.17.0",
+  "description": "The factory — models an agent operating environment as a graph of skills and workflows, then instruments and improves them through gated delivery.",
+  "author": {
+    "name": "stack-graph contributors"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Stack Graph",
+    "shortDescription": "A gated agentic engineering workflow",
+    "longDescription": "Run a graph-built engineering workflow with durable carriers, explicit gates, and shared documentation standards.",
+    "developerName": "stack-graph contributors",
+    "category": "Productivity",
+    "capabilities": [
+      "Engineering workflows",
+      "Documentation"
+    ],
+    "defaultPrompt": [
+      "Start or continue a Stack Graph work item."
+    ]
+  }
+}

@@ -78,7 +78,7 @@ Build the **amendment scope** before authoring:
 ## Phase 2 — Scan for drift and collisions (spec-layout / amend-existing)
 
 Before the amendment lands, **invoke `drift-detector`** over the touchpoint pages. Hand it its
-spawn bundle: the `read_set` (the touchpoint page-slugs), a `task_summary` (what this specify
+invocation bundle: the `read_set` (the touchpoint page-slugs), a `task_summary` (what this specify
 session is making canonical), and optional `trigger_examples` (the design moments). In
 `amend-existing`, narrow the `read_set` to the section under revision so the scan focuses there.
 
@@ -105,7 +105,7 @@ rather than adding a parallel one. This is the judgment core of the stage: you a
 
 ## Phase 4 — Graduate and approve in-session (spec-layout / amend-existing)
 
-Before the write, **consult `@git-policy`** — the harness's crystallised, **repo/path-keyed**
+Before the write, **consult `git-policy`** — the harness's crystallised, **repo/path-keyed**
 write-policy surface (each target = a repo + optional path predicate → `direct` / `pr-gated` +
 label; most-specific wins; no entry ⇒ fail closed to a labelled PR; the shape is
 `git-policy-schema`). Resolve the mode for the repo + path the amendment writes to; do not
@@ -144,7 +144,7 @@ raised — every mode reads the design doc + carrier for context and writes no c
 ### spec-layout (default when a spec layout exists)
 
 The full spec-surface path: Phases 1–5. Scan the touchpoints with `drift-detector`, author the
-amendment, compose the PR body inline, graduate per `@git-policy`, and take the operator's
+amendment, compose the PR body inline, graduate per `git-policy`, and take the operator's
 in-session approval.
 
 ### null (no spec layout)
@@ -152,7 +152,7 @@ in-session approval.
 The product has no spec layout, so there is **no spec page to amend**. Skip the scan and the PR
 path (Phases 2–4 are the spec-surface path). **Record the touchpoints and decisions inline** —
 into the design doc and the carrier context surface the projection reads — so the settled
-decisions are durable for plan and build; graduate the write per `@git-policy` for the repo/path
+decisions are durable for plan and build; graduate the write per `git-policy` for the repo/path
 it lands in (direct when the policy resolves `direct`; a labelled PR over the inline record when
 it resolves `pr-gated`). Then hand back as Phase 5.
 
@@ -165,18 +165,18 @@ and edit that section in place. Graduate and approve the same way (Phase 4).
 ## Output
 
 - **spec-layout / amend-existing:** the authored spec amendment — collision-checked by
-  `drift-detector`, body composed inline to `pr-description-shape`, graduated per `@git-policy`,
+  `drift-detector`, body composed inline to `pr-description-shape`, graduated per `git-policy`,
   and **approved by the operator in-session** (merged, or revised on request-changes) — reported
   by URL where a PR was raised.
 - **null:** the touchpoints and decisions **recorded inline** (design doc + carrier context),
-  graduated per `@git-policy`, the work advanced.
+  graduated per `git-policy`, the work advanced.
 - **All modes:** the design / IUs marked **`spec-status: specified`**; no carrier field written,
   no gate decision recorded — the item moves toward `commit-to-build` with its spec settled.
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/context-principles.md` — `context-principles`
-- `references/pr-description-shape.md` — `pr-description-shape`
+- [context-principles](references/context-principles.md)
+- [pr-description-shape](references/pr-description-shape.md)
 

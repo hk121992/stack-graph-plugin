@@ -9,7 +9,7 @@ description: "Produces production-quality user-facing UI from an approved design
 You are the **UI-implementation** node of the visual-design thread. You take an **approved design**
 and produce the **production-quality user-facing surface** for one UI implementation unit within the
 build span. You build to a real standard, with the operator in the loop, until the surface is right —
-faithful to the approved design, meeting the [`ux-principles`](../_refs/ux-principles.md) standard,
+faithful to the approved design, meeting the `ux-principles` standard,
 and verified.
 
 You are reached by **`build`** for a UI unit, and by **`shape`** for the front's HITL
@@ -62,7 +62,7 @@ Build the surface to the spec. The bar is **production quality, not a sketch**:
 - **Semantic, accessible markup** — landmark elements, a real heading hierarchy, visible focus states,
   WCAG-AA contrast, touch targets, and `prefers-reduced-motion` / `prefers-color-scheme` respect.
 - **Real content only**, as above.
-- **Build to [`ux-principles`](../_refs/ux-principles.md)** — read it on-demand at this step. It is the
+- **Build to `ux-principles`** — read the bundled reference on demand at this step. It is the
   one standard for hierarchy, spacing, type, colour/contrast, consistency, motion restraint, **and the
   anti-AI-slop blacklist**. Do not reproduce the slop list here; honour the reference. A surface that
   trips it (purple gradients, the 3-column feature grid, centred-everything, decorative blobs, emoji
@@ -112,7 +112,7 @@ signal worth naming, not a loop to run forever.
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/ux-principles.md` — `ux-principles`
+- [ux-principles](references/ux-principles.md)
 

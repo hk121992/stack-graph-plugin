@@ -19,7 +19,7 @@ Set `confidence` to exactly one of `0` · `25` · `50` · `75` · `100` — a **
 between and never a float. Each anchor is tied to a behaviour you must honestly self-apply; if you cannot
 truthfully attach the behavioural claim, **step down** to the next anchor. (Discrete anchors prevent
 false-precision gaming — the model cannot calibrate meaningfully at finer granularity.) Confidence gates
-*where* a finding surfaces; [severity-scale](severity-scale.md) orders it once it does.
+*where* a finding surfaces; [severity-scale](../../../references/severity-scale.md) orders it once it does.
 
 - **`0` — not confident.** A false positive that does not survive light scrutiny, or a pre-existing issue this
   change did not introduce. **Suppress silently** (the anchor exists only so triage tracks the drop; lenses
@@ -43,6 +43,6 @@ a **`P0` at `50`+ must still be emitted** — critical-but-uncertain issues are 
 
 ## Cite out
 
-- **The finding record** this is a field of → [findings-schema](findings-schema.md).
-- **The orthogonal `severity` axis** → [severity-scale](severity-scale.md).
+- **The finding record** this is a field of → [findings-schema](../../../references/findings-schema.md).
+- **The orthogonal `severity` axis** → [severity-scale](../../../references/severity-scale.md).
 - **Term** senses → glossary.

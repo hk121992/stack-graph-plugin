@@ -16,7 +16,7 @@ related: [experience-contract-schema, findings-schema]
 # Checkpoint-manifest schema
 
 The **shape** the harness-supplied `checkpoint-manifest` conforms to — the config that drives
-`simulate-users`' deterministic-regression mode. The mode replays a frozen scenario corpus through a Claude
+`simulate-users`' deterministic-regression mode. The mode replays a frozen scenario corpus through an isolated
 Workflow, asserts each turn against a closed vocabulary plus one example-anchored judge, and returns
 PASS/FAIL/XFAIL/XPASS with a `pass_rate`. This reference fixes the **shape**; the harness fills the **content**
 — its own scenarios, state-builder binding, launch surface, domain operators, and version pins — on its local
@@ -50,7 +50,7 @@ is the record-then-fork base — a version-pinned committed session, re-recorded
 
 ## Launch surface & clean room {#launch-surface}
 
-- `launch_surface` — where the Workflow launches. A Workflow's subagents escape the metered pool **only when
+- `launch_surface` — where the Workflow launches. A Workflow's isolated child contexts escape the metered pool **only when
   launched from an interactive/cloud surface**; a credentialed CI runner is itself a launch surface. This single
   field decides the billing outcome.
 - `clean_room` — the hermetic container pin: the agent-CLI version + OS deps the turns run under, and the

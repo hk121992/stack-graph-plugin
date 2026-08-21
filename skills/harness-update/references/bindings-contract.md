@@ -30,7 +30,7 @@ the **harness-topology** spec's (local, per-consumer); this fixes the contract t
 
 ## The bindings mechanism {#mechanism}
 
-- A single **flat-key file** at the fixed overlay location (`.claude/bindings.yaml`): top-level keys → workspace
+- A single **flat-key file** at the fixed overlay location (`<bindings-surface>`): top-level keys → workspace
   paths, or small scalars for the dial keys.
 - A node **resolves the key it needs, then reads the value** — it never hardcodes a path or restates the key
   list.
@@ -48,9 +48,9 @@ property**, not a per-key path (the path is the harness's instance value):
 
 | category | keys (by role) |
 |---|---|
-| **Work-ledger surfaces** | the dashboard surface root · the work-items dir + its manifest · the sprint-records dir · the working-sessions dir · the decisions store (the D-numbered conclusion layer `log-decision` writes; per [decisions-schema](decisions-schema.md)) · the decisions-index projection path (the on-demand nav lookup both `harness-init` generates and `log-decision` re-derives — one key, two writers; distinct from the store) |
+| **Work-ledger surfaces** | the dashboard surface root · the work-items dir + its manifest · the sprint-records dir · the working-sessions dir · the decisions store (the D-numbered conclusion layer `log-decision` writes; per [decisions-schema](../../../references/decisions-schema.md)) · the decisions-index projection path (the on-demand nav lookup both `harness-init` generates and `log-decision` re-derives — one key, two writers; distinct from the store) |
 | **Improvements surface** | the standalone-IU surface (a **sibling** of the work-ledger, off it) + its manifest |
-| **Outcome / strategy** | the objectives surface (per [okr-schema](okr-schema.md)) · the strategy thesis · the outcome-anchor resolution rule |
+| **Outcome / strategy** | the objectives surface (per [okr-schema](../../../references/okr-schema.md)) · the strategy thesis · the outcome-anchor resolution rule |
 | **Runtime** | the analyzer's derived event-log path (under the gitignored runtime-state root) |
 | **Dial scalars** | the maturity dial · the plan-in-body-vs-linked threshold · the degraded-projection policy · the terminal recorder |
 | **Optional capability keys** | bound **only when the harness runs that capability** — e.g. personas + the experience-contract (the experience thread) · the deploy / verify / canary surfaces · the zone-matrix axis root + code-map + zone-test root · the architecture-reviews root · the learnings-archive · the pricing table · the triage source |
@@ -88,9 +88,9 @@ terminal-recorder: <mechanism>                   # what freezes the final metric
 A node resolves the key and acts on the value; the durable contract is the **key set and each key's role**, never
 the harness's chosen value.
 
-**The git-policy policy is not a dial** — it is a crystallised surface, `@git-policy` (shape:
-[git-policy-schema](git-policy-schema.md)): a per-repo/path map with labels that a git-writing agent reads off the
-floor. `harness-init` materializes it into `.claude/`, `@`-ref'd by `sg-root-instructions`; it is not a
+**The git-policy policy is not a dial** — it is a crystallised `git-policy` surface (shape:
+[git-policy-schema](../../../references/git-policy-schema.md)): a per-repo/path map with labels that a git-writing runtime reads off the
+floor. `harness-init` materializes it into the harness and `sg-root-instructions` requires it; it is not a
 `bindings.yaml` scalar. This contract fixes only the binding seam that resolves the harness's other surfaces and
 dials.
 
@@ -128,8 +128,8 @@ default, or exports the **directory** — never conflates the two into one joine
 
 ## Cite out {#cite-out}
 
-- **What a work-item / objective / experience-contract *is*** (the *what* to this *where*) → [work-item-schema](work-item-schema.md) · [okr-schema](okr-schema.md) · [experience-contract-schema](experience-contract-schema.md).
-- **The git-policy resolution rule + the policy shape** (per-repo/path) → [git-policy-schema](git-policy-schema.md) (full doctrine: the local `devops-loops` reference).
+- **What a work-item / objective / experience-contract *is*** (the *what* to this *where*) → [work-item-schema](../../../references/work-item-schema.md) · [okr-schema](../../../references/okr-schema.md) · [experience-contract-schema](../../../references/experience-contract-schema.md).
+- **The git-policy resolution rule + the policy shape** (per-repo/path) → [git-policy-schema](../../../references/git-policy-schema.md) (full doctrine: the local `devops-loops` reference).
 - **The analytics derivation + fleet model** the env seam feeds → the **analytics-recall** internals (local, per-consumer).
-- **How a harness extends the graph** (overlay · binding · local nodes) → the **harness-topology** spec (local, per-consumer) · [local-node-schema](local-node-schema.md).
+- **How a harness extends the graph** (overlay · binding · local nodes) → the **harness-topology** spec (local, per-consumer) · [local-node-schema](../../../references/local-node-schema.md).
 - **Term** senses (harness · binding · overlay · crystallised) → glossary.

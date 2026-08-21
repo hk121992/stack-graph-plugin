@@ -17,7 +17,7 @@ related: [IU-schema, gate-model, handoff-prompt-convention, operator-interview]
 
 `shape` (the front coordinator) and `triage` make three routing calls per piece of work —
 **decisions** (who resolves), **depth** (how much shaping), **tools** (which capability nodes).
-These principles govern all three. The appliers import this reference; consumers of the result read
+These principles govern all three. Appliers declare this reference required and read it before action; consumers of the result read
 the carrier field (`IU-schema`'s `autonomy`), never re-judge it. Routing is a **defined, improvable
 node**, not per-session free judgment.
 
@@ -27,7 +27,7 @@ node**, not per-session free judgment.
 - **Every routing call emits a trace** (the decision + the signals it used) so a mis-route is
   observable and routing sharpens over time: examples → guidance → better-defined rules.
 - Routing is itself on-graph — a defined node the loop measures and improves, never free-clauding or
-  CLAUDE.md.
+  root instruction projections.
 
 ## 1 · Decision routing — WHO resolves each decision (the altitude line)
 

@@ -69,7 +69,7 @@ Document each issue **the moment you find it** — do not batch. Two evidence ti
 - **Static bug** (typo, layout, missing image): one annotated screenshot + a description.
 
 **Every issue needs at least one screenshot.** Retry an issue once to confirm it reproduces before
-documenting it — not a fluke. Emit each finding to the imported `findings-schema` (the compact
+documenting it — not a fluke. Emit each finding to the required `findings-schema` (the compact
 tier: title, severity, file, line, confidence, `autofix_class`, `owner`, `requires_verification`,
 `pre_existing`, and a `suggested_fix` where one is reachable) so `verify` can consolidate your
 findings with the other modalities.
@@ -79,7 +79,7 @@ findings with the other modalities.
 Sort issues by severity and fix the set the tier permits. For each fixable issue, in severity
 order:
 
-1. **Locate source.** Grep / glob for the responsible file(s). Modify **only** files related to
+1. **Locate source.** Search files for the responsible source. Modify **only** files related to
    the issue.
 2. **Re-resolve the surface brief.** Before changing source, resolve the touched surface's zone
    brief (constraints · stack · conventions · pointers) on its `zone` coordinate via `explore`
@@ -137,9 +137,9 @@ prominently — something regressed. Return to `verify`:
 - A health-score delta and a one-line ship-readiness summary.
 - **No carrier field written; no gate touched.**
 
-## Imported references
+## Required references
 
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
+Before taking any action, read these bundled references:
 
-@references/findings-schema.md
+- [findings-schema](references/findings-schema.md)
 

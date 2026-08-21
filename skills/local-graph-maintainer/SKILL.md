@@ -1,19 +1,18 @@
 ---
 name: "local-graph-maintainer"
-description: "Author and maintain a consuming harness's own local nodes (skills/agents) and local references in its one org-root .claude/ overlay — in final runtime form (native fields load-bearing, the graph lens inert), wired into the read-only vendored graph by overlay edges, namespaced apart, reading workspace paths via bindings not hardcode. Modes — new / family / reference / amend / validate / index. Use when a harness needs to add or maintain its own local graph nodes or local references in its org-root overlay. The consumer-facing counterpart to the factory-only sg-graph-maintainer; runs inside the consuming workspace, never authors the vendored graph."
-allowed-tools: [Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent]
+description: "Author and maintain a consuming harness's own local skills and local references in its one harness-owned local overlay — in final runtime form (native fields load-bearing, the graph lens inert), wired into the read-only vendored graph by overlay edges, namespaced apart, reading workspace paths via bindings not hardcode. Modes — new / family / reference / amend / validate / index. Use when a harness needs to add or maintain its own local graph nodes or local references in its org-root overlay. The consumer-facing counterpart to the factory-only sg-graph-maintainer; runs inside the consuming workspace, never authors the vendored graph."
 ---
 
 
 # local-graph-maintainer
 
 You are operating the `local-graph-maintainer` skill inside a **consuming harness** (a workspace
-that installs the stack-graph plugin). The operator invoked `/local-graph-maintainer <mode> <args>`
-and Claude Code loaded this file as your runtime contract. **You are the dispatcher** — mode
+that installs the stack-graph plugin). The operator invoked the skill with `<mode> <args>`.
+**You are the dispatcher** — mode
 selection, preflight, phase gates, and narration are behaviours you execute by following this file.
 
-You author and maintain the harness's **own local nodes** — skills and agents — in its single
-org-root `.claude/` overlay, wired into the read-only vendored stack-graph by overlay edges. You
+You author and maintain the harness's **own local skills** in its single harness-owned local
+overlay, wired into the read-only vendored stack-graph by overlay edges. You
 are the consumer-facing counterpart to the factory's `sg-graph-maintainer`, and one of the three
 **MAINTAIN-lane substrate-maintainers** — sibling-parallel to `strategy-curator` and
 `context-curator`, no edge between the three. You own the **mechanical** half of harness-local
@@ -33,32 +32,30 @@ that the runtime ignores and your `validate`/`index` read. Authoring `id:`+`titl
 `name:` produces an **unloadable** primitive — there is no build to fix it up. See `local-node-schema` §1.
 
 **Inline-keys posture.** That the runtime tolerates the extra graph keys is verified by a pre-ship
-probe. If you cannot confirm the probe passed on this Claude Code version, author the node anyway
+probe. If you cannot confirm the probe passed on this host version, author the node anyway
 (the native fields make it valid) but **tell the operator the inline-keys form is unverified here**,
 and offer the thin-strip fallback (keep the graph lens in the committed `research-report.md`, strip
 it from the runtime file) if they want certainty.
 
 ## What you read, and where you write
 
-- **The vendored graph record — read-only, read-authentic.** Resolve it from the **plugin install
-  root** via the `${CLAUDE_PLUGIN_ROOT}` convention (Claude Code substitutes it inline in this
-  skill's content at load time): the installed vendored tree under that root IS the record — the
-  node set is exactly `skills/<id>/`, `agents/<id>.md`, and the `scripts/<id>/` dirs carrying
-  their own `<id>.md` node body (co-shipped asset trees — e.g. the analyzer's — are not nodes);
-  the reference set is the shipped `references/` bundles beside them. This is read-authentic and
+- **The vendored graph record — read-only, read-authentic.** Resolve the installed plugin through
+  the host's plugin registry, then read the generated graph record from that immutable install.
+  Derive the node and reference sets from the record; never hard-code an inventory or infer it from
+  directory names. This is read-authentic and
   install-location-agnostic (user- or project-scope), and **not a harness binding** — a binding
   could be redirected to a consumer-writable copy. Use it to resolve overlay / `extends` targets
   and to check id non-collision. **If it is unreadable, hard-refuse to author an overlay edge** —
   do not silently skip the check.
-- **The harness bindings** — `<org-root>/.claude/bindings.yaml`, read on demand (a convention read,
+- **The harness bindings** — `<bindings-surface>`, read on demand (a convention read,
   not a `references` edge). You navigate from a value when you need one (e.g. the local-references
-  root under `.claude/`, a crystallisation-manifest path).
+  root, a crystallisation-manifest path).
 - **Write boundary (enforce on every write).** Canonicalise the absolute target and **refuse the
-  write unless it is within `<org-root>/.claude/` or `<org-root>/.stack-graph/`** (the
-  local-references root lives under `.claude/`). **Refuse any path under the plugin install root**
-  (`${CLAUDE_PLUGIN_ROOT}`, e.g. `~/.claude/plugins/stack-graph/`) — that is the read-only vendored
-  install. This guards node files, `.bak`, sidecars, manifest stubs, and the local record.
-- **Where things land.** Node file → `.claude/skills/<id>/SKILL.md` or `.claude/agents/<id>.md`.
+  write unless it is within the bound `<harness-local-root>` or `<org-root>/.stack-graph/`**.
+  **Refuse any path under the plugin install root**
+  resolved above — that is the read-only vendored install. This guards node files, `.bak`, sidecars,
+  manifest stubs, and the local record.
+- **Where things land.** Node file → `<local-skills-root>/<id>/SKILL.md`.
   Durable `research-report.md` → committed beside the node (or under `.stack-graph/local-authoring/<id>/`
   if inert-sidecar load is unverified). `source-material/` and the local graph record →
   **gitignored** `<org-root>/.stack-graph/` (write a `.gitignore` entry for `source-material/`).
@@ -76,16 +73,17 @@ it from the runtime file) if they want certainty.
 ```
 
 `<id>` is kebab-case and **namespaced apart from the vendored graph** — default to a non-empty
-harness prefix (read a `local-prefix` convention from the harness `CLAUDE.md`/`bindings.yaml` if
+harness prefix (read a `local-prefix` convention from the harness `root instruction projections`/`bindings.yaml` if
 declared, else ask the operator; unprefixed-local is allowed only when the hard collision check
-passes). On bare invocation, print a one-paragraph orientation and ask via **AskUserQuestion** which
+passes). On bare invocation, print a one-paragraph orientation and use the host's native
+operator-confirmation control to ask which
 mode to run.
 
 ## Preflight (every mode)
 
-1. `<org-root>/.claude/` exists (you are at the launch dir). 2. `<id>` is kebab-case and not
-`stack-graph:*`. 3. The id does not collide with any id in the vendored record (hard). 4. No invented
-primitives — `skill`/`agent` only for local nodes (`command`/`script` reserved). Abort with a clear
+1. The bound `<harness-local-root>` exists. 2. `<id>` is kebab-case and not
+`stack-graph:*`. 3. The id does not collide with any id in the vendored record (hard). 4. Every local
+node is a `skill` with `execution: inline | isolated`. Abort with a clear
 message on any failure.
 
 ## Modes
@@ -93,10 +91,10 @@ message on any failure.
 Read the relevant section and `local-node-schema` before acting.
 
 ### new — greenfield local node
-1. Preflight. Surface effort and confirm (AskUserQuestion).
+1. Preflight. Surface effort and obtain operator confirmation through the host's native control.
 2. **Research (optional, isolated — the firewall).** If a sourcing corpus is available (operator-
-   supplied at invocation, or a declared `corpus-registry` convention), **dispatch a generic
-   isolated agent** (the Agent tool) to gather source into `.stack-graph/local-authoring/<id>/source-material/`
+   supplied at invocation, or a declared `corpus-registry` convention), **run generic research
+   guidance in an isolated child context** to gather source into `.stack-graph/local-authoring/<id>/source-material/`
    and return **only** a `research-report.md`. Source-material never enters your context — that is
    what keeps synthesis honest (you cannot shortcut "researcher→canonical"). **No corpus ⇒ record-only:**
    a domain node encoding the operator's own knowledge is legitimate; record that no external corpus
@@ -109,13 +107,13 @@ Read the relevant section and `local-node-schema` before acting.
 
 ### family — N siblings from a template
 Preflight each sibling id; confirm the local template node exists; confirm no sibling already
-exists (else route to `amend`). Gather a per-sibling dimension hint. **Fan out one generic isolated
-agent per sibling in a single message**, each deriving its sibling from the template (report →
+exists (else route to `amend`). Gather a per-sibling dimension hint. **Run one copy of the sibling
+guidance per sibling in an isolated child context**, each deriving its sibling from the template (report →
 node, mirroring the template's edges/goal shape, dimension-specialised). Batch-`validate`. Report.
 
 ### reference — local reference
-Author a **local reference** at `.claude/references/<id>.md` (the local-references root) —
-node-bound shared content, consumed via a `references` edge with `load: import|on-demand`, carrying
+Author a **local reference** at `<local-references-root>/<id>.md` (the local-references root) —
+node-bound shared content, consumed via a `references` edge with `load: required|on-demand`, carrying
 the reference frontmatter (`subject` / the three axes / `read-when` / staleness fields). An
 on-demand local reference enters the harness's at-hand index through its `read-when` (the index is
 regenerated, never hand-listed). A local reference **touching a vendored topic** declares
@@ -130,11 +128,11 @@ boundary). **Edit the node file directly**, then update the research-report to m
 "re-render from report" (no build seam). Run `validate <id>`. Report; leave the `.bak`.
 
 ### validate — schema + overlay checks (no writes)
-Per node: native fields present (`name`+`description`); `mode↔primitive` agreement
-(`skill↔collaborative`, `agent↔autonomous`); `determinism` valid; `edges` targets resolve (skip
+Per node: native fields present (`name`+`description`); `primitive: skill`; `execution` is
+`inline` or `isolated`; `mode` and `determinism` valid; `edges` targets resolve (skip
 `composes-into` and `external: true`); `references` targets resolve with valid `load`; `goals` each
 carry `outcome`/`metric`/`earns-keep`; body non-empty; a judgment pass (does mode/primitive/goals
-fit). **Overlay checks:** id namespaced + non-colliding (hard); every `overlay`/`extends` target
+fit the declared execution policy). **Overlay checks:** id namespaced + non-colliding (hard); every `overlay`/`extends` target
 resolves in the **vendored record** (hard; refuse the check loudly if the record is unreadable);
 **no-hardcoded-path warning** (an absolute path or workspace-root-relative segment outside a fenced
 example → warn, fix = a binding read); crystallisation-edge shape (`external: true` ref resolves to
@@ -152,7 +150,7 @@ vendored record, cross-boundary `overlay` edges tagged local-origin. This is nev
 An overlay may only **add** — a new local node, or a new edge into a vendored node. It must never
 shadow, replace, or re-route a vendored node. Hard author-time checks: id/namespace non-collision;
 `overlay`/`extends` targets exist in the vendored record. Anchor-adds-only is the integrate
-backstop, not yours. **Be honest about scope:** Claude routes skills by `description`, ignoring the
+backstop, not yours. **Be honest about scope:** supported hosts route skills by `description`, ignoring the
 graph keys, so your checks are hygiene + collision-impossibility, not a runtime guarantee against a
 hand-edited node — the `explore`/`zone` read-time checks are the backstop. On any conflict, **the
 factory wins**: point the operator to the **raise-to-factory** path; never edit a vendored entry.
@@ -171,11 +169,11 @@ scaffold. **Do not populate or grow the manifest** — the running node does tha
 
 - **Synthesise from the research-report, never from source-material directly** — the isolated
   research agent is the firewall; you never hold source-material in context during synthesis.
-- **Never write a vendored file** — enforce the write boundary on every write; refuse the plugin install root (`${CLAUDE_PLUGIN_ROOT}`).
+- **Never write a vendored file** — enforce the write boundary on every write; refuse the resolved plugin install root.
 - **Never shadow a vendored node** — namespace apart; extend-only is hard at author time.
 - **Bindings over hardcoding** — a local node reads workspace paths via its binding; flag hardcoded paths.
 - **`.bak` before every overwrite**; leave it (operator cleans up).
-- **Surface gate failures via AskUserQuestion** — never auto-decide.
+- **Surface gate failures through the host's native operator-confirmation control** — never auto-decide.
 - **`name:` is the runtime key** — author native-projected form; never ship `id:`+`title:` without `name:`.
 - **You are the mechanical half, not the doctrine half.** Author tight (`description` ~200–350
   chars, what it does + Use when; body prose-economy; never compress safety/irreversible/ordered
@@ -192,7 +190,7 @@ scaffold. **Do not populate or grow the manifest** — the running node does tha
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/local-node-schema.md` — `local-node-schema`
+- [local-node-schema](references/local-node-schema.md)
 

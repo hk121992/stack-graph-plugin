@@ -87,4 +87,4 @@ Two valid uses of this schema:
 - **The `severity` enum** → [severity-scale](severity-scale.md).
 - **The `confidence` enum + suppression behaviour** → [confidence-anchors](confidence-anchors.md).
 - **The producer + validator** — the lens family that emits this, and the dispatch that validates and merges it → the lens nodes · lens-dispatch.
-- **The consumers** that inline it (`load: import`) into their lens spawns → review + verify + the front spine (design · plan · shape).
+- **The consumers** that declare it required and read it before running lens roles → review + verify + the front spine (design · plan · shape).

@@ -110,7 +110,7 @@ pass-when fields); this section fixes **how** every product gate is put to the o
   `gate-sign-off/` home under the harness's work-ledger surface (resolved through its binding, never a
   hardcoded path; the home's index maps each product gate to its template). A complete harness authors one
   template per product gate; a gate still lacking one degrades to rendering its pass-when fields. With no
-  widget surface at all, fall back to the host's native elicitation (`AskUserQuestion`). The ladder ends
+  widget surface at all, fall back to the host's native operator-confirmation control. The ladder ends
   there — plain chat text is not a sign-off surface.
 - **The real click is the attestation.** The operator's real click/selection on the rendered surface is the
   `operator-attested` precondition the writer keys on — the same trust at every product gate; never
