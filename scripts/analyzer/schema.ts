@@ -81,8 +81,8 @@ export const SLASH_CMD_RE = /<command-name>\/?((?:stack-graph:)?[A-Za-z0-9][A-Za
 // ── IU-1 (wi-analyzer-refinement) — carrier-arg grammar + the closed STAGES set ──────────────────
 //    Attended-session attribution is SIGNAL-DERIVED (DR1): carrier-operand tool events in two
 //    classes — span-opening stage-skill args and point script operands. This is the ONE exported
-//    extraction grammar those signals ride; the IU-10 PreToolUse hook LOCKSTEPS to this constant
-//    (import where the runtime allows, else equality-tested) — never a drifting duplicate.
+//    extraction grammar those analytics signals ride. Operational carrier entry is enforced by the
+//    graph-derived preamble contract; no host hook or second node inventory shares this concern.
 
 /** The carrier-arg extraction grammar — every convention spelling in ONE constant:
  *    • the Skill/Agent args token         `carrier=<id>`            (the META-grammar token)

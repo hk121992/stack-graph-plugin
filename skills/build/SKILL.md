@@ -1,6 +1,6 @@
 ---
 name: "build"
-description: "Execute one implementation unit to spec in a fresh-context session — the tracer-bullet loop on the vertical slice, RED → GREEN → REFACTOR after every green, proven by running its acceptance_check and showing the raw evidence. Consumes one fully-formed IU (the front settled it; build never re-asks) and hands the diff to review; it is the unit dispatch re-runs for a reopen correction. Use when a dispatched session must deliver its IU — the commit-to-build gate has passed and the work moves from defined to in-delivery."
+description: "Executes one IU to spec in a fresh-context session: the tracer-bullet loop, RED/GREEN/REFACTOR, proven by running its acceptance_check, then hands the diff to review. Also the reopen correction unit. Use when a dispatched session must deliver its IU after commit-to-build."
 ---
 
 
@@ -14,10 +14,11 @@ settled** — you build against it. You are also the unit the reopen re-runs: on
 defect, `dispatch` re-dispatches you as a **fresh single-shot correction session** scoped to the
 finding.
 
-The `IU-schema` reference (imported) defines the field contract the unit carries: `id`, `goal`,
+The required `IU-schema` reference defines the field contract the unit carries: `id`, `goal`,
 `files`, `dependencies`, `acceptance`, `acceptance_check`, `size`, `verification`, and the `zone`
 coordinate. These are your spec. You are held to the `goal` and the `acceptance` criteria — not to
-effort. Your turn-1 state load is the preamble's **`build` parameterization** — the
+effort. Before any work, pass the generated carrier-entry preflight by invoking `preamble` with the
+active carrier; continue only on exit zero. Its **`build` parameterization** is the
 `required-state` declared on your own `IU-schema` edge (the one IU record plus the correction
 `finding` and the prior `dev_tip`), not dispatch's batch list.
 
@@ -59,14 +60,14 @@ For the slice:
 - **REFACTOR after every green — and its scope is the surrounding, growing code.** Refactor is the
   loop's third step, not a slice-end afterthought: after each behaviour goes GREEN, consolidate —
   extract the duplication the new code introduced, deepen the modules it touched, keep the seams
-  honest (the standard is the imported `architecture-doctrine`) — across the code the slice is
+  honest (the standard is the required `architecture-doctrine`) — across the code the slice is
   **growing**, not just the new lines. **Never refactor while RED.** This is the
   coherence-by-construction half the sequential schedule relies on: the next IU builds on *your*
   refactored base.
 - **Non-code slice.** For a slice that edits a reference or doc (no runnable test), the analogue is
   **one verifiable claim → one edit → confirm**, with the slice's `verification` fixture playing
   the test's role — same vertical discipline, claim by claim.
-- **Test shape — `test-discipline`.** Each test the loop writes follows the imported
+- **Test shape — `test-discipline`.** Each test the loop writes follows the required
   `test-discipline`: it verifies behaviour through the public interface (not implementation) and
   mocks only at system boundaries. The loop owns the *order* tests are written; the reference owns
   their *quality*.
@@ -127,10 +128,10 @@ Build reaches into four sub-path nodes from inside the run. Each is an `invokes`
 build's side); control returns to the slice, which then proves the unit as usual. Reach for one
 only when the unit warrants it:
 
-**Carry the carrier down every dispatch.** When you spawn a sub-path session — or invoke any skill or
-agent from inside the slice — the brief passes the **compulsory `carrier=` argument** (the slice's
-own carrier): the `carrier=` token in a spawned session's `META:` envelope, or the `carrier=` arg on
-an in-session skill/agent invocation. A spawned session's envelope also carries its own **`stage=`** —
+**Carry the carrier down every dispatch.** When you run a sub-path in an isolated child context — or invoke any
+skill inside the slice — the brief passes the **compulsory `carrier=` argument** (the slice's
+own carrier): the `carrier=` token in the child context's `META:` envelope, or the `carrier=` argument on
+an inline skill invocation. An isolated child context's envelope also carries its own **`stage=`** —
 a member of the closed `STAGES` set the analyzer owns (`scripts/analyzer/schema.ts`;
 cite it, never re-list the members), `other` for a non-stage helper — because `stage` never inherits:
 an envelope-less sub-dispatch attributes `stage: null` and drops from every stage rollup.
@@ -161,11 +162,16 @@ an envelope-less sub-dispatch attributes `stage: null` and drops from every stag
 - **A blocker report via the return envelope** when triggered: the affected unit, the blocker, the
   evidence, and the options — `blocked` or `escalated`, never an improvised workaround.
 
-## Imported references
+## Carrier entry preflight
 
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
+Before taking any workflow action, Invoke `preamble` with `--node build --carrier <active-carrier-file> --carrier-id <active-carrier-id>`. Missing or invalid carrier input blocks the invocation. Preamble resolves the exact required state from its bundled graph-derived contract; continue only when the bundled runner exits zero. Never substitute a host hook or a hand-written state list.
 
-@references/IU-schema.md
-@references/architecture-doctrine.md
-@references/test-discipline.md
+
+## Required references
+
+Before taking any action, read these bundled references:
+
+- [IU-schema](references/IU-schema.md)
+- [architecture-doctrine](references/architecture-doctrine.md)
+- [test-discipline](references/test-discipline.md)
 

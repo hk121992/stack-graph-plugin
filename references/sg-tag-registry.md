@@ -14,8 +14,8 @@ related: [sg-root-instructions]
 
 # sg-tag registry — the closed <sg-*> member contract
 
-The closed registration home for the `<sg-*>` process-tag family. The always-on floor
-([sg-root-instructions](sg-root-instructions.md)) states the emission contract — which members a
+The closed registration home for the `<sg-*>` process-tag family. The always-on
+`sg-root-instructions` floor states the emission contract — which members a
 turn emits, and when; this registry fixes the **capture contract** — each member's fields, bounds,
 source rule, and emitter class — as one machine-readable definition every code twin conforms to.
 Emission contract and capture contract move together, so a live tag and its derived row never
@@ -76,7 +76,7 @@ fails the suite.
       "member": "sg-gate",
       "fields": ["gate", "decision", "carrier", "seq"],
       "bounds": "gate: closed enum; decision: closed enum; carrier: normalised carrier id (ID_RE); seq: integer",
-      "source-rule": "the record-gate runner, on a successful enactment only (never on a rejection); accepted only with executed-runner provenance — tool_use/tool_result id pairing plus an executed-argv-anchored command match",
+      "source-rule": "the record-gate runner, on a successful enactment only (never on a rejection); accepted only with executed-runner provenance — paired command/result events plus an executed-argv-anchored command match",
       "emitter-class": "script"
     }
   ]
@@ -99,7 +99,7 @@ Each member entry carries five attributes:
   captured only from the class that owns it.
 - **`emitter-class`** — `model` or `script`. **`model`** members are paired tags in assistant text,
   captured on any turn. **`script`** members (`sg-gate`) are captured only from a
-  provenance-bound tool_result — an executed runner, never a prose echo, a file read of this
+  provenance-bound command result — an executed runner, never a prose echo, a file read of this
   reference, a fixture, or an external issue.
 
 ## Format example — non-conforming by construction {#example}
@@ -119,7 +119,7 @@ non-conforming fragments, and the gate channel's tag comes from executing the re
 ## Cite out {#cite-out}
 
 - **The emission contract** — which members a turn emits, and the paired-close / attended
-  same-collection close rule → [sg-root-instructions](sg-root-instructions.md).
+  same-collection close rule → the `sg-root-instructions` floor.
 - **`sg-decision`'s durable record** — the two-layer decision write → [decisions-schema](decisions-schema.md).
 - **`sg-gate`'s runtime** — the gated lifecycle and the enactment the runner records → [gate-model](gate-model.md).
 - **`sg-friction`'s `severity` vocabulary** → [severity-scale](severity-scale.md).

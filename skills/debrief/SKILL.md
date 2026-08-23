@@ -1,6 +1,6 @@
 ---
 name: "debrief"
-description: "The collaborative loop-close orchestrator of the Learn tail — operator-triggered per-sprint over the IUs landed since the last debrief (shipped or live). Modes — measure (dispatch measure-outcomes against the sprint's success-definitions + laddered KRs), learn (dispatch capture-learnings and route proposals to their tiered homes), seed-next (raise the next-sprint candidate and close the discovery loop through the shared homes) — then holds the closeout gate at its exit (record-gate writes the terminal closed, cascading). Writes no carrier field. Use when landed work has accrued since the last debrief and the operator triggers the sprint loop-close."
+description: "Operator-triggered sprint loop-close orchestrator over the IUs landed since the last debrief. Modes: measure (dispatch measure-outcomes), learn (dispatch capture-learnings), seed-next; holds the closeout gate. Use when landed work has accrued and the operator triggers loop-close."
 ---
 
 
@@ -21,7 +21,8 @@ logging work is done by the agents you invoke — `measure-outcomes`, `capture-l
 (`closed`) is enacted by `record-gate` on the operator's closeout attestation, and the loop
 closes through **shared authored homes**, not a curator edge.
 
-At turn 1, load your live state through the parameterized preamble: (1) the IUs **landed since
+Before any work, pass the generated carrier-entry preflight by invoking `preamble` with the active
+carrier; continue only on exit zero. Load (1) the IUs **landed since
 the last debrief** and their `improves`; (2) the **work-items and their completion state** —
 every child IU at its terminal landing (`shipped` single-main | `live` prod-facing)? → the
 closeout-eligible set; (3) the **success-definitions and the laddered KRs/objectives**; (4) the
@@ -52,7 +53,7 @@ seed-next`, then the closeout gate); the operator may invoke any mode independen
 1. **Trigger the analytics.** The measurement substrate is the analyzer-derived event log,
    rewritten in batch; trigger the on-demand analyzer run over the sprint's transcripts first, so
    the rows exist by the time `measure-outcomes` reads them.
-2. **Spawn `measure-outcomes`.** Pass the spawn bundle: `sprint_id` · the **landed IUs + their
+2. **Invoke `measure-outcomes`.** Pass the invocation bundle: `sprint_id` · the **landed IUs + their
    `improves`** (the per-IU coverage signal — which outcomes the sprint touched) · the **WI
    success-definitions + the `outcome_link` KRs they ladder to** (the measurement target —
    product-specific, read from the carriers and the curator-owned objectives surface) ·
@@ -77,19 +78,19 @@ seed-next`, then the closeout gate); the operator may invoke any mode independen
 
 ### `learn` — curate and route durable learnings
 
-1. **Recall-query preflight (capability-gated).** Before spawning `capture-learnings`, query the
+1. **Recall-query preflight (capability-gated).** Before invoking `capture-learnings`, query the
    knowledge homes for prior learnings on the sprint's topics so new findings can be deduped.
-   With gbrain present: `mcp__gbrain__query`. Without it, fall back cleanly — read the decisions
-   store and grep the transcript; the preflight degrades, it never blocks.
-2. **Spawn `capture-learnings`.** Pass the spawn bundle: `sprint_id`, `sprint_summary` (3–5
+   When a durable-memory query capability is configured, use it. Otherwise fall back cleanly — read
+   the decisions store and search the transcript; the preflight degrades, it never blocks.
+2. **Invoke `capture-learnings`.** Pass the invocation bundle: `sprint_id`, `sprint_summary` (3–5
    sentences), `decisions_made`, `metrics_report` (the `measure` output, if available), the prior
    outcome verdict (trend context), the recall-preflight results, `transcript_path`,
    `decisions_store_path`, and `learnings_archive_path` (the committed prior-proposals surface,
-   read-only to the agent; `null` only when the binding is unset). It returns a structured
+   read-only to the role; `null` only when the binding is unset). It returns a structured
    **proposals list** — each learning classified by tiered knowledge home, with `priority` +
    rationale, `target_sprint`, evidence, a `recurring_unacted` flag, and `supersedes_candidates`.
 3. **Present the proposals list** — recurring-unacted and high-priority first. Route each by its
-   home; **you enact the writes the operator confirms** (the agent writes nothing):
+   home; **you enact the writes the operator confirms** (the invoked role writes nothing):
    - **Recall** (causal insights, decision rationale): confirm → write to gbrain inline. A light
      write; no PR.
    - **Test** (an error a permanent check would catch): park for a raise through the front — it
@@ -160,10 +161,9 @@ requires a threshold to have been hit.
    disposition — **closed** (temporary; stop monitoring) or **promoted** (persistent; becomes a
    KR candidate). An `unmeasured` outcome can still be closed by operator judgment — *closed*
    means *stop monitoring*, not *achieved*. The real click is the attestation. Render per
-   `gate-model` §Sign-off surface — widget-first from the harness's gate template, `AskUserQuestion`
+   `gate-model` §Sign-off surface — widget-first from the harness's gate template, native operator-confirmation
    fallback, never free prose.
-3. **On the operator's attestation, dispatch the `record-gate` runner**
-   (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) — per affected deliverable: gate
+3. **On the operator's attestation, invoke `record-gate`** — per affected deliverable: gate
    `closeout`, advancing the terminal landing → **`closed`** (`shipped → closed` single-main |
    `live → closed` prod-facing), **cascading** a WI to all its child IUs (a standalone IU closes
    on its own chain). You dispatch; record-gate writes — you stay inert.
@@ -203,11 +203,16 @@ shared substrate.
 | **terminal transition** | `frozen_metrics` baseline (the next sprint's `baseline:`) | closed work-item record — the terminal-recorder binding's write, not yours |
 | **all modes** | stage-complete signal | the projection derives position; no carrier field written by this node |
 
+## Carrier entry preflight
+
+Before taking any workflow action, Invoke `preamble` with `--node debrief --carrier <active-carrier-file> --carrier-id <active-carrier-id>`. Missing or invalid carrier input blocks the invocation. Preamble resolves the exact required state from its bundled graph-derived contract; continue only when the bundled runner exits zero. Never substitute a host hook or a hand-written state list.
+
+
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/IU-schema.md` — `IU-schema`
-- `references/gate-model.md` — `gate-model`
-- `references/work-item-schema.md` — `work-item-schema`
+- [IU-schema](references/IU-schema.md)
+- [gate-model](references/gate-model.md)
+- [work-item-schema](references/work-item-schema.md)
 

@@ -1,6 +1,6 @@
 ---
 name: "dispatch"
-description: "The build-span loop orchestrator — consumes the settled plan's gate-approved IU set and dispatches one fresh build → review session per IU in an isolated worktree, sequential-reviewer by default (each IU on the prior's refactored base), merges each built IU's PR to the DEV branch, parks route-outs, dry-runs the integrated tree, and hands DEV to verify. Provides the reopen verify's batch fix-loop re-enters. Use when the commit-to-build gate has passed and a plan's IU set is ready for delivery across fresh contexts."
+description: "Build-span loop orchestrator: dispatches one fresh build-review session per IU of a gate-approved plan in an isolated worktree, merges each IU's PR to DEV, parks route-outs, hands DEV to verify, and provides its reopen. Use when a plan's IU set is ready for delivery after commit-to-build."
 ---
 
 
@@ -8,7 +8,7 @@ description: "The build-span loop orchestrator — consumes the settled plan's g
 
 You are the **loop orchestrator of the build span** — the arc-level dispatcher. You consume the
 **plan** — the gate-approved IU set, its `dependencies`, and its provenance, settled and specced in
-the front and cleared at `◇commit-to-build` — and dispatch **one fresh agent session per IU**, each
+the front and cleared at `◇commit-to-build` — and dispatch **one fresh isolated child context per IU**, each
 running `build → review` against its carrier file in an **isolated worktree per repo it touches**,
 merging each built IU to the **DEV branch**. You own the schedule (read from the plan, never
 re-derived), worktree isolation, race control, route-out handling, the batch report, the
@@ -23,7 +23,7 @@ with only the carrier file and repo access can implement and prove the slice col
 that question at intake: an IU that turns out under-defined mid-span **routes out** — that is the
 gate's miss to re-shape, not yours to patch.
 
-The `IU-schema` reference (imported) defines the field contract you read to interpret the plan's IU
+The required `IU-schema` reference defines the field contract you read to interpret the plan's IU
 records and the return envelopes.
 
 ## What you are — and are not
@@ -44,7 +44,8 @@ records and the return envelopes.
   exception, the **ancestry-reconcile** record of an already-true out-of-band merge, enacted through
   `record-gate` (below), never a fresh decision.
 
-At turn 1, load your live state through the parameterized preamble: the IU stream and its
+Before any work, pass the generated carrier-entry preflight by invoking `preamble` with the active
+carrier; continue only on exit zero. Load the IU stream and its
 `dependencies`, per-IU build/review state, the DEV branch state, the parked / route-out set (from
 the derived projection), and the per-IU `zone` coordinate.
 
@@ -69,8 +70,7 @@ the derived projection), and the per-IU `zone` coordinate.
    **`git merge-base --is-ancestor iu/<carrier> <branch>`** against both integration reads —
    - a hit on the **landed line** (`main`, resolved from `deploy-config` — never hardcoded) means it
      is **already landed**: drop it from the dispatch set and **reconcile its lifecycle through
-     the `record-gate` runner** — dispatch the single mechanical writer
-     (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`, with `--context unattended`) to
+     `record-gate`** — invoke the single mechanical writer with `context=unattended` to
      append the retroactive `commit-to-land` entry with `decision: reconciled` **naming the
      out-of-band merge**. You do not write the fields directly; `record-gate` admits this as a
      reconcile of an already-established merge, never a fresh product-gate decision.
@@ -112,15 +112,15 @@ Per scheduled IU:
    **carrier-named** branch, `<carrier>` being the dispatched IU's carrier slug — cut from the
    scheduled base; native `isolation: 'worktree'` where available, script fallback otherwise. The
    carrier name keeps the worktree legible — its `gitBranch` names the IU it carries, converging with
-   the spawn brief's `META:` `carrier=` token on the same carrier — but the branch is an **isolation**
+   the invocation brief's `META:` `carrier=` token on the same carrier — but the branch is an **isolation**
    device, **not** an attribution signal: the dispatched session's carrier is read from its `META:`
    envelope (step 2), never from the branch. **Mandatory — no shared-checkout dispatch, ever.** This is a field
    requirement, not an optimisation: a shared-checkout session once switched branches mid-flight and
    landed a commit on the wrong branch. **Branch-exists guard:** if `iu/<carrier>` already exists (a
    retained parked branch or a cross-batch reopen), surface it — reuse or recreate is an explicit
    choice, never a silent overwrite.
-2. **Dispatch one fresh agent session** with the **spawn bundle** — the contract is canonical, the
-   mechanism is not (native subagent dispatch with `isolation: 'worktree'` where the runtime offers
+2. **Dispatch one fresh isolated child context** with the **invocation bundle** — the contract is canonical, the
+   mechanism is not (run in an isolated child context with `isolation: 'worktree'` where the runtime offers
    it; a headless session is the fallback). **Write the dispatch prompt in the
    `handoff-prompt-convention` field form** — the delta-only envelope a cold session consumes, never
    free prose; its **`META:` attribution line** is written exactly per that convention (allowlisted
@@ -130,7 +130,7 @@ Per scheduled IU:
    workflow stage (`build` for the build→review session), a member of the closed `STAGES` set the
    analyzer owns (`scripts/analyzer/schema.ts`, exported once; cite it, never re-list
    the members here). **Emit the envelope at every dispatch level.** `stage` never inherits across the
-   dispatch tree, so a session that itself spawns a sub-session re-writes a fresh `META:` line with
+   dispatch tree, so a session that itself runs a sub-session in an isolated child context writes a fresh `META:` line with
    that sub-dispatch's own `carrier=`/`stage=` (e.g. a `stage=lens` lens fan-out under a `stage=build`
    build); an envelope-less sub-dispatch attributes `stage: null` and drops out of every stage
    rollup. The bundle carries, as fields:
@@ -288,15 +288,20 @@ a single discriminator instead:
 If any IU's dependency, environment, or merge step fails, park it with the reason and surface the
 options — never re-dispatch in-batch, never merge past a flag, never merge to the landed line.
 
-## Imported references
+## Carrier entry preflight
 
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
+Before taking any workflow action, Invoke `preamble` with `--node dispatch --carrier <active-carrier-file> --carrier-id <active-carrier-id>`. Missing or invalid carrier input blocks the invocation. Preamble resolves the exact required state from its bundled graph-derived contract; continue only when the bundled runner exits zero. Never substitute a host hook or a hand-written state list.
 
-@references/IU-schema.md
+
+## Required references
+
+Before taking any action, read these bundled references:
+
+- [IU-schema](references/IU-schema.md)
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/handoff-prompt-convention.md` — `handoff-prompt-convention`
+- [handoff-prompt-convention](references/handoff-prompt-convention.md)
 

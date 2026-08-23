@@ -1,6 +1,6 @@
 ---
 name: "optimise"
-description: "Generates N implementation variants of a span in parallel isolated worktrees, measures each, and selects the one that best improves the objective while still passing its gate. Two modes: perf (benchmark; keep the fastest that passes correctness) and AX (simulate-users; keep the cheapest in tokens/latency whose UX still passes the contract). Use when a built span inside the AFK build has a measurable objective worth improving and the baseline is correct — the spend (planned N + objective + gate) was declared upstream in the shaped scope; invoked from within build."
+description: "Generates N variants of a span in parallel worktrees, measures each, and selects the best that still passes its gate. Modes: perf (benchmark; fastest correct) and AX (simulate-users; cheapest in tokens/latency). Use when a built span inside build has a measurable objective and correct baseline."
 ---
 
 

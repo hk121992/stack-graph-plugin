@@ -1,224 +1,134 @@
 # stack-graph
 
-**A gated, graph-built agentic engineering workflow for Claude Code — shipped as a plugin.**
+stack-graph is a graph-built engineering workflow for Claude Code and Codex. It carries work from
+triage through shape, build, verification, landing, and debrief with durable work-item carriers,
+explicit operator gates, and shared documentation standards.
 
-stack-graph models an agent operating environment as a **graph of its `.claude` primitives** —
-skills, agents, references, scripts — and runs a full delivery loop over any repository you bind
-it to: work is raised, shaped, built, reviewed, verified, and landed through explicit, recorded
-gates, with a transcript analyzer deriving activity and attribution analytics on the side.
+This repository is the generated distributable. One authored graph produces one physical `skills/`
+payload; the host manifests are thin projections around those same bytes.
 
-Nearly everything in this repository is **generated**: a deterministic build projects a
-privately authored graph wholesale into this tree. Same graph in, byte-identical tree out —
-the generated-ness is the design; the short list of hand-maintained files lives in
-[Contributing](#contributing).
+## Compatibility contract
 
-## What this is
+- Every runtime node is a skill with common `name` and `description` frontmatter.
+- Context isolation is canonical graph policy; it does not create a second host-specific skill body.
+- `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` share identity metadata and discover
+  the same `skills/` directory.
+- Shared instructions use ordinary Markdown links and bundle-relative executable paths.
+- Script-owning skills carry their runners inside their own bundles.
+- Harness runtime state lives under `.stack-graph/harness/`, not in duplicated host directories.
 
-The plugin ships four kinds of surface:
+The Factory release gates reject a missing skill, manifest drift, duplicated host payload, stale
+host syntax, or unresolved bundled reference.
 
-- **Skills** — invocable workflow stages and orchestrators (`/stack-graph:triage`,
-  `/stack-graph:build`, …) that move a unit of work through the loop.
-- **Agents** — dispatchable specialists (review lenses, probes, measurement and curation
-  helpers) that the skills fan out to.
-- **References + floor** — the doctrine pages the nodes cite, plus the always-on floor page a
-  workspace inlines into its root instructions.
-- **Scripts** — deterministic runtime pieces: the transcript analyzer, the gate recorder, and
-  a carrier-argument session hook (TypeScript, run with bun), plus a Python session-preamble
-  hook.
+## Prerequisites
 
-### Core vocabulary
+- Claude Code or Codex with plugin support.
+- [Bun](https://bun.sh) for bundled TypeScript/JavaScript runners and the optional analyzer.
+- Python 3 for the carrier preflight runner.
+- git. POSIX shell and cron are needed only for scheduled analytics.
 
-| Term | Meaning |
-| :-- | :-- |
-| **node** | One shipped `.claude` primitive — a skill, agent, or script; one directory per node in the source graph. |
-| **reference** | A doctrine page a node cites; shipped under `references/` (shared) or inside a skill's own bundle. |
-| **floor** | The always-on instruction layer; a workspace's harness inlines `floor/sg-root-instructions.md` into its root instructions. |
-| **harness** | A consuming workspace's local, additive overlay — bindings, crystallised local surfaces, dashboard. The vendored plugin tree itself is never edited. |
-| **carrier** | The recorded unit of work (a work item or implementation unit) that moves through the loop and carries its own gate decisions. |
-| **gate** | An explicit, recorded decision point (e.g. commit-to-build, commit-to-land) with an append-only, hash-chained decision log. |
-| **the loop** | triage → shape → build → review → verify → land → debrief — the delivery workflow the skills implement. |
-| **generate** | The deterministic factory build that writes this repository's content wholesale from the authored graph. |
-
-## Quickstart
-
-Requires Claude Code with plugin support (see [Prerequisites](#prerequisites)). From a terminal:
+## Install for Claude Code
 
 ```bash
 claude plugin marketplace add hk121992/stack-graph-plugin
 claude plugin install stack-graph@stack-graph
 ```
 
-Or inside a Claude Code session: `/plugin marketplace add hk121992/stack-graph-plugin`, then
-`/plugin install stack-graph@stack-graph`. Restart Claude Code (or run `/reload-plugins` if the
-install summary asks for it) and the skills appear namespaced as `/stack-graph:<skill>`.
+Restart Claude Code or reload plugins after installation. The skills appear under the
+`/stack-graph:<skill>` namespace.
 
-> Verified against **Claude Code v2.1.132**. The native plugin/marketplace flow is documented in
-> the [official Claude Code plugin docs](https://code.claude.com/docs/en/plugins) — treat those
-> as the authority if the CLI surface has moved.
+## Install for Codex
 
-## Prerequisites
+Codex installs plugins from a marketplace. Until this repository is listed in a shared Codex
+marketplace, use a small local marketplace wrapper:
 
-- **Claude Code** — the plugin targets the native plugin/marketplace flow (version stamp above).
-- **[bun](https://bun.sh)** — the TypeScript scripts (`scripts/analyzer`, `scripts/record-gate`,
-  the carrier-argument hook) are executed with bun.
-- **Python 3** — the session-preamble hook (`scripts/preamble/preamble.py`) runs with the
-  system `python3`.
-- **POSIX shell + cron** — for the optional scheduled analytics task (the analyzer derives the
-  event log from session transcripts on a schedule).
-- **git** — the workflow's gates and landing recipes assume a git repository.
-
-## Workspace setup
-
-Installing the plugin gives you the skills; a workspace becomes operable by standing up its
-**harness** — the local overlay the plugin's own skills scaffold:
-
-1. In the target workspace, run `/stack-graph:harness-init scaffold` — writes `bindings.yaml`
-   (how the vendored nodes resolve this workspace's surfaces), materialises the always-on floor
-   into `.claude/`, seeds the dashboard and strategy surface skeletons, and writes the analytics
-   env vars.
-2. **Install the scheduled analyzer task.** `harness-init` emits a runbook for the recurring
-   analyzer job — the cron entry that turns session transcripts into the derived event log.
-   Follow that runbook; analytics stay dark until the task is installed.
-3. Run `/stack-graph:harness-init validate` — checks every required binding resolves and probes
-   the analyzer with a dry run.
-4. Later plugin upgrades go through `/stack-graph:harness-update`, which re-crystallises what
-   the new version changed.
-
-From there, raise work with `/stack-graph:triage` and let the loop route it.
-
-## Architecture
-
-```mermaid
-flowchart LR
-  subgraph factory["Private factory (authored source)"]
-    G["The graph —<br/>one directory per node,<br/>shared references beside them"]
-  end
-  subgraph plugin["This repository — the generated plugin"]
-    T["skills/ · agents/ · scripts/<br/>references/ · floor/<br/>.claude-plugin/"]
-  end
-  subgraph workspace["Consuming workspace"]
-    H["Harness — additive local overlay<br/>(bindings.yaml, .claude/ floor,<br/>dashboard surfaces)"]
-    LOOP["The delivery loop<br/>triage → shape → build →<br/>review → verify → land → debrief"]
-  end
-  G -->|"generate<br/>(deterministic, wholesale)"| T
-  T -->|"claude plugin install"| H
-  H --> LOOP
+```bash
+mkdir -p /absolute/path/stack-graph-marketplace/plugins \
+  /absolute/path/stack-graph-marketplace/.agents/plugins
+git clone https://github.com/hk121992/stack-graph-plugin.git \
+  /absolute/path/stack-graph-marketplace/plugins/stack-graph
 ```
 
-Repository layout:
+Create `/absolute/path/stack-graph-marketplace/.agents/plugins/marketplace.json`:
 
-- `.claude-plugin/` — `plugin.json` (the plugin manifest; its `version` is build-written) and
-  `marketplace.json` (the marketplace entry this repository serves).
-- `skills/<id>/SKILL.md` — the workflow skills, each with a co-located `references/` bundle
-  where it carries one.
-- `agents/<id>.md` — the dispatchable agents.
-- `references/` — the shared doctrine references (`<id>.md`), plus per-agent bundle
-  directories (`references/<agent-id>/`) carrying the references each agent cites.
-- `floor/` — the always-on floor page harnesses inline.
-- `scripts/` — the transcript analyzer, the record-gate runner, the session hooks, and their
-  shared `lib/`.
+```json
+{
+  "name": "stack-graph-local",
+  "interface": { "displayName": "Stack Graph local" },
+  "plugins": [
+    {
+      "name": "stack-graph",
+      "source": { "source": "local", "path": "./plugins/stack-graph" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
+    }
+  ]
+}
+```
 
-## Node catalogue
+Then install it:
 
-Rendered from the build's generate manifest at plugin version **0.16.14** (46 nodes, 82 placed
-files). The catalogue is re-rendered when the tree is regenerated; if it ever lags a newer tree,
-the shipped files win.
+```bash
+codex plugin marketplace add /absolute/path/stack-graph-marketplace
+codex plugin add stack-graph@stack-graph-local
+```
 
-### Skills — the invocable workflow stages and curators (25)
+Start a new Codex task so the installed skill set is loaded.
 
-| Node | Ships as |
-| :-- | :-- |
-| architecture-review | `skills/architecture-review/SKILL.md` |
-| build | `skills/build/SKILL.md` |
-| context-curator | `skills/context-curator/SKILL.md` |
-| debrief | `skills/debrief/SKILL.md` |
-| debug | `skills/debug/SKILL.md` |
-| deploy | `skills/deploy/SKILL.md` |
-| design | `skills/design/SKILL.md` |
-| design-implement | `skills/design-implement/SKILL.md` |
-| design-review | `skills/design-review/SKILL.md` |
-| design-shotgun | `skills/design-shotgun/SKILL.md` |
-| dispatch | `skills/dispatch/SKILL.md` |
-| harness-init | `skills/harness-init/SKILL.md` |
-| harness-update | `skills/harness-update/SKILL.md` |
-| land | `skills/land/SKILL.md` |
-| local-graph-maintainer | `skills/local-graph-maintainer/SKILL.md` |
-| optimise | `skills/optimise/SKILL.md` |
-| plan | `skills/plan/SKILL.md` |
-| qa | `skills/qa/SKILL.md` |
-| review | `skills/review/SKILL.md` |
-| shape | `skills/shape/SKILL.md` |
-| shape-product | `skills/shape-product/SKILL.md` |
-| specify | `skills/specify/SKILL.md` |
-| strategy-curator | `skills/strategy-curator/SKILL.md` |
-| triage | `skills/triage/SKILL.md` |
-| verify | `skills/verify/SKILL.md` |
+## Initialise a workspace harness
 
-### Agents — the dispatchable specialists (18)
+Invoke `harness-init` in scaffold mode after installing the plugin. In Claude Code this is
+`/stack-graph:harness-init scaffold`; in Codex, ask it to use stack-graph's `harness-init` skill in
+scaffold mode. Confirm the workspace bindings, then invoke `harness-init` in validate mode.
 
-| Node | Ships as |
-| :-- | :-- |
-| auto-shaper | `agents/auto-shaper.md` |
-| benchmark | `agents/benchmark.md` |
-| canary | `agents/canary.md` |
-| capture-learnings | `agents/capture-learnings.md` |
-| consistency-checker | `agents/consistency-checker.md` |
-| drift-detector | `agents/drift-detector.md` |
-| explore | `agents/explore.md` |
-| health | `agents/health.md` |
-| investigate-probe | `agents/investigate-probe.md` |
-| lens-correctness | `agents/lens-correctness.md` |
-| lens-maintainability | `agents/lens-maintainability.md` |
-| lens-security | `agents/lens-security.md` |
-| lens-tests | `agents/lens-tests.md` |
-| link-validator | `agents/link-validator.md` |
-| log-decision | `agents/log-decision.md` |
-| measure-outcomes | `agents/measure-outcomes.md` |
-| queue-checker | `agents/queue-checker.md` |
-| simulate-users | `agents/simulate-users.md` |
+Initialisation materialises:
 
-### Scripts — the deterministic runtime pieces (3)
+- byte-identical root `CLAUDE.md` and `AGENTS.md` projections from one template;
+- one shared `.stack-graph/harness/` home for bindings and the always-on floor;
+- the bound carrier, dashboard, strategy, reference, and analytics surfaces.
 
-| Node | Ships as |
-| :-- | :-- |
-| carrier-arg-hook | `scripts/carrier-arg-hook/carrier-arg-hook.md` |
-| preamble | `scripts/preamble/preamble.md` |
-| record-gate | `scripts/record-gate/record-gate.md` |
+Existing Claude-only or Codex-only harnesses migrate through the same materializer. Known legacy
+managed prose and the retired carrier hook are removed; operator-authored root content and bindings
+are preserved. Divergent custom roots or first-migration bindings fail before any write so the
+operator can reconcile them explicitly. An unchanged rerun performs no writes.
 
-Alongside the nodes, the build places **30 shared references** (doctrine pages) under
-`references/`, **4 node-carried references** inside their owning skill's bundle, and the
-always-on floor file `floor/sg-root-instructions.md` that a workspace's harness inlines into its root instructions.
+Raise work by invoking `triage`. Gate decisions are collected in the active host's session and
+recorded by the bundled `record-gate` runner; no host hook writes lifecycle state.
 
-## Contributing
+## Update
 
-This repository is a **build artifact**. The authored source is a private factory repository
-holding the graph — one directory per node plus the shared references; a deterministic build
-(`generate`) projects it into this tree **wholesale**: `skills/`, `agents/`, `references/`,
-`floor/`, `scripts/`, and the `plugin.json` version field are overwritten on every release.
+For Claude Code:
 
-- **Do not hand-edit the generated directories.** A pull request that edits them cannot land
-  meaningfully — the next generate erases it. The repo-owned surfaces — this README, `LICENSE`,
-  `.claude-plugin/marketplace.json`, and all of `.claude-plugin/plugin.json` except its
-  build-written `version` field — are the only hand-maintained files; treat this list as the
-  authoritative ownership statement.
-- **Where change actually happens:** in the factory graph. Bug reports and suggestions are
-  welcome as [issues on this repository](https://github.com/hk121992/stack-graph-plugin/issues);
-  accepted changes land here through the factory's build, not as direct commits.
-- **Determinism is the contract.** The same authored graph produces a byte-identical tree (the
-  build's freshness gate enforces it) — that is what makes vendoring, review, and rollback
-  tractable.
+```bash
+claude plugin update stack-graph@stack-graph
+```
 
-## Optional integrations
+Then restart/reload the session.
 
-- **Two-layer decision records.** The `log-decision` agent (see `agents/log-decision.md`) writes
-  every recorded decision's **conclusion** to the workspace's decisions store. When the harness
-  additionally binds an external personal knowledge base, the fuller **reasoning layer** is
-  written there too; with no such binding, the reasoning is appended beside the conclusion in
-  the decisions store, marked as a fallback — nothing is silently dropped. A few tail-stage nodes (`explore`, `capture-learnings`, the `debrief` skill) use
-  the same optional binding.
-- **Analytics.** The transcript analyzer is optional-but-recommended: without the scheduled
-  task the workflow still runs — you just get no derived event log.
+For the local Codex route above:
 
-## License
+```bash
+git -C /absolute/path/stack-graph-marketplace/plugins/stack-graph pull --ff-only
+codex plugin add stack-graph@stack-graph-local
+```
 
-MIT — see [LICENSE](LICENSE). Copyright (c) 2026 stack-graph contributors.
+Start a new Codex task after reinstalling. In either host, invoke `harness-update` after the plugin
+bump; it re-materialises the shared floor/root projections, validates bindings, and changes nothing
+when the harness is already current.
+
+## Layout and ownership
+
+- `skills/` — the shared workflow and specialist skills, with owned runners and reference bundles.
+- `references/` — shared on-demand doctrine.
+- `floor/` — the always-on core materialised by the harness lifecycle.
+- `scripts/analyzer/` and `scripts/lib/` — optional transcript-derived analytics.
+- `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` — generated host manifests.
+- `.claude-plugin/marketplace.json`, this README, and `LICENSE` — repository-owned release files.
+
+Do not hand-edit generated content. Changes originate in the Factory graph or generator and arrive
+here as a deterministic release cut. Bug reports and proposals belong in this repository's issue
+tracker.
+
+## Licence
+
+MIT — see [LICENSE](LICENSE).

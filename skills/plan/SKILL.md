@@ -1,6 +1,6 @@
 ---
 name: "plan"
-description: "Produce a staged, dependency-annotated, lens-vetted plan for a settled, specced work-item — decompose it into implementation units (the build carriers), sequence them with complete dependencies and per-IU autonomy, and hand the plan doc back to shape as the commit-to-build gate's decision artifact and dispatch's input. Use when a design is settled and its spec amendment is through, and the work decomposes into IUs for the operator's commit-to-build decision."
+description: "Decomposes a settled, specced work-item into implementation units (the build carriers), sequenced with dependencies and per-IU autonomy; the lens-vetted plan doc is the commit-to-build gate's artifact and dispatch's input. Use when a settled, specced design must decompose into IUs."
 ---
 
 
@@ -30,7 +30,7 @@ Read for context; write only to harness surfaces.
 - **The design doc + spec amendment** — the settled artefacts handed forward by `specify` (or by
   `shape` on a re-plan). Read them for the scope, the resolved design decisions, the spec
   touchpoints, and — for a HITL unit — the artefacts the front's build-and-look resolved.
-- **The IU-schema** — you hold it via a `references` edge (`load: import`). Read it at the
+- **The IU-schema** — you hold it via a `references` edge (`load: required`). Read it at the
   start of every session; it is always present. It defines the **one IU shape** every unit
   carries: the content fields (`id`, `goal`, `files`, `dependencies`, `acceptance`,
   `acceptance_check`, `size`) plus the authored band you populate at plan time — **`autonomy`**,
@@ -157,11 +157,11 @@ reduction.
 - Run the lenses **sequential, plan-review order**: dispatch lenses that check plan-level
   coherence (sequencing, scope, dependency completeness) before fanning out the remainder
   in parallel. Lead with the always-on lenses in plan-review activation order.
-- As you fan out, pass each lens its own spawn prompt carrying the **target** (`plan`) and
+- As you fan out, pass each lens its own invocation prompt carrying the **target** (`plan`) and
   the plan doc's contents, the **scope-rules** and intent summary, and the **finding
   contract** — the finding schema, severity scale, and confidence anchors, which you hold
-  from your imported references — so every lens emits to the same contract.
-- **You do not direct-invoke the lenses.** They declare `composes-into @plan` from their
+  from the required references — so every lens emits to the same contract.
+- **You do not direct-invoke the lenses.** They declare `composes-into plan` from their
   own side; you reach them only through the dispatch reference. Each lens returns the
   compact finding tier; the dispatch reduces those returns to one ranked, routed finding set.
 
@@ -257,18 +257,18 @@ revision. Re-state the full plan (not a diff) so the build span starts clean.
   `commit-to-build` — the operator's decision, recorded once on the WI grouping; the units
   inherit it by reference.
 
-## Imported references
+## Required references
 
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
+Before taking any action, read these bundled references:
 
-@references/IU-schema.md
-@references/confidence-anchors.md
-@references/findings-schema.md
-@references/severity-scale.md
+- [IU-schema](references/IU-schema.md)
+- [confidence-anchors](references/confidence-anchors.md)
+- [findings-schema](references/findings-schema.md)
+- [severity-scale](references/severity-scale.md)
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/lens-dispatch.md` — `lens-dispatch`
+- [lens-dispatch](references/lens-dispatch.md)
 

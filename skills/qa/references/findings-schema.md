@@ -19,7 +19,7 @@ The **per-finding record shape every review lens emits and every consumer valida
 dispatch's merge / dedup / corroboration / confidence-gate / severity-sort runs **mechanically**, with no
 per-lens parsing. One contract for every lens is what holds the deterministic-from-the-returns-inward guarantee:
 the reduction never has to introduce judgment to reconcile shapes. It composes with two sibling contracts —
-[severity-scale](severity-scale.md) (the `severity` enum) and [confidence-anchors](confidence-anchors.md) (the
+[severity-scale](../../../references/severity-scale.md) (the `severity` enum) and [confidence-anchors](../../../references/confidence-anchors.md) (the
 `confidence` enum + suppression) — handed to a lens together as the **finding contract**. This fixes the field
 shapes and value-spaces, never an instance (a real finding's title, file, and line are runtime).
 
@@ -37,14 +37,14 @@ A lens returns:
 | field | value-space | meaning |
 |---|---|---|
 | `title` | string, ≤10 words | short, specific issue title |
-| `severity` | `P0 · P1 · P2 · P3` | per [severity-scale](severity-scale.md) |
+| `severity` | `P0 · P1 · P2 · P3` | per [severity-scale](../../../references/severity-scale.md) |
 | `file` | string | path from repo root (for a `doc` target, the doc location/section) |
 | `line` | integer ≥1 | primary line (for a `doc` target, the section anchor) |
 | `why_it_matters` | string | the impact + failure mode — *what breaks*, not *what is wrong*; lead with observable behaviour, ground it in the cited code |
 | `autofix_class` | `safe_auto · gated_auto · manual · advisory` | the routing class for the downstream fixer (below) |
 | `owner` | `fixer · follow-up · human · release` | the default next actor |
 | `requires_verification` | boolean | does a fix need targeted tests / a re-review before it is trusted |
-| `confidence` | `0 · 25 · 50 · 75 · 100` | anchored, per [confidence-anchors](confidence-anchors.md) |
+| `confidence` | `0 · 25 · 50 · 75 · 100` | anchored, per [confidence-anchors](../../../references/confidence-anchors.md) |
 | `evidence` | array of strings, ≥1 | code-grounded snippets / line references / pattern descriptions |
 | `pre_existing` | boolean | true only for unchanged code unrelated to this change |
 | `suggested_fix` | string \| null | a concrete minimal fix when one is reachable (below) |
@@ -84,7 +84,7 @@ Two valid uses of this schema:
 
 ## Cite out {#cite-out}
 
-- **The `severity` enum** → [severity-scale](severity-scale.md).
-- **The `confidence` enum + suppression behaviour** → [confidence-anchors](confidence-anchors.md).
+- **The `severity` enum** → [severity-scale](../../../references/severity-scale.md).
+- **The `confidence` enum + suppression behaviour** → [confidence-anchors](../../../references/confidence-anchors.md).
 - **The producer + validator** — the lens family that emits this, and the dispatch that validates and merges it → the lens nodes · lens-dispatch.
-- **The consumers** that inline it (`load: import`) into their lens spawns → review + verify + the front spine (design · plan · shape).
+- **The consumers** that declare it required and read it before running lens roles → review + verify + the front spine (design · plan · shape).

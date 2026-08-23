@@ -1,6 +1,6 @@
 ---
 name: "land"
-description: "The PROD-zone orchestrator — takes the operator-authorized promotion (commit-to-land, fired at verify's exit) through to a live, health-confirmed production deployment. Sequences deploy → canary, holds the live-confirmed exit gate (per-IU shipped → live), and owns the revert decision + the loop re-entry; single-main it executes the merge-to-main landing itself and the PROD zone skips. Use when a promotion has cleared the commit-to-land gate at verify's exit and must reach a live, health-confirmed deployment (or the single-main terminal landing)."
+description: "PROD-zone orchestrator: sequences deploy then canary, holds the live-confirmed exit gate (shipped to live), owns the revert decision and loop re-entry; single-main it lands the merge to main itself. Use when a promotion cleared commit-to-land must reach live."
 ---
 
 
@@ -19,7 +19,8 @@ You do not build, merge mechanically, or re-verify — `deploy` owns the mechani
 outcomes — those are `debrief`'s, disposed at the closeout gate. You are pure engineering
 delivery + confirmation.
 
-At turn 1, load your live state through the parameterized preamble: the promotion-set carriers
+Before any work, pass the generated carrier-entry preflight by invoking `preamble` with the active
+carrier; continue only on exit zero. Load the promotion-set carriers
 (`shipped`, with `merge_sha` / `evidence_refs`), the live deploy / smoke / canary health, and the
 `live-confirmed` gate state. `deploy-config` is at-hand (a crystallised harness surface), not a
 preamble inject.
@@ -38,8 +39,7 @@ route back to `verify`'s exit. Fail closed: never execute an unauthorized promot
 
 Read the carriers for context (the promotion records are per-IU per `IU-schema`; a grouping
 work-item aggregates per `work-item-schema`). You **write no carrier field**. When your gate
-settles, you dispatch the **`record-gate` runner**
-(`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) — the single mechanical writer — with
+settles, you invoke **`record-gate`** — the single mechanical writer — with
 the settled decision. The gate *experience* is yours: the sign-off surface, the evidence walk, the
 operator's real click. The *record* is record-gate's.
 
@@ -56,8 +56,8 @@ names the fields, the harness supplies the values — never hardcode a branch or
   PRs to `main` (the PRs `dispatch` opened and left open; the merge **is** `commit-to-land`'s
   enactment, per-IU). `deploy`, `canary`, and `live-confirmed` **skip** — there is no prod
   target to release to or confirm; the **terminal landing state is `shipped`**. Once each merge is real,
-  record its enactment evidence (the real merge SHA) by dispatching the `record-gate` runner
-  (`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) per its commit-to-land contract.
+  record its enactment evidence (the real merge SHA) by invoking `record-gate` per its
+  commit-to-land contract.
   `verify` ran in both regimes; the landing is equally deliberate.
 
 ## Step 1 — Deploy (prod-facing)
@@ -68,8 +68,8 @@ version/tag bump, triggers the prod pipeline, waits for it to settle, and runs i
 single-pass smoke check (HTTP 200 · console-error scan · content-present · screenshot). It
 reports `smoke_health`; **you consume that result** — the live-confirmed gate never fires on a
 URL that returns 200 over a blank or broken page. Once the promotion's merge is real, its
-enactment evidence (the `merge_sha`) is recorded by dispatching the `record-gate` runner
-(`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) per its commit-to-land contract.
+enactment evidence (the `merge_sha`) is recorded by invoking `record-gate` per its
+commit-to-land contract.
 
 If deploy fails at any phase, surface its failure output and ask:
 
@@ -96,7 +96,7 @@ sign-off surface showing **what was deployed** (the promotion set + `merge_sha` 
 **what signals were checked** (deploy's smoke + canary's verdict, or its honest DORMANT), and the
 question the operator alone answers: is it **actually live and clean on prod**? The real click is
 the attestation. Render per `gate-model` §Sign-off surface — widget-first from the harness's gate
-template, `AskUserQuestion` fallback, never free prose.
+  template, native operator-confirmation fallback, never free prose.
 
 Pass-when (the operator attests):
 
@@ -108,8 +108,7 @@ Pass-when (the operator attests):
    hold (keep watching), confirm (accept the degradation, on the record), or revert;
 4. **live & clean** — the operator's own confirmation it is actually working on prod.
 
-On confirmation, dispatch the **`record-gate` runner**
-(`${CLAUDE_PLUGIN_ROOT}/scripts/record-gate/record-gate.ts`) — **per-IU** on each promoted carrier:
+On confirmation, invoke **`record-gate`** — **per-IU** on each promoted carrier:
 gate `live-confirmed`, `decision: confirmed`, advancing `shipped → live`, `evidence_refs →
 deploy_url + smoke screenshot + canary verdict`. On decline (not live, or BROKEN): nothing
 advances to `live`; go to the revert seam.
@@ -148,11 +147,16 @@ over the batches landed since the last debrief. You end at the recorded landing 
 If any step fails, stop at that step and surface the failure with the named options. Never
 silently continue, never auto-revert.
 
+## Carrier entry preflight
+
+Before taking any workflow action, Invoke `preamble` with `--node land --carrier <active-carrier-file> --carrier-id <active-carrier-id>`. Missing or invalid carrier input blocks the invocation. Preamble resolves the exact required state from its bundled graph-derived contract; continue only when the bundled runner exits zero. Never substitute a host hook or a hand-written state list.
+
+
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/IU-schema.md` — `IU-schema`
-- `references/gate-model.md` — `gate-model`
-- `references/work-item-schema.md` — `work-item-schema`
+- [IU-schema](references/IU-schema.md)
+- [gate-model](references/gate-model.md)
+- [work-item-schema](references/work-item-schema.md)
 

@@ -18,7 +18,7 @@ related: [work-item-schema, gate-model, axis-entry-schema, routing-principles]
 The field contract for an **implementation unit (IU)** — the unit of build work and **the build carrier**: the
 one shape `build` reads to operate autonomously against a well-specified unit. It carries the **content fields**
 (the build-tracking body) and an **authored + gated band**; that band's `lifecycle_state` + `gate_decisions[]`
-are [the gate model](gate-model.md)'s — carried here and cited, **never restated**. What an IU *is* relationally —
+are [the gate model](../../../references/gate-model.md)'s — carried here and cited, **never restated**. What an IU *is* relationally —
 an instance flowing an arc, not a node — and where it sits in the two-track loop are the **graph model**'s (local,
 per-consumer); this fixes the **field shapes and value-spaces**, never an instance (a real IU's ids, files, and chain are runtime,
 in the workspace).
@@ -28,7 +28,7 @@ in the workspace).
 There is **one IU shape**, not a `oneOf` over a "child" kind and a "standalone" kind. The single discriminator is
 **`{ parent?, authorizing-gate-ref }`**:
 
-- **has a `parent`** — a unit of a grouping [work-item](work-item-schema.md); it **inherits the grouping's
+- **has a `parent`** — a unit of a grouping [work-item](../../../references/work-item-schema.md); it **inherits the grouping's
   authorising gate by reference** (and the grouping's signed intent), rather than carrying its own.
 - **no `parent`** — a **standalone** unit; it **carries its own gate** and its own intent.
 
@@ -57,7 +57,7 @@ The build-tracking body — identity plus what `build` is held to:
 Beyond the build body, the IU carries the authored + gated fields — most defined elsewhere and cited:
 
 - **`lifecycle_state` + `gate_decisions[]`** — carried, **not redefined**: the band, its hash-chain, its
-  provenance rules, and the single writer are [the gate model](gate-model.md)'s. The IU applies gate-model's **role
+  provenance rules, and the single writer are [the gate model](../../../references/gate-model.md)'s. The IU applies gate-model's **role
   scope**: a **standalone** unit records its **own full set** (front · build-readiness · landing · closeout); a
   unit **with a `parent`** inherits the grouping's authorising gate by reference and records only its own per-unit
   landing entries.
@@ -96,8 +96,8 @@ Beyond the build body, the IU carries the authored + gated fields — most defin
 
 ## Cite out {#cite-out}
 
-- **`lifecycle_state` · `gate_decisions[]` · decision provenance · the rigour dial · the single writer** → [gate-model](gate-model.md).
-- **The grouping** a unit's `parent` points at — the work-item that holds the inherited gate, intent, and `outcome_link` → [work-item-schema](work-item-schema.md).
+- **`lifecycle_state` · `gate_decisions[]` · decision provenance · the rigour dial · the single writer** → [gate-model](../../../references/gate-model.md).
+- **The grouping** a unit's `parent` points at — the work-item that holds the inherited gate, intent, and `outcome_link` → [work-item-schema](../../../references/work-item-schema.md).
 - **What an IU IS relationally**, the two tracks, where the gates sit → the **graph-model** internals (local, per-consumer — not shipped or linked here).
 - **The relational carrier summary** — one-shape-not-two-kinds, the two substrates, position-is-projected → the **graph-spec** (local, per-consumer).
 - **`current_stage`** — projected, read-only, never carrier-written → the context engine / generation model.

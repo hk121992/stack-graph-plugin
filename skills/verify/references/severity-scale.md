@@ -18,7 +18,7 @@ related: [findings-schema, confidence-anchors, lens-dispatch]
 The single **P0–P3** vocabulary every review lens **and** every non-lens findings emitter (`review`'s
 per-IU spec-match · `drift-detector`) sets `severity` to. Severity **orders** a finding within the actionable
 surface; it is **independent** of `confidence` (which gates *whether* it surfaces — see
-[confidence-anchors](confidence-anchors.md)). A `P2` can be `confidence: 100`; a `P0` can be `confidence: 50`.
+[confidence-anchors](../../../references/confidence-anchors.md)). A `P2` can be `confidence: 100`; a `P0` can be `confidence: 50`.
 
 Set `severity` to exactly one of:
 
@@ -40,6 +40,6 @@ findings-severity and keep their own vocabularies.
 
 ## Cite out
 
-- **The finding record** this is a field of → [findings-schema](findings-schema.md).
-- **The orthogonal `confidence` axis** + suppression thresholds → [confidence-anchors](confidence-anchors.md).
+- **The finding record** this is a field of → [findings-schema](../../../references/findings-schema.md).
+- **The orthogonal `confidence` axis** + suppression thresholds → [confidence-anchors](../../../references/confidence-anchors.md).
 - **Term** senses → glossary.

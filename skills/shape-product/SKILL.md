@@ -1,6 +1,6 @@
 ---
 name: "shape-product"
-description: "Shape's first action — the problem-altitude discovery check: is this the right problem, and does it serve the value proposition, the target user, and the objective it claims? Runs the four-risks scan (value and viability leading), records the strategy frame, and authors the success definition laddered to the outcome_link's KRs. Full-track only; decides no product strategy by fiat. Use when shape dispatches the front spine and the right-problem question must be settled before design."
+description: "Shape's first action, problem-altitude discovery: tests the problem against the value proposition, target user, and claimed objective via the four-risks scan, authors the success definition laddered to the objective's KRs. Use when the right problem must be settled before design; full track only."
 ---
 
 
@@ -45,7 +45,7 @@ objectives are **harness-supplied**, read at the step of need:
   settled call. These are the source of truth for *what the value proposition and target user
   are* — read, never assumed or restated.
 - **The objective the item serves** — the work-item names the objective it claims to move (its
-  `outcome_link`). Read the outcome layer's shape from your `okr-schema` reference (imported,
+  `outcome_link`). Read the outcome layer's shape from the required `okr-schema` reference,
   always present) so you can check the claimed objective is a real *outcome* (not a feature), and
   that moving it is plausible.
 
@@ -56,7 +56,7 @@ strategy frame, and the success definition, folded into the design conversation*
 
 ## The check you run — the four risks at the problem altitude
 
-The four risks (`four-risks`, imported, always present) apply at **both** the venture level (the
+The risk framework (`four-risks`, required and read before action) applies at **both** the venture level (the
 discovery loop's job) and the **problem altitude** — yours: the item's stated problem and premise,
 before any solution exists. Lead with the two the engineering side of the front cannot own:
 
@@ -204,10 +204,10 @@ the overlap; that is intended, so do not suppress your strategy angle to avoid i
 - **No carrier write and no gate decision.** The gates read your frame; the calls are the
   operator's.
 
-## Imported references
+## Required references
 
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
+Before taking any action, read these bundled references:
 
-@references/four-risks.md
-@references/okr-schema.md
+- [four-risks](references/four-risks.md)
+- [okr-schema](references/okr-schema.md)
 

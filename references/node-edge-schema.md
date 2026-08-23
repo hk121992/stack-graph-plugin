@@ -24,28 +24,29 @@ are runtime, recorded in the graph-record.
 
 ## The node file {#node-file}
 
-A node is **one canonical markdown file** — graph frontmatter over an imperative body — and a valid `.claude`
-primitive *in place*: the graph keys are additive, ignored by the runtime. The frontmatter is a **superset** of a
-required core plus the primitive's own native fields.
+A node is **one canonical markdown file** — graph frontmatter over an imperative body — projected into one
+common Agent Skill. The graph keys are authoring metadata stripped by `generate`; runtime frontmatter is exactly
+`name` and `description`.
 
 **Required core** — validate rejects a node missing any:
 
 | field | value-space | note |
 |---|---|---|
 | `id` | kebab-case; matches the node's directory | |
-| `primitive` | `skill` · `agent` · `command` · `script` | the Claude taxonomy — never an invented type |
+| `primitive` | `skill` | the one runtime primitive |
+| `execution` | `inline` · `isolated` | context policy; defaults to `inline` |
 | `title` | string | |
 | `description` | string — *what it does* + *Use when …* | the routing signal; "when-to-use" is folded in, not a separate field |
-| `mode` | `collaborative` · `autonomous` | must agree with `primitive` (below) |
+| `mode` | `collaborative` · `autonomous` | hand-run posture; independent of context isolation |
 | `determinism` | `deterministic` · `generative` | algorithmic → deterministic; judgment → generative |
 | `edges` | object of typed arrays | the edge vocabulary (below) |
 | `goals` | array of `{ outcome, metric, earns-keep }`, ≥ 1 | outcomes, not activities (below) |
 | `status` | `vX.Y.Z — YYYY-MM-DD` | terse |
 
-**`primitive` ↔ `mode` agreement** — a hard validation: `skill` → `collaborative` · `agent` → `autonomous` ·
-`command` → either · `script` → `autonomous`. `mode` classifies the node's **default hand-run posture**, not its
-body branches: a node may carry an **unattended branch** provided that branch **routes out rather than proceeds**
-on any decision it would otherwise put to the operator.
+**Execution policy.** `inline` runs in the invoking context; `isolated` runs in a fresh child context and returns
+a summary. Isolation changes context only — never node identity, content, permissions, or gate authority.
+`mode` separately classifies the node's **default hand-run posture**: a node may carry an unattended branch
+provided that branch routes out rather than proceeds on any decision it would otherwise put to the operator.
 
 **Classification axes + staleness (required on every node).** A node carries the same three axes a reference
 does (glossary §axes) plus the staleness-engine fields — validate rejects a node missing any:
@@ -57,9 +58,16 @@ does (glossary §axes) plus the staleness-engine fields — validate rejects a n
 | `level` | `L1` · `L2` · `L3` | entropy altitude; a node body carries execution detail → **`L3`** (the contaminant rule: mixed → L3) |
 | `reviews-on` · `last-reviewed` · `entropy` | staleness-engine fields | drift-clock subject · git-SHA pin · observed churn |
 
-**Native passthrough.** Everything outside the required core + axes is an **optional native field** — carried
-through verbatim, following the primitive's own `.claude` schema (e.g. `model`, `allowed-tools`). This contract
-does not re-enumerate the native surface.
+**Runtime projection.** Every emitted `SKILL.md` contains exactly the common `name` and `description`
+frontmatter fields. Host-only fields are not emitted from the shared graph. Scripts and references are relative
+resources owned by the skill directory.
+
+**Carrier entry metadata (optional).** A node whose `references` edges declare exactly one
+`required-state` participates in the generated carrier-entry contract. Absence of extra metadata means
+the skill requires an existing carrier and must pass the bundled preamble before work. The one creator
+exception declares `carrier-entry: creates`; it may enter without a carrier because it creates one.
+`carrier-entry` without a `required-state` declaration, any value other than `creates`, or more than one
+declaring edge is invalid. The field is graph-only and never survives into runtime skill frontmatter.
 
 ## The edge vocabulary {#edges}
 
@@ -71,7 +79,7 @@ The **structural skeleton is acyclic; only process edges cycle** — that is how
 | `invokes` | node → node | structural | no |
 | `loads` | node → node / reference | structural | no |
 | `composes-into` | node → arc (or parent node) | structural | no |
-| `references` | node → reference (or node); carries `load: import \| on-demand` | structural | no |
+| `references` | node → reference (or node); carries `load: required \| on-demand` | structural | no |
 | `maintains` | node → viewer-rendered reference | structural | no |
 | `precedes` | node → node or product gate | process | **yes** |
 | `can-follow` | node → node or product gate | process | **yes** |
@@ -116,7 +124,7 @@ loop: a node whose metric never moves is visible and can be cut.
 
 ## A reference's frontmatter {#reference-frontmatter}
 
-A **reference is not a node** — it owns no control flow and declares **no `primitive` / `mode` / `goals` / process
+A **reference is not a node** — it owns no control flow and declares **no `primitive` / `execution` / `mode` / `goals` / process
 edges**. Its frontmatter is a smaller, different shape, classified by the **three axes** with **no `kind` split**
 (a reference is a reference; cadence — not a stored kind — governs whether the viewer renders it):
 

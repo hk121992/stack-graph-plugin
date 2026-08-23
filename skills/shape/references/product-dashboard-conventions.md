@@ -16,7 +16,7 @@ related: [work-item-schema, okr-schema, git-policy-schema, sg-root-instructions]
 # Product-dashboard conventions
 
 The conventions the front follows when it authors **work-ledger content** — the work items
-(carriers) on the product-dashboard. They are imported wherever the front creates or advances a
+(carriers) on the product-dashboard. They are declared required wherever the front creates or advances a
 carrier: `raise` at create, `shape` (the shaping session) as it shapes, a dashboard `edit` at a terminal
 disposition. They live here, as a vendored reference, so they hold the same way **regardless of which
 node enacts them** — a dedicated curator skill, or the front nodes directly.
@@ -65,7 +65,7 @@ projection owns the stage, gates own the lifecycle — so it holds independently
   `shape` (the shaping session) resolves as not worth an IU is parked / killed / deferred here, carrying its
   `disposition` (`work-item-schema`).
 - **Graduate per the harness's git policy.** How a content change graduates — a labelled PR or a
-  direct push — is **not hardcoded here**: resolve your repo/path against `@git-policy` (**no entry ⇒
+  direct push — is **not hardcoded here**: resolve your repo/path against the materialized `git-policy` surface (**no entry ⇒
   labelled PR**; the entry shape + most-specific-wins + fail-closed live in `git-policy-schema`, not
   restated here). When it resolves to **`pr-gated`**, graduate via a labelled PR: group content edits
   in one operator-decision frame into one PR; split across frames; **never bundle a structural ledger

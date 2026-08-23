@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "nodes": {
+    "build": {
+      "entry": "requires",
+      "required_state": [
+        "goal",
+        "files",
+        "acceptance",
+        "verification",
+        "finding",
+        "dev_tip"
+      ]
+    },
+    "debrief": {
+      "entry": "requires",
+      "required_state": [
+        "landed_ius",
+        "improves",
+        "work_item_completion",
+        "success_definitions",
+        "objectives",
+        "frozen_metrics",
+        "learnings_archive",
+        "decisions_index"
+      ]
+    },
+    "dispatch": {
+      "entry": "requires",
+      "required_state": [
+        "iu_queue",
+        "dependencies",
+        "build_review_state",
+        "dev_branch_state",
+        "parked_route_outs",
+        "zone"
+      ]
+    },
+    "land": {
+      "entry": "requires",
+      "required_state": [
+        "promotion_set",
+        "deploy_status",
+        "health_status",
+        "canary_status",
+        "commit_to_land_state",
+        "live_confirmed_state"
+      ]
+    },
+    "shape": {
+      "entry": "requires",
+      "required_state": [
+        "settled_decisions",
+        "signed_intent",
+        "open_ius",
+        "spec_status",
+        "lifecycle_state",
+        "stage"
+      ]
+    },
+    "triage": {
+      "entry": "creates",
+      "required_state": [
+        "triage-source-queue",
+        "open-iu-manifest"
+      ]
+    },
+    "verify": {
+      "entry": "requires",
+      "required_state": [
+        "batch_change_set",
+        "touched_dev_surfaces",
+        "dev_env_health"
+      ]
+    }
+  }
+}

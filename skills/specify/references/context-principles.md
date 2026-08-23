@@ -55,7 +55,7 @@ runtime).
 3. **Cadence?** every-turn-from-first-message → an **always-on floor core** · an injected runtime fact → the
    **preamble** · globally reachable at need → an **on-demand reference** · used only inside one node → a
    **node-carried `process-reference`**.
-4. **Whose?** **vendored** (→ the plugin) or **local** (→ `.claude/`).
+4. **Whose?** **vendored** (→ the plugin) or **local** (→ the harness's local canonical store).
 
 → exactly **one home** = a (provenance × cadence) reference home. **Single home per instruction — no
 duplication across surfaces; duplication is *the* drift vector.** (How that pair derives to a path is the
@@ -66,7 +66,7 @@ duplication across surfaces; duplication is *the* drift vector.** (How that pair
 Three delivery surfaces, ordered by cost. The routing question: **"what is the agent already touching at the
 moment it needs this? Put it there."**
 
-- **`always-on` floor** — `@`-inlined into `CLAUDE.md`; every agent, every session, from message one. The
+- **`always-on` floor** — loaded into the host's root instruction projections; every session, from message one. The
   most expensive surface.
 - **`on-demand` reference** — named in a node's body (a `references` edge); pulled when the work calls;
   globally reachable via the at-hand-references-index.
@@ -100,4 +100,4 @@ on the floor, its **mechanism** on-demand.)*
   internals** (local, per-consumer; not restated or linked here). How to *read and act on* its verdict, and
   the curator that runs it, are the **context-curator** node's modes + the local `context-layer` doctrine.
 - How a (provenance × cadence) pair **derives to a path** → the **generation model** (local, per-consumer).
-- **Term definitions** (entropy, cadence, provenance, floor, the surfaces) → the [glossary](glossary.md).
+- **Term definitions** (entropy, cadence, provenance, floor, the surfaces) → the [glossary](../../../references/glossary.md).

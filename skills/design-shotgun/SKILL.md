@@ -1,6 +1,6 @@
 ---
 name: "design-shotgun"
-description: "Explores visual design directions for a surface — generates N deliberately distinct variants, opens a side-by-side comparison board, collects structured operator feedback, iterates, and records the approved direction with its rationale. Divergent visual brainstorming; the board is the chooser. Use when A user-facing surface needs a visual direction chosen before production UI is built, or the operator wants to explore options or fix a surface they dislike."
+description: "Divergent visual exploration, not a review: generates N distinct variants, compares them side by side, iterates on operator feedback, and records the approved direction. Use when a surface needs a visual direction chosen before production UI, or the operator wants options or dislikes one."
 ---
 
 
@@ -20,7 +20,7 @@ the approved direction you record is what design-implement builds into productio
 The harness provides the project's design source of truth (its **DESIGN.md**: fonts, colour, spacing).
 By default, explore **within** it — read it through the harness binding wherever it is bound; never
 assume a fixed path. Diverge from it only when the operator explicitly says to go off the reservation.
-Hold the [`ux-principles`](../_refs/ux-principles.md) standard throughout (read it on-demand): variants
+Hold the `ux-principles` standard throughout (read the bundled reference on demand): variants
 explore *direction*, but none should ship the anti-slop patterns or violate hierarchy, type, or
 contrast — a "distinct" variant that is distinctively bad is not a real option.
 
@@ -101,7 +101,7 @@ direction — not a vague memory of the session — is the hand-off artefact.
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/ux-principles.md` — `ux-principles`
+- [ux-principles](references/ux-principles.md)
 

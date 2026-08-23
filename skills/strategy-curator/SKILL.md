@@ -1,6 +1,6 @@
 ---
 name: "strategy-curator"
-description: "Maintains the product's strategic substrate, objectives-first — owns and authors the objectives (OKRs) surface the workflow ladders to and debrief measures against, over the strategy grounding beneath it (the strategy kernel plus, when the harness does product-market discovery, the VPC/BMC canvas held honest by an evidence-first test-and-learn loop). Canvas modes — hypothesise (frame testable claims), gather-evidence (run evidence), assess (record findings, confirm/kill/ supersede/pivot), refresh-canvas (regenerate the view) — are secondary, periodic steering, present only when a canvas is bound. The vendored, general curator; a harness points it at its own surfaces via overlay. Use when an objective needs authoring, amending, or laddering; a promoted KR candidate awaits authoring; a canvas claim needs framing or putting to evidence; a finding has landed that confirms, kills, supersedes, or pivots a hypothesis; the riskiest value/viability assumption is unaddressed; the canvas view has drifted from its sources; or (when the harness uses the zone matrix) a vertical — a customer experience — needs homing on the strategy surface. NOT for delivery (the product-dashboard/gates) or measuring outcomes (debrief reads the objectives you author)."
+description: "Owns the objectives (OKRs), strategy kernel, and VPC/BMC canvas. Modes: hypothesise, gather-evidence, assess, refresh-canvas. Use when an objective, KR candidate, canvas claim, hypothesis-changing finding, or vertical needs authoring, amending, or laddering. NOT delivery or measuring outcomes."
 ---
 
 
@@ -75,7 +75,7 @@ The day-to-day work: keep the objectives **live, well-formed, and trustworthy on
 - **Be readable without re-derivation.** Intent-to-build ladders every unit's outcome anchor to a
   live objective, and `debrief` measures the sprint against your `key_results[]` — both read the
   surface directly. A malformed or stale objective breaks them downstream; that is the bar.
-- **Graduate every objectives write** per the crystallised **`@git-policy`** surface for the
+- **Graduate every objectives write** per the crystallised **`git-policy`** surface for the
   objectives home's repo/path (below) — the same single-gated-path rule as the canvas.
 
 ## The canvas loop (secondary, when a canvas is bound)
@@ -83,12 +83,12 @@ The day-to-day work: keep the objectives **live, well-formed, and trustworthy on
 Strategy is held honest by a test-and-learn cycle: **`hypothesise`** frames testable claims about
 the market, users, jobs, value, and model; **`gather-evidence`** runs evidence against them;
 **`assess`** records the findings and moves each affected item along its lifecycle, graduating the
-change per `@git-policy` for the strategy home; **`refresh-canvas`** regenerates the readable
+change per `git-policy` for the strategy home; **`refresh-canvas`** regenerates the readable
 view from its sources. The loop closes from outside, too — when a downstream debrief reports a real
 outcome, it arrives here to **confirm** or **kill** the strategy hypothesis it bears on. There is
 no other write path to the canvas surface.
 
-Two invariants ride the whole loop, both from your `four-risks` lens (imported, always present):
+Two invariants ride the whole loop, both from the required `four-risks` lens:
 
 - **Evidence-first.** Every canvas claim traces to a finding. An item with state `assumed` is never
   silently treated as true — it is a claim awaiting evidence, marked as such.
@@ -103,7 +103,7 @@ Two invariants ride the whole loop, both from your `four-risks` lens (imported, 
 Confirm the target surface is reachable through its overlay binding — the objectives home for
 objectives work; the canvas home for a canvas mode (a canvas mode with no canvas bound is a
 mis-invocation — say so and stop). Read the product's **maturity stage** — it sets the evidence bar
-for `assess`. Before any write, consult the crystallised **`@git-policy`** surface for the target
+for `assess`. Before any write, consult the crystallised **`git-policy`** surface for the target
 surface's **repo/path** (no entry ⇒ labelled PR); **only when it resolves `pr-gated`** confirm PR
 tooling is authenticated (abort and surface the auth error otherwise) and the working tree is clean
 before branching.
@@ -162,7 +162,7 @@ before branching.
    target files, with **your queue label** (the label is a per-caller parameter of the shared queue
    mechanism). If an open PR already touches them, **do not open a second** — surface the
    overlapping PR(s) and stop, recommending the operator extend or close the existing one.
-5. **Graduate per `@git-policy`.** Resolve the write mode from the crystallised `@git-policy`
+5. **Graduate per `git-policy`.** Resolve the write mode from the crystallised `git-policy`
    surface for the target home's **repo/path** (do not restate the rule; no entry ⇒ labelled PR).
    When it resolves **`pr-gated`**: compose the PR body **inline** per `pr-description-shape` for
    the settled edits, branch off the home's main line, apply the edits, open the PR with the
@@ -202,8 +202,8 @@ preserved as the source records them, never upgraded by the transform.
   the vision; if it can only be stated as a feature, it is not an objective.
 - **Address the riskiest value/viability assumption first.** Confidence on three risks and a blind
   spot on the fourth is not a green light.
-- **Graduate per `@git-policy`.** How a change graduates — via a labelled PR or a direct push — is
-  **not hardcoded here**: consult the crystallised `@git-policy` surface for the target home's
+- **Graduate per `git-policy`.** How a change graduates — via a labelled PR or a direct push — is
+  **not hardcoded here**: consult the crystallised `git-policy` surface for the target home's
   repo/path (no entry ⇒ labelled PR; do not restate the resolution rule). When the resolved mode is
   **`pr-gated`**, every graduated PR carries the overlay's queue label — without it the PR drops out
   of the operator's triage. The curator is the single write path to both surfaces, whichever mode
@@ -216,19 +216,19 @@ preserved as the source records them, never upgraded by the transform.
   the objectives shape lives in `okr-schema`, the canvas structure in `vpc-schema` / `bmc-schema`,
   the maturity stage and the surface homes in the overlay binding.
 
-## Imported references
+## Required references
 
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
+Before taking any action, read these bundled references:
 
-@references/four-risks.md
+- [four-risks](references/four-risks.md)
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/axis-entry-schema.md` — `axis-entry-schema`
-- `references/bmc-schema.md` — `bmc-schema`
-- `references/okr-schema.md` — `okr-schema`
-- `references/pr-description-shape.md` — `pr-description-shape`
-- `references/vpc-schema.md` — `vpc-schema`
+- [axis-entry-schema](references/axis-entry-schema.md)
+- [bmc-schema](references/bmc-schema.md)
+- [okr-schema](references/okr-schema.md)
+- [pr-description-shape](references/pr-description-shape.md)
+- [vpc-schema](references/vpc-schema.md)
 

@@ -1,6 +1,6 @@
 ---
 name: "harness-update"
-description: "Brings a harness's installed stack-graph plugin current — detects installed-vs-published version, runs the scope-aware marketplace-update → uninstall → install dance (the native `claude plugin update` is broken), regenerates the at-hand-references-index on a bump, re-binds only when the bindings-contract version moved (re-materializing the crystallised @git-policy surface and re-wiring the sg-root-instructions floor via harness-init), re-validates the ambient surface every run and re-vends the SG-managed CLAUDE.md on drift (customisation lives in the crystallised refs, never inline), and surfaces the restart reminder plus the version/commit landed. Steps — Detect, Update, Contract-drift, Ambient-sync, Hand off. Use when a harness operator needs to update an already-installed stack-graph plugin to the latest published version. NOT for first-time setup — standing up a harness from scratch is `harness-init scaffold`; this assumes the plugin is already installed and only advances its version."
+description: "Brings a harness's installed stack-graph plugin current: detects the installed-vs-published delta, updates in scope, re-binds on a bindings-contract move. Use when an operator advances an installed plugin to the latest published version. NOT for first-time setup; that is `harness-init scaffold`."
 ---
 
 
@@ -15,21 +15,18 @@ plugin is **already installed**; if it is not, this is a first-time setup and th
 `harness-init scaffold`, not you.
 
 You are **vendored and general** — you carry **no product paths, ids, or toolchain**. The binding key
-set and the `bindings.yaml` format live in the **`bindings-contract`** reference (imported, not
+set and the `bindings.yaml` format live in the required **`bindings-contract`** reference (not
 restated here); you read its **`Contract version:`** line only to detect whether the contract moved. Every path you
-touch is **runtime-owned** (the Claude Code install registry, resolved per scope) or harness-local —
+touch is **runtime-owned** (the active host's install registry, resolved per scope) or harness-local —
 you never mutate the vendored plugin or the factory.
 
-## Why the dance exists (the upstream CLI bug)
+## Host install boundary
 
-The native `claude plugin update <plugin>` is **broken** for an installed, enabled plugin: it returns
-`✘ Failed to update plugin "<plugin>": Plugin "<plugin>" not found`. And `claude plugin install
-<plugin>@<market>` is a no-op (`✔ already installed`) whenever the registry is still pinned to an
-older `version` / `gitCommitSha`, even after the marketplace cache is refreshed. So the **only**
-sequence that actually advances the install is `marketplace update → uninstall → install`. You
-encapsulate that dance so the operator never has to know it. **This is a work-around, not the intended
-UX** — the `claude plugin update` "not found" failure looks like a CLI bug independent of this skill
-and is worth upstreaming to the plugin CLI.
+Resolve registry, cache refresh, update, uninstall, and install operations through the active host's
+plugin controls. Keep the shared workflow invariant: refresh published state before comparing,
+preserve install scope, and verify the registry advanced after mutation. If a host's native update
+does not refresh an enabled install, use that host's uninstall/install fallback. Host command syntax
+does not belong in this shared skill.
 
 ## Preflight (before any step)
 
@@ -43,30 +40,26 @@ first-time setup.
 
 ### 1. Detect
 
-1. **Read the installed version.** Resolve the Claude Code install registry (`installed_plugins.json`)
+1. **Read the installed version.** Resolve the active host's plugin install registry
    **at run time, per scope** — it is runtime-owned, not in this repo, so do not hardcode a path; shell
    out / read it where the runtime keeps it. Note the installed `version` (and `gitCommitSha` if
    recorded) and the **scope** the plugin is installed under (`user` / `project`).
-2. **Refresh the cache, THEN read the published version.** Run `claude plugin marketplace update
-   <market>` **first** to refresh the local marketplace cache to the latest published state — *before*
+2. **Refresh the cache, THEN read the published version.** Use the host's plugin controls to refresh
+   the local marketplace cache to the latest published state **before**
    reading the published version. Reading the published `version` / `gitCommitSha` from a **stale**
    cache makes Detect compare against an old value and wrongly report "up to date", so the refresh is
    not optional. Then read the published version: for a **GitHub-sourced** marketplace, the source
-   repo's `.claude-plugin/plugin.json` (`version` + `gitCommitSha`); for a **local/path** source, the
-   bound source's `plugin.json`. Branch on the bound source kind; both resolve to a
+   source repository's published plugin metadata (`version` + `gitCommitSha`); for a **local/path**
+   source, read the bound source's metadata. Branch on the bound source kind; both resolve to a
    `version` + `gitCommitSha`.
 3. **Compare.** If installed == published → print **"up to date at vX.Y.Z"** and **exit** — an
    idempotent no-op, nothing mutated. Otherwise continue to Update.
 
 ### 2. Update
 
-Run the **scope-aware** sequence, using the scope **detected** in Detect (never assumed):
-
-```
-claude plugin marketplace update <market>        # refresh cache to latest published
-claude plugin uninstall  <plugin> --scope <s>    # clear the stale version pin
-claude plugin install    <plugin>@<market> --scope <s>
-```
+Run the active host's **scope-aware** update sequence, using the scope detected in Detect (never
+assumed). Refresh first; if native update cannot advance the installed version, uninstall and
+reinstall through the same host controls while preserving scope.
 
 Then **confirm the new `version` + `gitCommitSha` landed** in the install registry — re-read it the
 same way Detect did. If the install did not advance (still pinned to the old version), surface that as
@@ -79,7 +72,7 @@ floor's ref map wrong; regeneration is the bump's standing companion, not contra
 
 **On every bump, re-materialize the analyzer wrapper and probe it under the real cron env.** The bump
 ships a **new analyzer asset tree** at `<plugin>/scripts/analyzer`, so re-materialize the harness-local
-`<org-root>/.claude/sg-analyze.sh` — the same substitution `harness-init` performs at scaffold
+`<harness-runtime-root>/sg-analyze.sh` — the same substitution `harness-init` performs at scaffold
 (`@@ANALYZER_HOME@@` → the resolved absolute `<plugin>/scripts/analyzer`, the baked
 `BAKED_ANALYZER_HOME` **assignment only**, the fail-closed survival guard's literal sentinel left
 intact). Unlike scaffold's absent-only seed this is a **re-vend** — overwrite the materialized copy,
@@ -105,12 +98,12 @@ header).
   binding keys and the dial knobs (`bindings-contract` §dials — maturity · plan-policy ·
   stale-projection-policy · terminal-recorder) are reconciled and the harness re-passes its gate.
   The re-bind is what makes the new **always-on floor** actually load next session, not merely a key
-  reconciliation: through it the crystallised **`@git-policy`** surface is reconciled (a bump that
+  reconciliation: through it the crystallised **`git-policy`** surface is reconciled (a bump that
   moves `git-policy-schema` re-materializes an ABSENT map; a **present, operator-authored map is
   never clobbered** — the shape drift surfaces as a validate failure you flag and route to the
-  operator to reconcile; git-policy is a crystallised surface `@`-ref'd off the floor, **not** a
-  bindings dial) and the **`sg-root-instructions`** `@`-ref is
-  re-wired so the new vendored floor is what `CLAUDE.md` inlines. The full git/devops doctrine
+  operator to reconcile; git-policy is a crystallised surface linked off the floor, **not** a
+  bindings dial) and the **`sg-root-instructions`** link is
+  re-wired so the new vendored floor is what `root instruction projections` inlines. The full git/devops doctrine
   lives in the harness's local `devops-loops` reference — the surface you re-materialize is only
   the thin crystallised map.
 - If it is **unchanged** → say so and **skip** the re-bind — do not re-bind needlessly. (The read-only
@@ -118,33 +111,24 @@ header).
   not the validate.)
 
 The definition⇄instance pairs the drift check walks (`bindings-contract`⇄`bindings.yaml` ·
-`git-policy-schema`⇄`@git-policy` · the `deploy-config` values) include **optional,
+`git-policy-schema`⇄`git-policy` · the `deploy-config` values) include **optional,
 conditionally-present** blocks — an unbound optional block (e.g. no `deploy-config` on a
 non-deploying harness) is **not** drift; never report a false failure on a capability the harness
 does not run.
 
 ### 3b. Ambient-surface sync (every run, state-based)
 
-Independently of the contract check, **always** reconcile the harness's **ambient surface** — the
-always-on band `@`-ref'd from the org-root `CLAUDE.md` (`@.claude/always-on/sg-root-instructions.md` and its
-companions) that loads every session. The `@`-refs are **not binding keys**, so the Contract-drift
-check above never sees them; without this step a harness whose band never got wired — or drifted —
-never picks it up on update.
+Independently of the contract check, **always invoke `harness-init`'s materialize operation**. Its
+bundled lifecycle runner re-vends the floor into the one shared harness-runtime home, emits the two
+supported root instruction projections as byte-identical twins from one template, preserves
+non-managed root content and shared bindings, and removes only the retired carrier-argument hook
+from legacy settings. Then invoke `harness-init validate`.
 
-- **Run `harness-init validate`** (read-only — it already asserts that `CLAUDE.md` `@`-refs the vended
-  `@.claude/always-on/sg-root-instructions.md` and that the band files are present + non-empty) on **every**
-  update, not only on a contract move.
-- **On a flagged ambient-surface gap** (an `@`-ref line missing, a vended band file absent / stale,
-  or the `CLAUDE.md` drifted from the vended shape), invoke **`harness-init scaffold`** in its
-  idempotent repair posture. The `CLAUDE.md` is an **SG-managed, vended surface** — **re-vend it
-  wholesale** from the ambient template (never an insert-around-authored-prose repair): all harness
-  customisation lives in the **crystallised refs behind the `@`-band** (the identity surfaces ·
-  @git-policy · the at-hand index · the nav layer), never inline. Inline non-template content found
-  at re-vend is **MIGRATED** — quote it to the operator with its right home per `context-principles`
-  — never silently dropped. Then **re-validate** to confirm the gap closed.
-- **State-based, not version-gated.** The trigger is the validate result — does the `@`-ref actually
-  resolve? — never a version counter, so it self-heals a harness however it drifted (never-wired,
-  hand-edited, half-scaffolded) and is a clean **no-op** when the surface is already current.
+This is **state-based, not version-gated**. A missing twin, stale floor, first migration, or managed
+projection drift repairs deterministically. Divergent root custom content or first-migration bindings
+fails before writes and is surfaced for explicit reconciliation. An unchanged harness performs zero
+writes. Never recreate a root projection or host-local payload in this skill; `harness-init` owns the
+one materializer and one template.
 
 ### 4. Hand off
 
@@ -155,7 +139,8 @@ Print:
 - The **version + `gitCommitSha` landed** — the concrete state the install moved to — plus what the
   bump re-reconciled (the regenerated index; the re-materialized analyzer wrapper + its cron-probe
   result; the re-bind, when the contract moved).
-- The **RESTART-REQUIRED** reminder: the new skill set loads only on a Claude Code **restart**; until
+- The **RESTART-REQUIRED** reminder: the new skill set loads only after the active host reloads its
+  plugin/runtime context; until
   the operator restarts, the session is still running the old skills.
 
 ## Hard constraints
@@ -163,8 +148,8 @@ Print:
 - **Carry no product literals.** Plugin name, marketplace name, scope, and registry path are resolved
   from the runtime + the bound source at run time — never hardcoded. The key set + format live in
   `bindings-contract`.
-- **Runtime-registry + harness-local ops only.** You operate on the Claude Code install registry (via
-  `claude plugin …`) and, on a contract move, the harness-local `bindings.yaml` + the materialized
+- **Runtime-registry + harness-local ops only.** You operate on the active host's plugin registry
+  through its supported controls and, on a contract move, the harness-local `bindings.yaml` + the materialized
   band (through `harness-init`). You **never** mutate the vendored plugin or the factory.
 - **No workflow-carrier writes.** You are a harness-lifecycle node, not a workflow gate — you never
   write a carrier's `lifecycle_state` / `gate_decisions[]` (`record-gate` is their single writer).
@@ -179,15 +164,15 @@ Print:
   it landed on and the restart-required reminder; the operator is never left unsure whether the new
   skill set is live.
 
-## Imported references
+## Required references
 
-The following references are single-sourced into this primitive's bundle and spliced at load (`@`-import). They are always present:
+Before taking any action, read these bundled references:
 
-@references/bindings-contract.md
+- [bindings-contract](references/bindings-contract.md)
 
 ## On-demand references
 
-Read these at the step of need (single-sourced into this primitive's bundle):
+At the step of need, read these bundled references:
 
-- `references/sg-root-instructions.md` — `sg-root-instructions`
+- [sg-root-instructions](references/sg-root-instructions.md)
 

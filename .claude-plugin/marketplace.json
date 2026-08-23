@@ -4,7 +4,7 @@
     "name": "stack-graph contributors",
     "url": "https://github.com/hk121992/stack-graph-plugin"
   },
-  "description": "Marketplace for the stack-graph plugin — a graph-built, gated agentic engineering workflow for Claude Code.",
+  "description": "Marketplace for stack-graph — one graph-built, gated engineering workflow shared by Claude Code and Codex.",
   "plugins": [
     {
       "name": "stack-graph",
@@ -12,7 +12,7 @@
         "source": "github",
         "repo": "hk121992/stack-graph-plugin"
       },
-      "description": "The factory — models an agent operating environment as a graph of its .claude primitives and the workflows that traverse them; instruments and improves them via a gated loop."
+      "description": "A graph-built engineering workflow with durable carriers, explicit gates, and one shared skill payload for Claude Code and Codex."
     }
   ]
 }

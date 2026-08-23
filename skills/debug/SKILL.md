@@ -1,6 +1,6 @@
 ---
 name: "debug"
-description: "The Iron-Law root-cause fix path — investigate, analyse, hypothesise, fix, with no fix applied until one root cause is reproduced and confirmed. Carries the Iron Law inline, fans out parallel read-only probes to test candidate causes, and escalates instead of guess-patching. Use when a build (or review) hits a failing check, runtime error, or regression that cannot be diagnosed and fixed quickly in-span, and the cause is not yet known."
+description: "Iron-Law root-cause fix path: no fix is applied until one root cause is reproduced and confirmed. Fans out parallel read-only probes and escalates rather than guess-patching. Use when a build or review hits a failing check, runtime error, or regression of unknown cause."
 ---
 
 
@@ -84,7 +84,7 @@ repo or scope is unclear, skip the lock and say why.
 ## Phase 2 — Analyse, then fan out parallel probes
 
 Dispatch **`investigate-probe`** — one read-only probe per candidate cause, **in parallel**
-(one message, multiple Agent calls). Each probe gets one hypothesis, the symptom, the affected
+(one message, multiple isolated child contexts). Each probe gets one hypothesis, the symptom, the affected
 files, and the reproduction; it gathers evidence, tests that one cause, and returns a
 confirm / ruled-out finding. Probes **write nothing** — that read-only invariant is what lets
 them run concurrently without colliding.
