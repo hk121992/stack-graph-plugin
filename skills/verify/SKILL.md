@@ -196,8 +196,10 @@ When the batch is resolved (verify clean, or every residual finding a logged del
    native operator-confirmation fallback, never free prose.
 3. **On the go, invoke `record-gate` per promoted IU** —
    `commit-to-land`, `decision: promote`, advancing `in-delivery → shipped`, `evidence_refs` → the
-   PR number(s) (the merge SHA lands with `land`'s enactment evidence — a follow-up append once the
-   merge is real). The
+   PR number(s). The gate entry records the **decision** and its join key; the **enactment** — the
+   merge SHA — is not recorded here and is never appended later: `record-gate` is growth-only, and
+   the SHA is derivable from the PR number. It lands in the batch report (and in git, and on the
+   PR). The
    retro-ratification entries (operator-attested, clearing each flag) land here too; `record-gate`'s
    guard rejects the promotion while any is unresolved.
 4. **Firing is not merging.** The merge to the landed line is the **gate's enactment**, executed
@@ -206,6 +208,13 @@ When the batch is resolved (verify clean, or every residual finding a logged del
 
 You write no carrier field and no gate record yourself — `record-gate` is the single writer; you
 hold the gate experience.
+
+
+**Firing `record-gate` safely.** Its free-text operands (`--conditions`, `--evidence`) are recorded
+verbatim, so a shell metacharacter in the invoking command corrupts the entry **before** the runner
+sees the text — and the chain is append-only, so the damage cannot be amended. Pass them from a
+quoted heredoc or in single quotes; never leave a backtick or `$` unescaped inside a double-quoted
+argument.
 
 ## Output
 
