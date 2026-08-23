@@ -1,6 +1,6 @@
 ---
 name: "triage"
-description: "The workflow's front door — turns any raised improvement into a gated carrier and routes it by readiness: decision-complete work down the fast track to commit-to-build; design-needing work into shape; an unclear premise documented as an idea. Use when the operator says \"raise an IU/WI\" or \"triage github issues\" (any queued triage-source), or a recalled improvement surfaces; suggest it when collaborative edits escalate into build work worth documenting. Never create a carrier (IU/WI) without invoking triage."
+description: "Turns any improvement into a gated carrier routed by readiness: decision-complete to fast track, design-needing to shape, unclear premise to idea. Use when the operator raises an IU/WI, triages github issues, recalls an improvement, or edits escalate to build. Never create a carrier without triage."
 ---
 
 

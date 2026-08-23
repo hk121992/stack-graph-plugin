@@ -1,6 +1,6 @@
 ---
 name: "shape"
-description: "The front's HITL orchestrator — the one router for the FULL track. It takes a design-needing unit continued from triage and coordinates it to decision-complete IU(s) — routing decision/depth/tool, re-checking intent-alignment on a material pivot, and dispatching the spine (shape-product/design/specify/plan) + helpers by inferred depth. It finalises autonomy on every IU, resolves a HITL IU by build-and-look, and fires commit-to-build at exit. Use when a raised WI continued from triage, an idea-shaped raise, or work escalated back to the front must be coordinated to decision-complete without the operator hand-routing it."
+description: "The front's HITL orchestrator, the full track's one router: coordinates a design-needing unit to decision-complete IUs, routing depth and tool across shape-product, design, specify, plan; fires commit-to-build at exit. Use when a WI from triage, an idea-shaped raise, or escalated work needs shaping."
 ---
 
 

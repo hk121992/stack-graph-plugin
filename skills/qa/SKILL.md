@@ -1,6 +1,6 @@
 ---
 name: "qa"
-description: "Systematically QA-tests the running DEV build of the assembled batch like a real user, then fixes what breaks — runs the product's crystallised QA flows, navigates, interacts, fills every form, checks every state, fixes bugs atomically in source, and re-verifies with before/after evidence. The behaviour modality of the verify stage. Use when the batch on DEV has interactive behaviour (flows, forms, controls, state) that must be exercised against the running build and fixed before promotion — dispatched by verify with the resolved flows and tier."
+description: "Tests the running DEV build like a real user and fixes what breaks: runs the product's crystallised QA flows, fills every form, checks every state, fixes bugs in source with before/after evidence. Verify's behaviour modality. Use when DEV has interactive behaviour to exercise and fix."
 ---
 
 

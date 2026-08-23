@@ -1,6 +1,6 @@
 ---
 name: "design-review"
-description: "A senior designer's-eye visual QA of the running build, then iterative fixes — finds visual inconsistency, broken hierarchy, AI-slop patterns, and slow interactions, fixes them atomically, and re-verifies. Grades against the shared ux-principles standard, so every \"this looks wrong\" is debuggable. The visual modality of the verify stage. Use when A built change touches a user-facing visual surface that must be graded against the shared design standard and polished before it advances — dispatched by the verify stage."
+description: "Visual QA of the running build, then fixes: finds visual inconsistency, broken hierarchy, AI-slop, and slow interactions, fixes each atomically, and re-verifies to ux-principles. Use when a built user-facing surface needs visual grading and polish; dispatched by verify."
 ---
 
 

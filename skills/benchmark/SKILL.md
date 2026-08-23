@@ -1,6 +1,6 @@
 ---
 name: "benchmark"
-description: "Autonomous performance-measurement role that captures page-load timings, Core Web Vitals, bundle and resource sizes, and request counts, compares against a stored baseline, and returns a regression verdict plus a benchmark.perf trend measurement. Method only; this product's pages, budgets, and thresholds are harness-supplied. Use when a change is about to land (or has shipped) and a caller wants its performance vetted against a stored baseline before slow drift compounds — invoked by `verify`, `optimise`'s evaluator round, or the operator, not run interactively."
+description: "Measures performance: page-load timings, Core Web Vitals, bundle and resource sizes, request counts; compares against a stored baseline, returns a regression verdict plus a benchmark.perf trend. Use when a change needs its performance vetted; invoked by verify or optimise."
 ---
 
 

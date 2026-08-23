@@ -1,6 +1,6 @@
 ---
 name: "record-gate"
-description: "The single mechanical writer of a carrier's lifecycle_state + append-only gate_decisions[] — checks the operator-attestation precondition, then appends a hash-chain-linked entry and advances the state. No widget, no judgment — the gate experience lives in the firing skill's session. Use when a firing gate node (triage or shape at the front gates, verify at commit-to-land, land at live-confirmed, debrief's closeout exit, auto-shaper's provisional hold, dispatch's ancestry-reconcile) must record a lifecycle transition rather than write the carrier fields directly."
+description: "Sole mechanical writer of a carrier's lifecycle_state and gate_decisions[]: checks operator attestation, appends a hash-chain-linked entry, advances the state. Use when a firing gate node (triage, shape, verify, land, debrief, auto-shaper, dispatch) must record a lifecycle transition."
 ---
 
 

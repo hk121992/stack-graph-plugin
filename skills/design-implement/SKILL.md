@@ -1,6 +1,6 @@
 ---
 name: "design-implement"
-description: "Produces production-quality user-facing UI from an approved design — detects the design source, distils it to an implementation spec, generates real markup where text reflows and heights/layouts are dynamic, verifies at viewports, and refines with the operator to \"done\". Built to the ux-principles standard; never AI slop. Use when A UI implementation unit within the build span needs production UI built from an approved design — an approved mockup from design-shotgun, a plan/design doc, or a from-scratch description."
+description: "Builds production-quality UI from an approved design: real markup, dynamic reflow, verified at viewports, refined with the operator, to ux-principles, never AI slop. Use when a UI unit in the build span needs production UI from an approved mockup, a plan or design doc, or a description."
 ---
 
 

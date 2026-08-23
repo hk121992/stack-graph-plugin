@@ -1,6 +1,6 @@
 ---
 name: "auto-shaper"
-description: "Dispatched background formaliser that takes a drafted, decision-complete-from-raise IU to build-ready — renders the captured definition into the IU's content fields (goal/files/acceptance/acceptance_check/verification), formalises autonomy from the front's drafted call (never re-judges), authors the light success definition, and authors any spec change for the main session to approve. Warm (the fast front) it surfaces a genuine gap as a chat question; cold (a verify gap) it runs the 3-part auto-approval test and writes the agent-provisional hold via record-gate. Use when triage dispatches a drafted fast-track carrier toward commit-to-build, or verify dispatches an auto-approvable gap in the DEV zone."
+description: "Takes a drafted, decision-complete IU to build-ready: renders its content fields, fixes the drafted autonomy call without re-judging, authors the success definition and any spec change. Use when triage dispatches a fast-track carrier toward commit-to-build, or verify an auto-approvable gap on DEV."
 ---
 
 

@@ -1,6 +1,6 @@
 ---
 name: "build"
-description: "Execute one implementation unit to spec in a fresh-context session — the tracer-bullet loop on the vertical slice, RED → GREEN → REFACTOR after every green, proven by running its acceptance_check and showing the raw evidence. Consumes one fully-formed IU (the front settled it; build never re-asks) and hands the diff to review; it is the unit dispatch re-runs for a reopen correction. Use when a dispatched session must deliver its IU — the commit-to-build gate has passed and the work moves from defined to in-delivery."
+description: "Executes one IU to spec in a fresh-context session: the tracer-bullet loop, RED/GREEN/REFACTOR, proven by running its acceptance_check, then hands the diff to review. Also the reopen correction unit. Use when a dispatched session must deliver its IU after commit-to-build."
 ---
 
 

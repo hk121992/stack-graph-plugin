@@ -1,6 +1,6 @@
 ---
 name: "review"
-description: "Orchestrate the static vet of one IU's diff before it merges to DEV — two parallel axes: the lens panel (correctness, security, tests, maintainability, plus conditional health) and the per-IU spec-match (the diff is faithful to its IU's spec). Scope the target, run the panel, present the ranked findings, and own the within-session fix-loop back to build. Use when a built IU's diff is ready to be vetted before merge — inside the dispatched session after build, or hand-run over any diff."
+description: "Static vet of one IU's diff before merge to DEV: the lens panel (correctness, security, tests, maintainability, health) plus the per-IU spec-match, ranked findings, the fix-loop back to build. Never runs the app. Use when a built IU's diff, PR, or branch needs vetting."
 ---
 
 

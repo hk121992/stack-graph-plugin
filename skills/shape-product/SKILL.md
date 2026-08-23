@@ -1,6 +1,6 @@
 ---
 name: "shape-product"
-description: "Shape's first action — the problem-altitude discovery check: is this the right problem, and does it serve the value proposition, the target user, and the objective it claims? Runs the four-risks scan (value and viability leading), records the strategy frame, and authors the success definition laddered to the outcome_link's KRs. Full-track only; decides no product strategy by fiat. Use when shape dispatches the front spine and the right-problem question must be settled before design."
+description: "Shape's first action, problem-altitude discovery: tests the problem against the value proposition, target user, and claimed objective via the four-risks scan, authors the success definition laddered to the objective's KRs. Use when the right problem must be settled before design; full track only."
 ---
 
 

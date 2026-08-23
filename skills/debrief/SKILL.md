@@ -1,6 +1,6 @@
 ---
 name: "debrief"
-description: "The collaborative loop-close orchestrator of the Learn tail — operator-triggered per-sprint over the IUs landed since the last debrief (shipped or live). Modes — measure (dispatch measure-outcomes against the sprint's success-definitions + laddered KRs), learn (dispatch capture-learnings and route proposals to their tiered homes), seed-next (raise the next-sprint candidate and close the discovery loop through the shared homes) — then holds the closeout gate at its exit (record-gate writes the terminal closed, cascading). Writes no carrier field. Use when landed work has accrued since the last debrief and the operator triggers the sprint loop-close."
+description: "Operator-triggered sprint loop-close orchestrator over the IUs landed since the last debrief. Modes: measure (dispatch measure-outcomes), learn (dispatch capture-learnings), seed-next; holds the closeout gate. Use when landed work has accrued and the operator triggers loop-close."
 ---
 
 

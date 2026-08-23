@@ -1,6 +1,6 @@
 ---
 name: "verify"
-description: "The batch verification stage over the assembled DEV surfaces — after dispatch drains the IU stream, before the promotion gate. Runs the crystallised verify-procedure over the running DEV build, depth-adjusted by judgment: dispatches qa (behaviour), design-review (visual), and simulate-users (experience) — plus benchmark for a perf-relevant change — runs the batch integration-coherence pass, consolidates one ranked verdict, owns the batch fix-loop (reopen via dispatch), opens the integration PR, and fires commit-to-land at its exit. Use when dispatch has handed over the assembled batch and the running build must be proven before promotion."
+description: "Batch-verifies the running DEV build once dispatch drains the IU stream: dispatches qa, design-review, simulate-users, benchmark, runs the integration-coherence pass, consolidates one ranked verdict, owns the batch fix-loop, fires commit-to-land. Use when the batch must be proven before promotion."
 ---
 
 

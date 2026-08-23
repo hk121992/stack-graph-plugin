@@ -1,6 +1,6 @@
 ---
 name: "local-graph-maintainer"
-description: "Author and maintain a consuming harness's own local skills and local references in its one harness-owned local overlay — in final runtime form (native fields load-bearing, the graph lens inert), wired into the read-only vendored graph by overlay edges, namespaced apart, reading workspace paths via bindings not hardcode. Modes — new / family / reference / amend / validate / index. Use when a harness needs to add or maintain its own local graph nodes or local references in its org-root overlay. The consumer-facing counterpart to the factory-only sg-graph-maintainer; runs inside the consuming workspace, never authors the vendored graph."
+description: "Authors and maintains a harness's own local skills and references in its local overlay, wired to the vendored graph by overlay edges. Modes: new, family, reference, amend, validate, index. Use when a harness adds or maintains local nodes in its org-root overlay; never the vendored graph."
 ---
 
 

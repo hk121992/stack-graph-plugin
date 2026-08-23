@@ -1,6 +1,6 @@
 ---
 name: "queue-checker"
-description: "Stateless mechanical role that returns an open labelled-PR queue — mode list (the whole queue) or check-duplicate (the subset overlapping a target file set). The queue label is a per-caller parameter (context-curator's raise dup-check + integrate list; strategy-curator's pre-open dup-check). No model judgment. Use when a caller needs its live labelled-PR queue — to detect a duplicate before raise authors a second PR, or to list the batch before integrate merges it."
+description: "Mechanical role returning an open labelled-PR queue: mode list (the whole queue) or check-duplicate (the subset overlapping a target file set). Use when a caller must detect a duplicate before raise, or list the batch before integrate."
 ---
 
 

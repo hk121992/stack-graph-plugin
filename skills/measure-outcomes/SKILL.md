@@ -1,6 +1,6 @@
 ---
 name: "measure-outcomes"
-description: "Deterministic measurement role that computes the sprint's product outcomes — each work-item's success-definition against the KRs it ladders to — from the analyzer-derived event log. Returns a structured numbers-only metrics report; writes nothing and makes no judgments. Ships method only — what to measure is harness-supplied. Use when the debrief stage needs hard numbers for the sprint's outcomes before the operator assesses whether they were met."
+description: "Deterministic measurement role computing a sprint's outcomes: each work-item's success-definition against the KRs it ladders to, from the analyzer-derived event log. Numbers only, no judgment. Use when debrief needs hard numbers for the sprint's outcomes."
 ---
 
 

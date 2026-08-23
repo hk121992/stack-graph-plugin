@@ -1,6 +1,6 @@
 ---
 name: "capture-learnings"
-description: "Generative curation role that surfaces a sprint's durable learnings, deduplicates them against what is already recorded, and routes each to its tiered knowledge home as a proposal — surfaced, not enforced. Returns a proposals list; writes nothing (debrief enacts the writes the operator confirms). Use when the debrief stage needs a curated proposals list of durable learnings before the operator decides which to enact."
+description: "Generative curation role that surfaces a sprint's durable learnings, deduplicates them against what is recorded, and routes each to its tiered knowledge home as a proposal; writes nothing. Use when debrief needs the sprint's learnings curated for the operator to enact."
 ---
 
 

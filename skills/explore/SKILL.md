@@ -1,6 +1,6 @@
 ---
 name: "explore"
-description: "Read-only context-gathering role a stage invokes to collect just the context it needs and return a distilled digest. Use when a stage needs scoped, isolated context (repo / learnings / framework-docs / web / best-practices / zone) without polluting its own window or pausing for the operator."
+description: "Read-only context-gathering role that collects just the context a stage needs and returns a distilled digest. Use when a stage needs scoped, isolated context (repo, learnings, framework-docs, web, best-practices, zone) without polluting its window."
 ---
 
 

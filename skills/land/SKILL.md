@@ -1,6 +1,6 @@
 ---
 name: "land"
-description: "The PROD-zone orchestrator — takes the operator-authorized promotion (commit-to-land, fired at verify's exit) through to a live, health-confirmed production deployment. Sequences deploy → canary, holds the live-confirmed exit gate (per-IU shipped → live), and owns the revert decision + the loop re-entry; single-main it executes the merge-to-main landing itself and the PROD zone skips. Use when a promotion has cleared the commit-to-land gate at verify's exit and must reach a live, health-confirmed deployment (or the single-main terminal landing)."
+description: "PROD-zone orchestrator: sequences deploy then canary, holds the live-confirmed exit gate (shipped to live), owns the revert decision and loop re-entry; single-main it lands the merge to main itself. Use when a promotion cleared commit-to-land must reach live."
 ---
 
 

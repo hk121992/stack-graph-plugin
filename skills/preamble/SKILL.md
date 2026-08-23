@@ -1,6 +1,6 @@
 ---
 name: "preamble"
-description: "The workflow's single parameterized turn-1 state loader — a deterministic, stdlib-only script that loads the active carrier's live state from the DERIVED projection (never the carrier file), emits KEY: VALUE for turn 1, treats the carrier as delimited untrusted data (size-cap, field-allowlist, secret presence-probe), and fails closed. One loader serves every stage — triage, shape, dispatch, build, verify, land, debrief — each stage's inject-list a required-state declaration, its parameter; gates get no preamble. Use when a stage body fires its turn-1 state load at session start — fresh from the derived projection rather than a fat always-on reference or a stale carrier file."
+description: "Parameterized turn-1 state loader: reads the active carrier's live state from the derived projection, never the carrier file, emits KEY: VALUE, treats the carrier as delimited untrusted data (size-cap, field-allowlist, secret presence-probe), and fails closed. Use when a stage fires its turn-1 state load at session start; gates get no preamble."
 ---
 
 <!-- runs turn-1 every session -->

@@ -1,6 +1,6 @@
 ---
 name: "simulate-users"
-description: "Autonomous experience-verification role that runs a persona through the running probabilistic product against a harness-supplied experience contract, returning a graded UX verdict and AX (agent-experience) profile — the experience modality of verify's dynamic panel, re-run by optimise as its AX evaluator. Use when there is a built experience on the running DEV build to verify before (or alongside) real users and a caller wants the experience graded — both whether the output matches intent (UX) and how efficiently the product agent got there (AX). It is the experience thread's verification node, not a product-management evidence source."
+description: "Runs a persona through the running probabilistic product against its experience contract, returning a graded UX verdict and AX (agent-experience) profile. Verification, not discovery evidence. Use when a built experience on DEV needs grading; verify's experience modality, optimise's AX evaluator."
 ---
 
 

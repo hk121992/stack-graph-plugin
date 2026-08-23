@@ -1,6 +1,6 @@
 ---
 name: "drift-detector"
-description: "Read-only role that scans a caller-supplied doc set for drift, contradictions, stale terminology, broken cross-references, and missing canonical content, and returns a structured candidate list. Use when a spec amendment's touchpoints need the pre-landing collision/drift pass (specify; auto-shaper for a fast-track spec change), or context-curator's review needs the managed-context doc set audited — without the caller reading every doc itself."
+description: "Read-only role scanning a caller-supplied doc set for drift, contradictions, stale terminology, broken cross-references, and missing canonical content. Use when a spec amendment's touchpoints need the pre-landing drift pass, or context-curator's review needs its docs audited."
 ---
 
 

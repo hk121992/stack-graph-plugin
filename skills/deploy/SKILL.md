@@ -1,6 +1,6 @@
 ---
 name: "deploy"
-description: "The PROD-zone executor — carries the operator-authorized promotion to a settled, smoke-verified production deployment. Executes the squash-merge of the integration PR (dev → main, one revertable promotion commit), applies the version/tag bump, triggers the prod pipeline, waits for settle, and runs the inline single-pass smoke check; owns the mechanical revert execution. Production-only — a single-main repo skips it. Use when land sequences the PROD sub-arc after commit-to-land's sign-off; invoked by land, rarely standalone."
+description: "PROD-zone executor: squash-merges the integration PR (dev to main) as one revertable commit, bumps the version/tag, triggers the prod pipeline, waits for settle, runs the inline smoke check; owns revert execution. Production-only; single-main skips it. Use when land runs the PROD sub-arc."
 ---
 
 

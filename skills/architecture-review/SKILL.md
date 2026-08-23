@@ -1,6 +1,6 @@
 ---
 name: "architecture-review"
-description: "Standing, operator-triggered whole-tree review that surfaces architectural friction as deepening candidates (shallow modules → deep ones), grills the operator's pick to a terminal disposition, and — only after a pick — explores alternative interfaces (Design-It-Twice). Read-only; reports and routes, never edits product code. Use when The operator wants the whole codebase (or a scoped sub-tree) reviewed for architectural deepening — shallow modules, seam leakage, untestable parts — surfaced as candidates to grill to a disposition; not a diff-time review and not a backbone stage."
+description: "Operator-triggered whole-tree review surfacing architectural friction (shallow modules, seam leakage, untestable parts) as deepening candidates, grilled to a disposition. Modes: review, interface-design. Use when a tree or sub-tree needs deepening; not a diff-time review, not a backbone stage."
 ---
 
 

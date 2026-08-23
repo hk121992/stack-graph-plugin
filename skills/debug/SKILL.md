@@ -1,6 +1,6 @@
 ---
 name: "debug"
-description: "The Iron-Law root-cause fix path — investigate, analyse, hypothesise, fix, with no fix applied until one root cause is reproduced and confirmed. Carries the Iron Law inline, fans out parallel read-only probes to test candidate causes, and escalates instead of guess-patching. Use when a build (or review) hits a failing check, runtime error, or regression that cannot be diagnosed and fixed quickly in-span, and the cause is not yet known."
+description: "Iron-Law root-cause fix path: no fix is applied until one root cause is reproduced and confirmed. Fans out parallel read-only probes and escalates rather than guess-patching. Use when a build or review hits a failing check, runtime error, or regression of unknown cause."
 ---
 
 

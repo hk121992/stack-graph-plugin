@@ -1,6 +1,6 @@
 ---
 name: "log-decision"
-description: "Mechanical role that writes a decision in two layers — conclusion to the decisions store, reasoning to configured durable memory. Returns a write-receipt. Use when a significant decision has been made and must be durably recorded — both the conclusion (for quick lookup) and the reasoning (for future recall)."
+description: "Mechanical role that records a settled decision in two layers, the conclusion to the decisions store and the reasoning to durable memory, and returns a write-receipt. Use when a significant decision must be durably recorded."
 ---
 
 

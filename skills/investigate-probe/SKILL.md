@@ -1,6 +1,6 @@
 ---
 name: "investigate-probe"
-description: "Read-only hypothesis-probe role — debug invokes one per candidate root cause in parallel, each gathering evidence to confirm or rule out its one cause and returning a finding. Writes nothing, so any number run concurrently without collision. Use when debug has more than one candidate root cause and dispatches one read-only probe per candidate to test them in parallel."
+description: "Read-only hypothesis probe: tests one candidate root cause, gathers evidence to confirm or rule it out, and returns a finding. Writes nothing, so many run in parallel without collision. Use when debug has more than one candidate root cause to test at once."
 ---
 
 

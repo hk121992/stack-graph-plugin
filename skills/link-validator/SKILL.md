@@ -1,6 +1,6 @@
 ---
 name: "link-validator"
-description: "Stateless mechanical role for context-curator's integrate mode — verifies every cross-reference resolves across the POST-MERGE context doc set (a merged-preview worktree) — page-graph related[] edges incl. the bidirectional convention, file links, anchors, index↔disk agreement — and attributes each break to the PR(s) that introduced it. Resolution only; no content judgment. Use when the curator built a merged preview of the context-PR batch and needs to know that no cross-reference breaks once the batch lands — including links valid against the main line but broken by the batch's combination."
+description: "Mechanical role for context-curator's integrate mode: verifies every cross-reference resolves across the POST-MERGE context doc set, attributing each break to its PR. Resolution only, no content judgment. Use when a merged preview must be proven link-clean before the batch lands."
 ---
 
 

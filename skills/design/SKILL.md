@@ -1,6 +1,6 @@
 ---
 name: "design"
-description: "Shape's fork-resolution action — resolve a work-item's load-bearing design questions by intended outcome (including whether the solution serves the confirmed problem and objective), vet the resolution with the lens panel over the design doc, and produce a design doc with a Spec touchpoints table plus, for an experience-bearing item, an authored or refined experience-contract. Use when a unit's design forks must be resolved by outcome before specify/plan/build."
+description: "Resolves a work-item's design forks by intended outcome and fit to the problem and objective, vets them with the lens panel, and produces a design doc with a Spec touchpoints table, plus an experience-contract for experience-bearing work. Use when forks must be settled before specify/plan/build."
 ---
 
 

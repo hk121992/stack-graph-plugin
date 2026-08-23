@@ -1,6 +1,6 @@
 ---
 name: "specify"
-description: "Turn a settled design doc and its Spec touchpoints into a canonical spec amendment — in the front, before build: scan the touchpoints for drift and collisions, author the amendment by the entropy test, graduate it per the git-policy for its repo/path, and take the operator's in-session approval. Modes — spec-layout (the spec-surface path), null (no spec layout — record inline), amend-existing (revise a section). Use when a design doc with Spec touchpoints is settled and the work needs the spec made canonical before plan/build."
+description: "Turns a settled design doc and its Spec touchpoints into a canonical spec amendment before build: drift and collision scan, entropy-test authoring, graduation per git-policy, in-session operator approval. Use when a settled design needs the spec made canonical before plan/build."
 ---
 
 

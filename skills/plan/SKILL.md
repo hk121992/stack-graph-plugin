@@ -1,6 +1,6 @@
 ---
 name: "plan"
-description: "Produce a staged, dependency-annotated, lens-vetted plan for a settled, specced work-item — decompose it into implementation units (the build carriers), sequence them with complete dependencies and per-IU autonomy, and hand the plan doc back to shape as the commit-to-build gate's decision artifact and dispatch's input. Use when a design is settled and its spec amendment is through, and the work decomposes into IUs for the operator's commit-to-build decision."
+description: "Decomposes a settled, specced work-item into implementation units (the build carriers), sequenced with dependencies and per-IU autonomy; the lens-vetted plan doc is the commit-to-build gate's artifact and dispatch's input. Use when a settled, specced design must decompose into IUs."
 ---
 
 

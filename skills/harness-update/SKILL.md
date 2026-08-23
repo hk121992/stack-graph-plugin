@@ -1,6 +1,6 @@
 ---
 name: "harness-update"
-description: "Brings a harness's installed stack-graph plugin current — detects installed-vs-published version, uses the active host's scope-aware refresh controls, regenerates the at-hand-references-index on a bump, re-binds only when the bindings-contract version moved (re-materializing the crystallised git-policy surface and re-wiring the sg-root-instructions floor via harness-init), re-validates the ambient surface every run and re-vends the SG-managed root instruction projections on drift (customisation lives in the crystallised refs, never inline), and surfaces the restart reminder plus the version/commit landed. Steps — Detect, Update, Contract-drift, Ambient-sync, Hand off. Use when a harness operator needs to update an already-installed stack-graph plugin to the latest published version. NOT for first-time setup — standing up a harness from scratch is `harness-init scaffold`; this assumes the plugin is already installed and only advances its version."
+description: "Brings a harness's installed stack-graph plugin current: detects the installed-vs-published delta, updates in scope, re-binds on a bindings-contract move. Use when an operator advances an installed plugin to the latest published version. NOT for first-time setup; that is `harness-init scaffold`."
 ---
 
 

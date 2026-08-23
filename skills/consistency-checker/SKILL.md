@@ -1,6 +1,6 @@
 ---
 name: "consistency-checker"
-description: "Stateless judgment role for context-curator's integrate mode — checks the open context-PR batch against ITSELF for vocabulary collisions, frontmatter-shape collisions, index-voice breaks, file collisions, and stale-against-batch references, and extracts operator-decision items from PR descriptions. Surface consistency only; not deep-semantic. Use when the curator is integrating a batch of open context PRs and needs the cross-PR layer no single raise gate saw — two PRs naming one concept differently, a structural change colliding with another, or one PR's added text going stale against another's rename."
+description: "Judgment role for context-curator's integrate mode: checks an open context-PR batch against ITSELF for vocabulary, frontmatter, index-voice, and file collisions plus stale-against-batch references. Surface consistency only. Use when a batch needs the cross-PR layer no raise gate saw."
 ---
 
 

@@ -1,6 +1,6 @@
 ---
 name: "lens-security"
-description: "Autonomously hunt exploitable security vulnerabilities in a target and return structured findings. Use when A review/design/plan stage's dispatch fans out a security pass over a diff or a design/plan doc."
+description: "Autonomously hunt exploitable security vulnerabilities in a target and return structured findings. Use when a review/design/plan stage fans out a security pass over a diff or a design/plan doc."
 ---
 
 

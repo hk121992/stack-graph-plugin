@@ -1,6 +1,6 @@
 ---
 name: "health"
-description: "Autonomous code-quality role that runs the product's own checks, scores each category 0-10, computes a weighted composite, and returns a quality dashboard plus a health.quality trend measurement. Read-only — never fixes. Method only; this product's checks and weights are harness-supplied. Use when a caller wants the codebase's standing quality scored and trended — whole-tree, check-wrapped, before or after a change — as opposed to review's per-diff judgment pass. Invoked by `review` or the operator, not run interactively."
+description: "Scores standing code quality: runs the product's own checks, scores each category 0-10 into a weighted composite, returns a quality dashboard plus a health.quality trend. Read-only, never fixes. Use when whole-tree quality needs scoring and trending, not review's per-diff pass."
 ---
 
 

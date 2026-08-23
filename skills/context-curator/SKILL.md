@@ -1,6 +1,6 @@
 ---
 name: "context-curator"
-description: "Maintains the managed context layer — the locally-owned durable context (the local references in the graph, memory, crystallising context) kept in its one right home, current, and trustworthy on read. Modes — review (the currency pass: consume the staleness signal, audit, emit keep/amend/relocate/graduate/trim verdicts, route to owners), raise (author a labelled reference PR, with placement + duplicate detection), integrate (gated batch-merge of the queue with cross-PR consistency + link checks), refresh-index (regenerate the surface's index). Flags staleness everywhere; enacts only its own surfaces (strategy → strategy-curator, node bodies → the graph-maintainers). The vendored, general curator; a harness points it at its own context surface via overlay. Use when a session surfaced drift, a broken cross-reference, stale terminology, or a missing reference; a node proposed a durable finding that belongs in the managed layer; the staleness signal flags docs for review; or the operator wants to inspect/integrate the open-PR queue. NOT for context-loading — readers navigate references directly."
+description: "Maintains the managed context layer: local references, memory, crystallising context. Modes: review, raise, integrate, refresh-index. Use when drift, broken cross-references, stale terminology, missing references, or durable findings surface, or the PR queue needs integrating. NOT context-loading."
 ---
 
 

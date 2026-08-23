@@ -1,6 +1,6 @@
 ---
 name: "dispatch"
-description: "The build-span loop orchestrator — consumes the settled plan's gate-approved IU set and dispatches one fresh build → review session per IU in an isolated worktree, sequential-reviewer by default (each IU on the prior's refactored base), merges each built IU's PR to the DEV branch, parks route-outs, dry-runs the integrated tree, and hands DEV to verify. Provides the reopen verify's batch fix-loop re-enters. Use when the commit-to-build gate has passed and a plan's IU set is ready for delivery across fresh contexts."
+description: "Build-span loop orchestrator: dispatches one fresh build-review session per IU of a gate-approved plan in an isolated worktree, merges each IU's PR to DEV, parks route-outs, hands DEV to verify, and provides its reopen. Use when a plan's IU set is ready for delivery after commit-to-build."
 ---
 
 

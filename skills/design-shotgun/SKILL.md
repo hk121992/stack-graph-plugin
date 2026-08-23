@@ -1,6 +1,6 @@
 ---
 name: "design-shotgun"
-description: "Explores visual design directions for a surface — generates N deliberately distinct variants, opens a side-by-side comparison board, collects structured operator feedback, iterates, and records the approved direction with its rationale. Divergent visual brainstorming; the board is the chooser. Use when A user-facing surface needs a visual direction chosen before production UI is built, or the operator wants to explore options or fix a surface they dislike."
+description: "Divergent visual exploration, not a review: generates N distinct variants, compares them side by side, iterates on operator feedback, and records the approved direction. Use when a surface needs a visual direction chosen before production UI, or the operator wants options or dislikes one."
 ---
 
 

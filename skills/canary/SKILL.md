@@ -1,6 +1,6 @@
 ---
 name: "canary"
-description: "Autonomous post-deploy live-health role that watches a just-shipped deployment against a pre-deploy baseline, alerts on changes persisting across consecutive checks, and returns a HEALTHY/DEGRADED/BROKEN verdict that feeds land's live-confirmed gate. Input-gated on live prod traffic — built dormant; activates only once a real deployment with traffic exists, and never fabricates a baseline. Use when a deployment has just settled and a caller wants live confirmation that production actually works before the live-confirmed gate closes — but only once real prod traffic exists. Invoked by land (the invokes edge lives on land), not run interactively."
+description: "Post-deploy live-health watch: compares a just-shipped deployment to its pre-deploy baseline, alerts on changes persisting across consecutive checks, returns a HEALTHY/DEGRADED/BROKEN verdict for land's live-confirmed gate. Never fabricates a baseline. Use once real prod traffic exists."
 ---
 
 
