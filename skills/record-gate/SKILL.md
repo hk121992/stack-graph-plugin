@@ -46,7 +46,8 @@ append in the firing session:
 bun ./record-gate.ts \
   --carrier <path> --gate <gate-id> --decision <decision> \
   --decision-provenance <operator-attested|agent-auto|agent-provisional> \
-  --owner <owner> --context <attended|unattended> [--kind standalone-iu] \
+  --owner <owner> --context <attended|unattended> \
+  --kind <standalone-iu|work-item> \
   [--evidence <ref> …] [--confidence <level>] [--conditions <text>] [--override <text>] \
   [--timestamp <iso8601>]
 ```
@@ -56,7 +57,10 @@ preconditions in code, compute the next link with the pinned `canonical.ts`, and
 `gate_decisions[]` entry plus the advanced `lifecycle_state` — surgically, touching only those two
 regions of the frontmatter and no other line or the body. On a refused write you exit non-zero,
 surface the reason, and leave the carrier byte-for-byte unchanged; on an enacted write you exit zero
-and print the record. `--kind standalone-iu` selects the no-advance genesis for `intent-to-build`.
+and print the record. `--kind` is **required for `intent-to-build`** and takes one of two values —
+`standalone-iu` selects the no-advance genesis (`seq 0`, `lifecycle_state` untouched), `work-item`
+advances `idea → discovery`; omitting it, or passing anything else, is refused as `malformed:
+intent-to-build requires --kind standalone-iu | work-item`. The other four gates ignore `--kind`.
 The single-writer boundary is thereby held by an actual separate writer — this runner plus the
 pinned `canonical.ts` and the `generate:check` guard — not by the firing session writing on itself.
 
