@@ -203,7 +203,7 @@ Every exit: you wrote **no IU content field** (the shaper's), **no lifecycle or 
 
 ## Carrier entry preflight
 
-Before taking any workflow action, Invoke `preamble` with `--node triage`; pass no carrier because this is the graph-declared carrier-creating entry. Preamble resolves the exact required state from its bundled graph-derived contract; continue only when the bundled runner exits zero. Never substitute a host hook or a hand-written state list.
+Before taking any workflow action, invoke `preamble` with `--node triage`; pass no carrier because this is the graph-declared carrier-creating entry. Preamble resolves the exact required state from its bundled graph-derived contract; continue only when the bundled runner exits zero. Never substitute a host hook or a hand-written state list.
 
 
 ## Required references

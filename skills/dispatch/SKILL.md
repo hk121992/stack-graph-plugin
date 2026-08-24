@@ -290,7 +290,7 @@ options — never re-dispatch in-batch, never merge past a flag, never merge to 
 
 ## Carrier entry preflight
 
-Before taking any workflow action, Invoke `preamble` with `--node dispatch --carrier <active-carrier-file> --carrier-id <active-carrier-id>`. Missing or invalid carrier input blocks the invocation. Preamble resolves the exact required state from its bundled graph-derived contract; continue only when the bundled runner exits zero. Never substitute a host hook or a hand-written state list.
+Before taking any workflow action, invoke `preamble` with `--node dispatch --carrier <active-carrier-file> --carrier-id <active-carrier-id>`. Missing or invalid carrier input blocks the invocation. Preamble resolves the exact required state from its bundled graph-derived contract; continue only when the bundled runner exits zero. Never substitute a host hook or a hand-written state list.
 
 
 ## Required references
