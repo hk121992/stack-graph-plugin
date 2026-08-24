@@ -7,7 +7,7 @@ cadence: on-demand
 read-when: "Authoring or validating a node file or edge."
 derive-from: [graph-spec, node-schema]
 reviews-on: node-edge-schema-source
-last-reviewed: unset
+last-reviewed: 2026-08-24
 entropy: unmeasured
 status: drafted
 related: [local-node-schema, glossary]
@@ -24,17 +24,20 @@ are runtime, recorded in the graph-record.
 
 ## The node file {#node-file}
 
-A node is **one canonical markdown file** — graph frontmatter over an imperative body — projected into one
-common Agent Skill. The graph keys are authoring metadata stripped by `generate`; runtime frontmatter is exactly
-`name` and `description`.
+A node is **one canonical markdown file** — graph frontmatter over an imperative body — projected into **one
+host primitive per supported host**. The graph keys are authoring metadata stripped by `generate`; what survives
+into runtime frontmatter is the projection's own contract (below), not one fixed field pair.
+
+**One node, one primitive** (D34) — a node maps 1:1 onto exactly one rendered primitive per host. That
+cardinality is the standing rule and is unaffected by which primitive a node projects onto.
 
 **Required core** — validate rejects a node missing any:
 
 | field | value-space | note |
 |---|---|---|
 | `id` | kebab-case; matches the node's directory | |
-| `primitive` | `skill` | the one runtime primitive |
-| `execution` | `inline` · `isolated` | context policy; defaults to `inline` |
+| `primitive` | `skill` · `agent` | the runtime primitive the node projects onto; **derived from `execution`, not authored independently** |
+| `execution` | `inline` · `isolated` | context policy, and the **projection axis**: `inline` → `skill`, `isolated` → `agent`; defaults to `inline` |
 | `title` | string | |
 | `description` | string — *what it does* + *Use when …* | the routing signal; "when-to-use" is folded in, not a separate field |
 | `mode` | `collaborative` · `autonomous` | hand-run posture; independent of context isolation |
@@ -43,8 +46,17 @@ common Agent Skill. The graph keys are authoring metadata stripped by `generate`
 | `goals` | array of `{ outcome, metric, earns-keep }`, ≥ 1 | outcomes, not activities (below) |
 | `status` | `vX.Y.Z — YYYY-MM-DD` | terse |
 
-**Execution policy.** `inline` runs in the invoking context; `isolated` runs in a fresh child context and returns
-a summary. Isolation changes context only — never node identity, content, permissions, or gate authority.
+**Execution policy — a projected axis, not graph-only metadata.** `inline` runs in the invoking context;
+`isolated` runs in a fresh child context and returns a summary. `execution` is **projected onto each host's
+native primitive** — it must reach a runtime on every supported host or it is not a contract. A validated-then-
+stripped axis is a defect, not a neutral state: it reads as a guarantee while delivering nothing.
+
+Isolation preserves **node identity, content, and gate authority** — an isolated node is the same node, running
+elsewhere, with the same authority to record what it is entitled to record. It does **not** preserve the
+permission surface: an isolated node carries an **explicit least-privilege permission declaration**, derived from
+its declared read/write posture and emitted per host rather than inherited from the invoking context. `generate`
+refuses to emit an agent without one.
+
 `mode` separately classifies the node's **default hand-run posture**: a node may carry an unattended branch
 provided that branch routes out rather than proceeds on any decision it would otherwise put to the operator.
 
@@ -58,9 +70,22 @@ does (glossary §axes) plus the staleness-engine fields — validate rejects a n
 | `level` | `L1` · `L2` · `L3` | entropy altitude; a node body carries execution detail → **`L3`** (the contaminant rule: mixed → L3) |
 | `reviews-on` · `last-reviewed` · `entropy` | staleness-engine fields | drift-clock subject · git-SHA pin · observed churn |
 
-**Runtime projection.** Every emitted `SKILL.md` contains exactly the common `name` and `description`
-frontmatter fields. Host-only fields are not emitted from the shared graph. Scripts and references are relative
-resources owned by the skill directory.
+**Runtime projection.** One authored source, projected into each host's native mechanism — **never degraded to
+the syntax both hosts share** (D15). The projection is per primitive:
+
+| `execution` | projects onto | runtime frontmatter | payload rule |
+|---|---|---|---|
+| `inline` | the common Agent Skill, `skills/<id>/SKILL.md` | exactly `name` + `description` | byte-identical across hosts |
+| `isolated` | each host's native subagent primitive | the host's own agent shape, plus the required permission declaration | per-host by construction; equivalence is proven by re-derivation, not byte-comparison |
+
+**Host knowledge lives in one host-descriptor table** — per host: id, manifest path and shape, root-instruction
+filename and its import form, agent-path template, and the renderer for one agent record. Both the emitter and
+the dual-host gate read that one table; adding a host is one row plus one renderer, never an edit spread across
+the emitter, the gates, and the harness runner. **No host-specific identifier may enter the shared payload** —
+the portability gate scans every emitted instruction file, and its path predicate must cover every primitive
+that emits one, so that a new primitive cannot become silently exempt from the scan.
+
+Scripts and references are relative resources owned by the emitting directory.
 
 **Carrier entry metadata (optional).** A node whose `references` edges declare exactly one
 `required-state` participates in the generated carrier-entry contract. Absence of extra metadata means

@@ -16,7 +16,8 @@ runtime-state it declared. Gates carry **no** preamble. It exists so per-turn co
 **fresh, safe, and cheap** — the fat always-on operating-instructions reference stays retired — and
 so a stage **resumes from the live projection** rather than re-reading a carrier file that may have
 gone stale. You are the **turn-1 live load**; the standing root instructions are a separate surface
-(`sg-root-instructions`, linked into the harness's `root instruction projections` by `harness-init`).
+(`sg-root-instructions`, **inlined into** the harness's generated root instruction projections by
+`harness-init`, not linked from them).
 
 The script is the deliverable; this node is its contract. The **entered stage's body fires you at
 turn 1** — invoke this skill on each skill/phase invocation, **not** through a session-start hook —
@@ -27,7 +28,7 @@ disciplines intact. Do not re-implement the script's logic in prose — invoke t
 
 1. **Derived projection, never the carrier file.** The live lifecycle/stage is read from the **derived
    projection** (the `portal-projection.json` snapshot the publisher writes — see `bindings-contract`
-   §6 for where the event-log/projection surfaces bind; `IU-schema` / `work-item-schema` for the
+   §keys for where the event-log/projection surfaces bind; `IU-schema` / `work-item-schema` for the
    projected-`current_stage` rule and the carrier fields). The carrier *file*'s `lifecycle_state` is a
    hand-written field that goes **stale** the moment work advances without a gate write — a carrier
    can sit at `idea` while delivery is underway. Emit the projection's **derived** stage as the live
@@ -175,10 +176,26 @@ runner, contract, and blocks remain byte-fresh and deterministic.
 You operate **beneath** the always-on band the calling agent already carries: the consolidated floor
 `sg-root-instructions` (the root set, the `<sg-*>` process family inline, §Reference index →
 `at-hand-references-index`, §Git-operations → `git-policy`) plus the crystallised identity surfaces
-(`product-definition` · `product-principles`), loaded through the scaffolded
-`root instruction projections` by `harness-init`. You supplement that floor with **live work-state**; you do not
+(`product-definition` · `product-principles`), **inlined into** the generated root instruction projections by
+`harness-init`. You supplement that floor with **live work-state**; you do not
 re-inline doctrine, and per-session runtime state is loaded just-in-time by you — never embedded as a
-session-start procedure in `root instruction projections`.
+session-start procedure in a root instruction projection.
+
+### The floor-drift check
+
+You also **detect** floor drift, because you are the one deterministic thing a stage runs before work.
+`materialize` writes a per-surface **digest manifest** beside the projections (`bindings-contract`
+§scaffolds); you re-hash those surface files and compare. This is a **stdlib hash comparison, not a second
+derivation** — you never re-assemble the projection body, so there is no concatenation format to keep in
+step with the generator, and the stdlib-only and byte-stable goals above hold unchanged.
+
+On a mismatch, name the surface that moved and the repair command, and emit the drift as an explicit
+marker — the same discipline as every other degraded read: an explicit marker, never a guessed state.
+You **detect and report; you do not repair.** Enactment belongs to `harness-update`, which owns the
+materializer. Reach is honest and bounded: you fire at **stage entry**, so a session that never enters a
+stage — an ad-hoc session, a gate, a dispatched child — is not covered by this check, and the harness
+accepts that residual. A capability probe that cannot confirm the check ran **fails closed**: flag
+tolerance in an argument parser must never let an absent check read as a clean floor.
 
 ## On-demand references
 

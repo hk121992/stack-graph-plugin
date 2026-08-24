@@ -136,9 +136,15 @@ they do not restate the literals:
    ```
 
    The runner owns this mechanical boundary. It copies the floor once into `<always-on-home>`,
-   migrates one byte-consistent legacy bindings source into the shared home, and emits both supported
-   root instruction projections as **byte-identical twins from one template model**. The root template
-   points at the shared floor and bindings; no workflow body or local payload is duplicated per host.
+   migrates one byte-consistent legacy bindings source into the shared home, and emits **one root
+   instruction projection per supported host, each derived from one template model** — per
+   `bindings-contract` §scaffolds: the projections **carry the floor's content, not a pointer to it**.
+   One host receives the five always-on surfaces inlined; every other host's projection imports that
+   file through its own native mechanism. They are therefore **no longer byte-identical twins**, and
+   each is checked against **its own** expected projection. Follow the pinned derivation recipe
+   (surface order, separators, newline normalisation, `@`-line stripping, marker-string rejection,
+   local tail in the inlined projection only) — it is single-sourced in `bindings-contract`, never
+   restated here. The runner also writes the **per-surface digest manifest** the drift check reads.
    It also removes only the retired carrier-argument hook from legacy settings, pruning shells that
    become empty while preserving unrelated settings and hooks.
 
@@ -154,6 +160,19 @@ they do not restate the literals:
 
    The floor stays terse; live work-state is loaded just-in-time by `preamble`. Never recreate this
    projection with a host hook, dynamic plugin path, or hand-authored second body.
+
+   **`materialize` is this node's alone; `check` is not.** The sole-ownership rule above governs the
+   *write* verb. The runner's read-only `check` verb is callable by any node that needs to know whether
+   the floor is current — it writes nothing and cannot repair. A node needing only detection reads the
+   digest manifest instead, which requires no runner at all.
+
+   **Migration is a sequenced step, not a runner behaviour.** Where an org root carries hand-authored
+   prose that the legacy recogniser would classify as wholly SG-managed, that prose is **relocated into
+   an explicit local-content block before the first materialize** — the runner cannot distinguish it
+   after the fact, and its legacy branch discards silently. Take an unconditional pre-migration snapshot
+   and offer a dry-run diff before the first write on any existing harness. Prose that merely restates
+   the floor is **dropped, not migrated**: carrying it into an operator-owned block forks it from the
+   vendored source permanently.
 4b. **Seed the two crystallised identity surfaces** into `<always-on-home>` (§Band layout) —
    `product-definition` (what the product is: why · who · value), `product-principles` (the bar:
    the standing quality non-negotiables) — each seeded from its vendored guidance ref
@@ -274,7 +293,8 @@ they do not restate the literals:
 1. **bindings.yaml present** at `<harness-runtime-root>/bindings.yaml` and parseable as flat YAML.
 2. **Every required key resolves** (per `bindings-contract`) to a real path/target; optional keys
    either resolve or are explicitly marked not-yet. Report each missing/dangling key by name.
-3. **The org-root instruction projections are present, byte-identical twins, wired, and vended-shaped** — run
+3. **The org-root instruction projections are present, each matching its own expected shape, wired, and
+   vended-shaped** (they are not twins — one inlines the floor, the others import it) — run
    `bun ./harness-lifecycle.mjs check --root <org-root> --floor ./references/sg-root-instructions.md`;
    both exist at the org root,
    reaches the bindings reference, carries the **always-on band links**: the vended floor

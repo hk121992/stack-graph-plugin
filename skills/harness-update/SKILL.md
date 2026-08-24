@@ -102,8 +102,9 @@ header).
   moves `git-policy-schema` re-materializes an ABSENT map; a **present, operator-authored map is
   never clobbered** — the shape drift surfaces as a validate failure you flag and route to the
   operator to reconcile; git-policy is a crystallised surface linked off the floor, **not** a
-  bindings dial) and the **`sg-root-instructions`** link is
-  re-wired so the new vendored floor is what `root instruction projections` inlines. The full git/devops doctrine
+  bindings dial) and the **`sg-root-instructions`** floor is
+  re-vended and the root instruction projections **regenerated** from it (they carry the floor's
+  content, so a new floor means new projections — there is no link to re-wire). The full git/devops doctrine
   lives in the harness's local `devops-loops` reference — the surface you re-materialize is only
   the thin crystallised map.
 - If it is **unchanged** → say so and **skip** the re-bind — do not re-bind needlessly. (The read-only
@@ -119,13 +120,20 @@ does not run.
 ### 3b. Ambient-surface sync (every run, state-based)
 
 Independently of the contract check, **always invoke `harness-init`'s materialize operation**. Its
-bundled lifecycle runner re-vends the floor into the one shared harness-runtime home, emits the two
-supported root instruction projections as byte-identical twins from one template, preserves
-non-managed root content and shared bindings, and removes only the retired carrier-argument hook
-from legacy settings. Then invoke `harness-init validate`.
+bundled lifecycle runner re-vends the floor into the one shared harness-runtime home, emits **one root
+instruction projection per supported host** from one template model — each derived per the
+`bindings-contract` §scaffolds recipe, one inlining the floor and the others importing it — refreshes the
+**per-surface digest manifest** the drift check reads, preserves non-managed root content and shared
+bindings, and removes only the retired carrier-argument hook from legacy settings. Then invoke
+`harness-init validate`.
 
-This is **state-based, not version-gated**. A missing twin, stale floor, first migration, or managed
-projection drift repairs deterministically. Divergent root custom content or first-migration bindings
+**This step is the floor drift's one enactment site.** Detection is available anywhere the digest
+manifest is readable (`preamble` reports it at stage entry); repair happens here, because this is where
+the materializer runs. A harness whose surfaces moved without regeneration is brought current by this
+step without an operator having to know that is what happened.
+
+This is **state-based, not version-gated**. A missing projection, stale floor, drifted digest manifest,
+first migration, or managed projection drift repairs deterministically. Divergent root custom content or first-migration bindings
 fails before writes and is surfaced for explicit reconciliation. An unchanged harness performs zero
 writes. Never recreate a root projection or host-local payload in this skill; `harness-init` owns the
 one materializer and one template.
