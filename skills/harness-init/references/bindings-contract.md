@@ -15,7 +15,7 @@ related: [okr-schema, work-item-schema, local-node-schema, git-policy-schema, sg
 
 # Bindings contract — the harness instantiation seam
 
-**Contract version: v0.13.0** (adds the decisions-index-path key). The version the harness records in its
+**Contract version: v0.14.0** (adds the generated root-projection contract and its derivation recipe). The version the harness records in its
 `bindings.yaml` header and `harness-update`'s drift check compares — bump it on any key-set or
 file-format change. (Distinct from this file's `status:`, a lifecycle word.)
 
@@ -69,9 +69,33 @@ never scaffolded:
   the surface.
 - **The improvements surface** — the standalone-IU home (a sibling of the work-ledger), rendered as a distinct
   improvements lane, never mixed into the work-ledger.
-- **The org-root ambient surface** — the one file auto-loaded every session (the operator launches at the org
-  root); it carries **pointers, not content** — the bindings pointer + the navigation rule (read the graph at
-  task start). Structure only.
+- **The root instruction projections** — the files each supported host auto-loads every session (the operator
+  launches at the org root). These are **generated, not hand-written**, and they carry **the floor's content**,
+  not a pointer to it.
+
+  **The delivery rule.** A host that can splice a file into its context at load does so; a host that cannot
+  receives the content inlined. An instruction the model must *choose* to follow in order to reach the standing
+  policy is not a floor — it is a suggestion, and it fails open on exactly the sessions that most need the
+  policy. One host receives the five always-on surfaces **inlined** into its projection; every other host's
+  projection **imports that file** through its own native mechanism. This supersedes the earlier
+  byte-identical-twins-of-pointers model: the projections are no longer byte-identical to each other, and each is
+  checked against **its own** expected projection rather than against its twin.
+
+  **The derivation recipe — pinned, because the check is a byte-comparison.** The generator fixes: the order the
+  surfaces are concatenated in; the separator and heading treatment between them; trailing-newline and line-ending
+  normalisation; that every `@`-line inside an inlined surface is **stripped or rewritten** (a surface's relative
+  imports re-base when its body moves, and would otherwise resolve to nothing); that the local-content block sits
+  in the inlined projection only, never duplicated into the importing one; and that a surface containing any of
+  the managed/local-content **marker strings is rejected at build time**, since the projection is parsed back out
+  by those markers.
+
+  **The drift-guard obligation.** The projections are derived from surfaces the curators edit directly, so
+  regeneration is an obligation, not a convention. `materialize` writes a **per-surface digest manifest**
+  alongside the projections; any node may re-hash the surfaces and compare — no consumer re-implements the
+  concatenation, and none needs to. A mismatch names the surface that moved and the command that repairs it.
+  Enactment is `harness-update`'s (it can run the materializer); detection is available to any node that reads
+  the manifest. **Floor-source write policy must be at least as strict as the strictest target the floor
+  governs** — a surface that decides what is PR-gated cannot itself sit on the direct default.
 
 ## The dial scalars {#dials}
 

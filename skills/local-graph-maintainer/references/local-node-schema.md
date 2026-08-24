@@ -32,8 +32,14 @@ The local node file **is** the runtime primitive — there is no build to fix it
   (`mode` · `determinism` · `edges` · `goals` · `status`) as additional metadata the runtime **ignores** and only
   `validate`/`index` read. *(This inert-keys tolerance is **unverified on the running host version**
   until the pre-ship probe confirms it — the maintainer warns accordingly.)*
-- Every local node homes at the overlay's `skills/<id>/SKILL.md`; `primitive` is always `skill`.
-- `execution: inline | isolated`, `mode`, and the rest of the lens are exactly node-edge-schema's.
+- Every local node homes at the overlay's `skills/<id>/SKILL.md` and projects onto `skill`. This is a **harness
+  policy, not a universal claim**: node-edge-schema's `execution: isolated → agent` projection is performed by
+  `generate`, and a harness has no build — so a local node is authored in final runtime form and only the
+  inline/skill projection is available to it. A harness needing an isolated role authors that host's native
+  agent file directly, outside the local-node contract.
+- `execution: inline`, `mode`, and the rest of the lens are exactly node-edge-schema's. A local node declaring
+  `execution: isolated` is invalid — there is no projection step to honour it, and a declaration that reaches no
+  runtime is the defect node-edge-schema §Runtime projection names.
 
 ## Namespacing — collision-impossible by construction {#namespacing}
 
