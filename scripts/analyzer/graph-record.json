@@ -1,8 +1,8 @@
 {
-  "generated": "2026-08-25T12:19:28Z",
+  "generated": "2026-08-25T13:10:57Z",
   "node_count": 45,
   "reference_count": 38,
-  "edge_count": 251,
+  "edge_count": 253,
   "nodes": {
     "architecture-review": {
       "primitive": "skill",
@@ -416,6 +416,10 @@
             "id": "deploy-config",
             "load": "on-demand",
             "external": true
+          },
+          {
+            "id": "git-ownership",
+            "load": "on-demand"
           }
         ],
         "precedes": [
@@ -838,7 +842,7 @@
       "cadence": "on-demand",
       "level": "L3",
       "title": "Land",
-      "status": "v0.1.0 — 2026-07-01",
+      "status": "v0.2.0 — 2026-08-25",
       "edges": {
         "invokes": [
           {
@@ -879,6 +883,10 @@
           {
             "id": "gate-model",
             "load": "on-demand"
+          },
+          {
+            "id": "git-ownership",
+            "load": "required"
           }
         ],
         "can-follow": [
@@ -1966,7 +1974,9 @@
       "status": "drafted",
       "consumed_by": [
         "build",
+        "deploy",
         "dispatch",
+        "land",
         "verify"
       ],
       "maintained_by": []
@@ -2585,6 +2595,12 @@
     },
     {
       "from": "deploy",
+      "to": "git-ownership",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "deploy",
       "to": "canary",
       "type": "precedes"
     },
@@ -2960,6 +2976,12 @@
       "to": "gate-model",
       "type": "references",
       "load": "on-demand"
+    },
+    {
+      "from": "land",
+      "to": "git-ownership",
+      "type": "references",
+      "load": "required"
     },
     {
       "from": "land",

@@ -158,3 +158,10 @@ carrier write.
 
 If any phase fails, stop at that phase, surface the failure, and ask the operator for a path —
 never silently continue, never auto-revert.
+
+## On-demand references
+
+At the step of need, read these bundled references:
+
+- [git-ownership](references/git-ownership.md)
+
