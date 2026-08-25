@@ -1,8 +1,8 @@
 {
-  "generated": "2026-08-25T09:11:42Z",
+  "generated": "2026-08-25T09:33:46Z",
   "node_count": 45,
   "reference_count": 38,
-  "edge_count": 246,
+  "edge_count": 248,
   "nodes": {
     "architecture-review": {
       "primitive": "skill",
@@ -170,6 +170,14 @@
               "finding",
               "dev_tip"
             ]
+          },
+          {
+            "id": "handoff-prompt-convention",
+            "load": "on-demand"
+          },
+          {
+            "id": "git-ownership",
+            "load": "on-demand"
           }
         ],
         "can-follow": [
@@ -1944,7 +1952,9 @@
       "level": "L2",
       "title": "Git ownership — who performs each git act along the loop",
       "status": "drafted",
-      "consumed_by": [],
+      "consumed_by": [
+        "build"
+      ],
       "maintained_by": []
     },
     "git-policy-schema": {
@@ -1974,6 +1984,7 @@
       "title": "Handoff-prompt convention — the delta-only field form for cold handoffs",
       "status": "drafted",
       "consumed_by": [
+        "build",
         "dispatch",
         "harness-init"
       ],
@@ -2364,6 +2375,18 @@
         "finding",
         "dev_tip"
       ]
+    },
+    {
+      "from": "build",
+      "to": "handoff-prompt-convention",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "build",
+      "to": "git-ownership",
+      "type": "references",
+      "load": "on-demand"
     },
     {
       "from": "build",
