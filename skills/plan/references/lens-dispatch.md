@@ -32,13 +32,24 @@ Skipping a conditional lens whose trigger is unmet is the default, not a finding
 
 ## 2. Fan out
 
-Run each active lens in an isolated child context, in parallel. Hand each the same bundle:
-the `target` (`diff` or `doc`) and its contents, the scope-rules (what is in/out of the
-change; base-ref markers; untracked-scope notes), an optional intent/requirements summary,
-and the finding contract (the finding schema, severity scale, and confidence anchors) in the
-invocation prompt. Each lens returns the **compact** tier (no
-`why_it_matters`/`evidence`). A lens that errors or times out is recorded as a gap, not a
-silent drop — note which lens did not return.
+Run each active lens in an isolated child context, in parallel. Hand each **only the
+per-invocation delta** of its bundled [lens-frame](../../../references/lens-frame.md) §bundle contract: the `target` —
+one of `diff | doc | plan` — and its contents, the scope-rules (what is in/out of the change;
+base-ref markers; untracked-scope notes), and an optional intent/requirements summary. Supply
+no contract text — the finding contract (schema, severity scale, confidence anchors) rides
+each lens's bundled frame, dispatcher-independent. Each dispatch prompt carries the
+attribution envelope per the [handoff-prompt-convention](../../../references/handoff-prompt-convention.md)
+grammar, verbatim:
+
+```
+META: carrier=<id> kind=<work-item|standalone-iu> arc=<dev-sprint|incremental> iu=<id>
+```
+
+with the invoking slice's own values and `stage=lens` — a member of the closed `STAGES` set
+the analyzer owns (`scripts/analyzer/schema.ts`; cite it, never re-list the members); `stage`
+never inherits, so an envelope-less dispatch attributes `stage: null` and drops from every
+stage rollup. Each lens returns the **compact** tier (no `why_it_matters`/`evidence`). A lens that
+errors or times out is recorded as a gap, not a silent drop — note which lens did not return.
 
 ## 3. Merge — deduplicate and corroborate
 

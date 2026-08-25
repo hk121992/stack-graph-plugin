@@ -1,8 +1,8 @@
 {
-  "generated": "2026-08-25T13:10:57Z",
+  "generated": "2026-08-25T14:47:41Z",
   "node_count": 45,
   "reference_count": 38,
-  "edge_count": 253,
+  "edge_count": 257,
   "nodes": {
     "architecture-review": {
       "primitive": "skill",
@@ -915,33 +915,7 @@
       "cadence": "on-demand",
       "level": "L3",
       "title": "Correctness lens",
-      "status": "v0.1.0 — 2026-05-30",
-      "edges": {
-        "composes-into": [
-          {
-            "id": "dev-sprint",
-            "stage": "review"
-          },
-          {
-            "id": "dev-sprint",
-            "stage": "design"
-          },
-          {
-            "id": "dev-sprint",
-            "stage": "plan"
-          }
-        ]
-      }
-    },
-    "lens-maintainability": {
-      "primitive": "skill",
-      "execution": "isolated",
-      "mode": "autonomous",
-      "provenance": "vendored",
-      "cadence": "on-demand",
-      "level": "L3",
-      "title": "Maintainability lens",
-      "status": "v0.1.0 — 2026-05-30",
+      "status": "v0.2.0 — 2026-08-25",
       "edges": {
         "composes-into": [
           {
@@ -958,6 +932,42 @@
           }
         ],
         "references": [
+          {
+            "id": "lens-frame",
+            "load": "required"
+          }
+        ]
+      }
+    },
+    "lens-maintainability": {
+      "primitive": "skill",
+      "execution": "isolated",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Maintainability lens",
+      "status": "v0.2.0 — 2026-08-25",
+      "edges": {
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "review"
+          },
+          {
+            "id": "dev-sprint",
+            "stage": "design"
+          },
+          {
+            "id": "dev-sprint",
+            "stage": "plan"
+          }
+        ],
+        "references": [
+          {
+            "id": "lens-frame",
+            "load": "required"
+          },
           {
             "id": "architecture-doctrine",
             "load": "on-demand"
@@ -973,33 +983,7 @@
       "cadence": "on-demand",
       "level": "L3",
       "title": "Security lens",
-      "status": "v0.1.0 — 2026-05-30",
-      "edges": {
-        "composes-into": [
-          {
-            "id": "dev-sprint",
-            "stage": "review"
-          },
-          {
-            "id": "dev-sprint",
-            "stage": "design"
-          },
-          {
-            "id": "dev-sprint",
-            "stage": "plan"
-          }
-        ]
-      }
-    },
-    "lens-tests": {
-      "primitive": "skill",
-      "execution": "isolated",
-      "mode": "autonomous",
-      "provenance": "vendored",
-      "cadence": "on-demand",
-      "level": "L3",
-      "title": "Tests lens",
-      "status": "v0.1.0 — 2026-05-30",
+      "status": "v0.2.0 — 2026-08-25",
       "edges": {
         "composes-into": [
           {
@@ -1017,8 +1001,44 @@
         ],
         "references": [
           {
+            "id": "lens-frame",
+            "load": "required"
+          }
+        ]
+      }
+    },
+    "lens-tests": {
+      "primitive": "skill",
+      "execution": "isolated",
+      "mode": "autonomous",
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L3",
+      "title": "Tests lens",
+      "status": "v0.2.0 — 2026-08-25",
+      "edges": {
+        "composes-into": [
+          {
+            "id": "dev-sprint",
+            "stage": "review"
+          },
+          {
+            "id": "dev-sprint",
+            "stage": "design"
+          },
+          {
+            "id": "dev-sprint",
+            "stage": "plan"
+          }
+        ],
+        "references": [
+          {
+            "id": "lens-frame",
+            "load": "required"
+          },
+          {
             "id": "test-discipline",
-            "load": "on-demand"
+            "load": "required"
           }
         ]
       }
@@ -2046,7 +2066,12 @@
       "level": "L2",
       "title": "Lens frame — the family's shared invocation contract",
       "status": "drafted",
-      "consumed_by": [],
+      "consumed_by": [
+        "lens-correctness",
+        "lens-maintainability",
+        "lens-security",
+        "lens-tests"
+      ],
       "maintained_by": []
     },
     "local-node-schema": {
@@ -3012,6 +3037,12 @@
       "stage": "plan"
     },
     {
+      "from": "lens-correctness",
+      "to": "lens-frame",
+      "type": "references",
+      "load": "required"
+    },
+    {
       "from": "lens-maintainability",
       "to": "dev-sprint",
       "type": "composes-into",
@@ -3028,6 +3059,12 @@
       "to": "dev-sprint",
       "type": "composes-into",
       "stage": "plan"
+    },
+    {
+      "from": "lens-maintainability",
+      "to": "lens-frame",
+      "type": "references",
+      "load": "required"
     },
     {
       "from": "lens-maintainability",
@@ -3054,6 +3091,12 @@
       "stage": "plan"
     },
     {
+      "from": "lens-security",
+      "to": "lens-frame",
+      "type": "references",
+      "load": "required"
+    },
+    {
       "from": "lens-tests",
       "to": "dev-sprint",
       "type": "composes-into",
@@ -3073,9 +3116,15 @@
     },
     {
       "from": "lens-tests",
+      "to": "lens-frame",
+      "type": "references",
+      "load": "required"
+    },
+    {
+      "from": "lens-tests",
       "to": "test-discipline",
       "type": "references",
-      "load": "on-demand"
+      "load": "required"
     },
     {
       "from": "local-graph-maintainer",
