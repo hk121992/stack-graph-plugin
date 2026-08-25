@@ -92,8 +92,8 @@ argument.
 
 ## The revert seam
 
-- **You own the revert DECISION.** On a failed deploy, a BROKEN canary, or an operator "not
-  live", you surface and own that choice — never an auto-revert.
+- **You own the revert DECISION** (`git-ownership` §roles). On a failed deploy, a BROKEN
+  canary, or an operator "not live", you own that choice — never an auto-revert.
 - **The EXECUTOR splits on the regime.** Prod-facing: `deploy` executes the mechanical revert
   (`git revert <merge_sha>`, or a revert-PR under branch protection). Single-main: **you execute
   it directly** — `git revert <merge_sha>` of the landing you merged (deploy skips single-main,
