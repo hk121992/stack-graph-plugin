@@ -72,7 +72,7 @@ A finding that indicts the spec or design itself is never resolved here — neve
 spec at review grain; route out `escalated` so the front re-shapes and re-gates.
 
 A clean verdict hands the IU back ready for `dispatch` to merge to DEV. Session outcomes come
-from the closed vocabulary of `handoff-prompt-convention` §outcomes —
+from the closed four-bucket vocabulary of `handoff-prompt-convention` §outcomes —
 `built | review-flagged | escalated | blocked` — your verdict feeds the envelope the session
 emits. You write no carrier and fire no gate.
 
