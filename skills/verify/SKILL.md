@@ -156,8 +156,8 @@ When the batch is resolved (verify clean, or every residual finding a logged del
 1. **Open the promotion object.** Prod-facing: open the **one integration PR (DEV→main)** over the
    assembled batch, CI-green — your row in `git-ownership` §roles.
    Single-main: there is no integration PR — surface the **open per-IU PRs against `main`**: per
-   `git-ownership` §roles the dispatched session opened each and left it open; the gate's
-   sign-off merges them.
+   `git-ownership` §roles the dispatched session opened each and left it open; the merge waits
+   for the gate's enactment (step 4).
 2. **Fire `◇commit-to-land` in the operator's session.** The gate experience is yours: present the
    sign-off surface — the integration PR (number, diff stat, CI checks) or the per-IU PRs, the
    consolidated verdict with the **integration-coherence result leading** (the operator attests
