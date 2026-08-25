@@ -1,8 +1,8 @@
 {
-  "generated": "2026-08-25T11:19:54Z",
+  "generated": "2026-08-25T12:19:28Z",
   "node_count": 45,
   "reference_count": 38,
-  "edge_count": 250,
+  "edge_count": 251,
   "nodes": {
     "architecture-review": {
       "primitive": "skill",
@@ -1668,7 +1668,7 @@
       "cadence": "on-demand",
       "level": "L3",
       "title": "Verify",
-      "status": "v0.1.0 — 2026-07-01",
+      "status": "v0.2.0 — 2026-08-25",
       "edges": {
         "invokes": [
           {
@@ -1725,6 +1725,10 @@
           },
           {
             "id": "gate-model",
+            "load": "on-demand"
+          },
+          {
+            "id": "git-ownership",
             "load": "on-demand"
           }
         ],
@@ -1962,7 +1966,8 @@
       "status": "drafted",
       "consumed_by": [
         "build",
-        "dispatch"
+        "dispatch",
+        "verify"
       ],
       "maintained_by": []
     },
@@ -3694,6 +3699,12 @@
     {
       "from": "verify",
       "to": "gate-model",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "verify",
+      "to": "git-ownership",
       "type": "references",
       "load": "on-demand"
     },

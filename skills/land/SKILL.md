@@ -30,7 +30,7 @@ preamble inject.
 Read the **promotion set** — the IUs whose carriers record a cleared `commit-to-land` entry
 (`in-delivery → shipped`, `decision: promote`, `evidence_refs → the integration PR # +
 merge_sha` once enacted). The gate was fired and recorded at `verify`'s exit — the recorded
-promote entry is your precondition; the `merge_sha` lands with your own enactment append. **Do not
+promote entry is your precondition. **Do not
 re-ask the gate**. If a
 carrier in the set holds **no** recorded commit-to-land entry, **stop** — surface the gap and
 route back to `verify`'s exit. Fail closed: never execute an unauthorized promotion.
@@ -55,9 +55,9 @@ names the fields, the harness supplies the values — never hardcode a branch or
 - **Single-main** (no prod target): **you execute the landing yourself** — merge the open per-IU
   PRs to `main` (the PRs `dispatch` opened and left open; the merge **is** `commit-to-land`'s
   enactment, per-IU). `deploy`, `canary`, and `live-confirmed` **skip** — there is no prod
-  target to release to or confirm; the **terminal landing state is `shipped`**. Once each merge is real,
-  record its enactment evidence (the real merge SHA) by invoking `record-gate` per its
-  commit-to-land contract.
+  target to release to or confirm; the **terminal landing state is `shipped`**. Record each merge in
+  the **batch report**, not on the gate entry — `record-gate` is growth-only, so a decided entry
+  cannot be amended, and the SHA is derivable from the PR number anyway.
   `verify` ran in both regimes; the landing is equally deliberate.
 
 ## Step 1 — Deploy (prod-facing)
@@ -67,9 +67,8 @@ integration PR (`dev → main` — one revertable promotion commit, `merge_sha`)
 version/tag bump, triggers the prod pipeline, waits for it to settle, and runs its inline
 single-pass smoke check (HTTP 200 · console-error scan · content-present · screenshot). It
 reports `smoke_health`; **you consume that result** — the live-confirmed gate never fires on a
-URL that returns 200 over a blank or broken page. Once the promotion's merge is real, its
-enactment evidence (the `merge_sha`) is recorded by invoking `record-gate` per its
-commit-to-land contract.
+URL that returns 200 over a blank or broken page. Deploy's `merge_sha` is enactment, not decision:
+record it in the **batch report**, never as an append to the decided gate entry.
 
 If deploy fails at any phase, surface its failure output and ask:
 
@@ -126,6 +125,13 @@ advances to `live`; go to the revert seam.
   correction against the same carrier(s), rebuilt, re-verified, re-promoted.
 - Revert is a **git action, not a carrier write** — neither you nor deploy writes the carrier to
   revert.
+
+
+**Firing `record-gate` safely.** Its free-text operands (`--conditions`, `--evidence`) are recorded
+verbatim, so a shell metacharacter in the invoking command corrupts the entry **before** the runner
+sees the text — and the chain is append-only, so the damage cannot be amended. Pass them from a
+quoted heredoc or in single quotes; never leave a backtick or `$` unescaped inside a double-quoted
+argument.
 
 ## Terminus
 
