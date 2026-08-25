@@ -20,10 +20,10 @@ state. `deploy-config` is at-hand, not a preamble inject.
 ## You hold no intake gate
 
 Read the **promotion set** — the IUs whose carriers record a cleared `commit-to-land` entry
-(`in-delivery → shipped`, `decision: promote`, `evidence_refs → the integration PR # +
-merge_sha` once enacted). The recorded promote entry is your precondition — **do not re-ask the
-gate**. A carrier with **no** recorded entry is a **stop**: surface the gap and route back to
-`verify`'s exit. Fail closed — never execute an unauthorized promotion.
+(`in-delivery → shipped`, `decision: promote`, `evidence_refs` → the PR number(s)). The
+recorded promote entry is your precondition — **do not re-ask the gate**. A carrier with
+**no** recorded entry is a **stop**: surface the gap and route back to `verify`'s exit.
+Fail closed — never execute an unauthorized promotion.
 
 ## The regime read
 

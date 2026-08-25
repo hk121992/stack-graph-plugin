@@ -33,10 +33,9 @@ Both axes read one bundle, built before the panel runs:
 
 Run the panel per `lens-dispatch` — it owns lens selection, the parallel fan-out, and the
 merge / dedup / corroborate / confidence-gate / severity-route reduction. Hand each invocation
-the target (`diff`) and its contents, the scope-rules and intent summary, and the finding
-contract — `findings-schema` · `severity-scale` · `confidence-anchors`, held from the required
-references — so every emitter returns the compact tier to one contract, reduced to one ranked,
-routed finding set.
+only its per-invocation delta — the target (`diff`) and its contents, the scope-rules and
+intent summary — the bundle contents per `lens-dispatch` §2; every emitter returns the
+compact tier to one contract, reduced to one ranked, routed finding set.
 
 The four always-on lenses run every time. `health` — the whole-tree static re-score (lint,
 types, tests) against its stored baseline — is conditional: a broad refactor, a dependency
