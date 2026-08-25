@@ -1,8 +1,8 @@
 {
-  "generated": "2026-08-25T10:04:39Z",
+  "generated": "2026-08-25T10:33:34Z",
   "node_count": 45,
   "reference_count": 38,
-  "edge_count": 248,
+  "edge_count": 249,
   "nodes": {
     "architecture-review": {
       "primitive": "skill",
@@ -584,7 +584,7 @@
       "cadence": "on-demand",
       "level": "L3",
       "title": "Dispatch",
-      "status": "v0.1.0 — 2026-07-01",
+      "status": "v0.2.0 — 2026-08-25",
       "edges": {
         "invokes": [
           {
@@ -616,6 +616,10 @@
           {
             "id": "handoff-prompt-convention",
             "load": "on-demand"
+          },
+          {
+            "id": "git-ownership",
+            "load": "required"
           }
         ],
         "precedes": [
@@ -1953,7 +1957,8 @@
       "title": "Git ownership — who performs each git act along the loop",
       "status": "drafted",
       "consumed_by": [
-        "build"
+        "build",
+        "dispatch"
       ],
       "maintained_by": []
     },
@@ -2729,6 +2734,12 @@
       "to": "handoff-prompt-convention",
       "type": "references",
       "load": "on-demand"
+    },
+    {
+      "from": "dispatch",
+      "to": "git-ownership",
+      "type": "references",
+      "load": "required"
     },
     {
       "from": "dispatch",
