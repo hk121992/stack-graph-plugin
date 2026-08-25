@@ -58,9 +58,9 @@ against.
 
 ## Route-outs — the return envelope
 
-Outcomes are dispatch's four buckets, verbatim: `built | review-flagged | escalated | blocked`
-(envelope form: `handoff-prompt-convention`). State the issue and the options; never improvise
-past.
+Outcomes come from the closed four-bucket vocabulary of `handoff-prompt-convention` §outcomes —
+`built | review-flagged | escalated | blocked`, verbatim — `dispatch` routes on them. State the
+issue and the options; never improvise past.
 
 - **Scope expansion** → `blocked`: the affected files, why, the options (expand / split / proceed
   without).
@@ -73,7 +73,9 @@ past.
 ## Helpers — invoke on signal
 
 Pass the compulsory `carrier=` on every invocation, and `stage=` on an isolated child's `META:`
-envelope, per `handoff-prompt-convention` — `stage` never inherits.
+envelope (form: `handoff-prompt-convention`). `stage` names a member of the closed `STAGES` set
+the analyzer owns (`scripts/analyzer/schema.ts`; cite it, never re-list the members; `other` for
+a non-stage helper) — and never inherits.
 
 - Failing `acceptance_check`, cause not quickly diagnosable → `debug` (a quick, obvious fix stays
   inline).

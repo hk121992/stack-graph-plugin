@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-25T09:33:46Z",
+  "generated": "2026-08-25T10:04:39Z",
   "node_count": 45,
   "reference_count": 38,
   "edge_count": 248,
@@ -131,7 +131,7 @@
       "cadence": "on-demand",
       "level": "L3",
       "title": "Build",
-      "status": "v0.1.0 — 2026-07-01",
+      "status": "v0.2.0 — 2026-08-24",
       "edges": {
         "invokes": [
           {
