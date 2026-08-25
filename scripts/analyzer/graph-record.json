@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-25T08:42:05Z",
+  "generated": "2026-08-25T09:11:42Z",
   "node_count": 45,
   "reference_count": 38,
   "edge_count": 246,
@@ -1760,7 +1760,7 @@
       "provenance": "vendored",
       "cadence": "on-demand",
       "level": "L2",
-      "title": "Architecture doctrine — deep modules, seams, dependency categories",
+      "title": "Architecture doctrine — deep modules, seams, structural judgment",
       "status": "drafted",
       "consumed_by": [
         "architecture-review",
