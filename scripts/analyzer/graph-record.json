@@ -1,8 +1,8 @@
 {
-  "generated": "2026-08-25T10:33:34Z",
+  "generated": "2026-08-25T11:19:54Z",
   "node_count": 45,
   "reference_count": 38,
-  "edge_count": 249,
+  "edge_count": 250,
   "nodes": {
     "architecture-review": {
       "primitive": "skill",
@@ -1271,7 +1271,7 @@
       "cadence": "on-demand",
       "level": "L3",
       "title": "Review",
-      "status": "v0.1.0 — 2026-07-01",
+      "status": "v0.2.0 — 2026-08-25",
       "edges": {
         "invokes": [
           {
@@ -1306,6 +1306,10 @@
           {
             "id": "confidence-anchors",
             "load": "required"
+          },
+          {
+            "id": "handoff-prompt-convention",
+            "load": "on-demand"
           }
         ],
         "composes-into": [
@@ -1991,7 +1995,8 @@
       "consumed_by": [
         "build",
         "dispatch",
-        "harness-init"
+        "harness-init",
+        "review"
       ],
       "maintained_by": []
     },
@@ -3253,6 +3258,12 @@
       "to": "confidence-anchors",
       "type": "references",
       "load": "required"
+    },
+    {
+      "from": "review",
+      "to": "handoff-prompt-convention",
+      "type": "references",
+      "load": "on-demand"
     },
     {
       "from": "shape",
