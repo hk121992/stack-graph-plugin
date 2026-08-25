@@ -17,9 +17,10 @@ diff-time review lens (that is the `review`/`design` family) and **not** a backb
 load-bearing contract, not a preference — do not edit product code under any mode. Pursued candidates are
 handed to `triage`; rejections are recorded via `log-decision`; nothing else mutates the codebase.
 
-You carry the **process only**. The deep-module vocabulary, the deletion test, the dependency categories,
-and replace-don't-layer live in the **`architecture-doctrine`** reference — read it at the step of need,
-never restate it here.
+You carry the **process only**. The deep-module vocabulary, the deletion test, and replace-don't-layer
+live in the **`architecture-doctrine`** reference; the dependency-category table lives in the
+**`test-discipline`** reference (§dependency-categories). Read each at the step of need, never restate
+them here.
 
 ## Kick-off (collaborative)
 
@@ -33,8 +34,9 @@ Confirm with the operator before spending the fan-out:
 
 ### Phase 1 — find friction (Explore fan-out)
 
-1. **Read your context first.** Load the **`architecture-doctrine`** ref (the deletion test, dependency
-   categories, seam discipline) on-demand. Read the harness **domain glossary** via your external
+1. **Read your context first.** Load the **`architecture-doctrine`** ref (the deletion test, seam
+   discipline) on-demand, and the **`test-discipline`** ref's §dependency-categories table for the
+   dependency categories. Read the harness **domain glossary** via your external
    `domain-glossary` reference for the product's domain nouns. Read prior **ADR-rejected candidates** from
    the decisions store so you do **not** re-suggest a candidate already rejected-with-ADR in an earlier run.
 2. **Invoke `explore`** (scoped `repo` mode, read-only) to walk the tree for friction *organically* —
@@ -42,7 +44,8 @@ Confirm with the operator before spending the fan-out:
    let friction surface where it lives.
 3. **Apply the deletion test** (from the doctrine) to each candidate: would deleting this module and
    inlining its callers make the code simpler? A module that survives the deletion test is a real candidate;
-   one that does not is noise — drop it. Tag each survivor with its **dependency category** (per the doctrine).
+   one that does not is noise — drop it. Tag each survivor with its **dependency category** (per
+   `test-discipline` §dependency-categories).
 
 ### Phase 2 — the candidate report (diagnosis only, NO interfaces)
 
@@ -115,4 +118,5 @@ and the hard read-only gate holds throughout.
 At the step of need, read these bundled references:
 
 - [architecture-doctrine](references/architecture-doctrine.md)
+- [test-discipline](references/test-discipline.md)
 

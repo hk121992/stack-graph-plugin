@@ -1,8 +1,8 @@
 {
-  "generated": "2026-08-25T14:47:41Z",
+  "generated": "2026-08-25T17:19:52Z",
   "node_count": 45,
   "reference_count": 38,
-  "edge_count": 257,
+  "edge_count": 258,
   "nodes": {
     "architecture-review": {
       "primitive": "skill",
@@ -25,6 +25,10 @@
         "references": [
           {
             "id": "architecture-doctrine",
+            "load": "on-demand"
+          },
+          {
+            "id": "test-discipline",
             "load": "on-demand"
           },
           {
@@ -2223,6 +2227,7 @@
       "title": "Test discipline — the test-quality standard",
       "status": "drafted",
       "consumed_by": [
+        "architecture-review",
         "build",
         "lens-tests"
       ],
@@ -2285,6 +2290,12 @@
     {
       "from": "architecture-review",
       "to": "architecture-doctrine",
+      "type": "references",
+      "load": "on-demand"
+    },
+    {
+      "from": "architecture-review",
+      "to": "test-discipline",
       "type": "references",
       "load": "on-demand"
     },
