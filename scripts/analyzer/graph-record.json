@@ -1,7 +1,7 @@
 {
-  "generated": "2026-08-18T13:46:02Z",
+  "generated": "2026-08-25T08:42:05Z",
   "node_count": 45,
-  "reference_count": 36,
+  "reference_count": 38,
   "edge_count": 246,
   "nodes": {
     "architecture-review": {
@@ -1938,6 +1938,15 @@
       ],
       "maintained_by": []
     },
+    "git-ownership": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Git ownership — who performs each git act along the loop",
+      "status": "drafted",
+      "consumed_by": [],
+      "maintained_by": []
+    },
     "git-policy-schema": {
       "provenance": "vendored",
       "cadence": "on-demand",
@@ -1993,6 +2002,15 @@
         "review",
         "shape"
       ],
+      "maintained_by": []
+    },
+    "lens-frame": {
+      "provenance": "vendored",
+      "cadence": "on-demand",
+      "level": "L2",
+      "title": "Lens frame — the family's shared invocation contract",
+      "status": "drafted",
+      "consumed_by": [],
       "maintained_by": []
     },
     "local-node-schema": {

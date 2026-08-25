@@ -7,7 +7,7 @@ cadence: on-demand
 read-when: "Writing or grading a slice's tests."
 derive-from: [test-discipline]
 reviews-on: test-discipline-source
-last-reviewed: 2026-07-01
+last-reviewed: 2026-08-25
 entropy: unmeasured
 status: drafted
 related: [architecture-doctrine, ux-principles]
@@ -15,85 +15,37 @@ related: [architecture-doctrine, ux-principles]
 
 # Test discipline
 
-`build` writes a slice's tests to this standard; `lens-tests` grades a diff's or a design's tests
-against it. It is the **one named rubric** both draw on, so test quality is a single contract rather
-than each node's private paraphrase.
+The one named test-quality rubric: `build` writes a slice's tests to it, `lens-tests` grades against it — a single contract, not each node's private paraphrase. Quality only: the RED→GREEN→REFACTOR loop's *order* lives in `build`, not here.
 
-This reference is the **quality of a test**, not the *order* you write tests in. The
-RED→GREEN→REFACTOR tracer-bullet loop — vertical-not-horizontal, minimal-code, refactor-under-green —
-lives in `build` ("Incremental arc — build mode"). Do not restate it here.
+## The core principle {#core}
 
-## The core principle
+A test verifies **behaviour through a public interface**, not implementation. If a behaviour-preserving refactor breaks a test, that test was testing implementation — a liability, not coverage.
 
-A test verifies **behaviour through a public interface**, not implementation. The code underneath can
-change entirely; the test should not. If renaming an internal function or restructuring internals
-breaks a test whose behaviour is unchanged, that test was testing implementation — it is a liability,
-not coverage.
+## Good / bad {#good-bad}
 
-## Good test / bad test
+**Good:** exercises a real path through the public API; reads as a specification — names *what* capability exists, not *how*; survives a behaviour-preserving refactor; makes one logical assertion.
 
-A **good** test:
+**Red flags:** mocks an internal collaborator or tests a private method; asserts on call counts or call order; verifies through a back-channel (querying the DB directly) instead of the interface; breaks on a refactor that changed no behaviour.
 
-- exercises a real code path through the **public API** (integration-style, not a mock of internal parts);
-- reads like a specification — its name says **what** capability exists ("user can checkout with a valid cart"), not **how**;
-- survives a behaviour-preserving refactor;
-- makes **one logical assertion**.
+## Mocking — boundaries only {#mocking}
 
-A **bad** test (red flags):
+Mock **only at system boundaries**: external APIs, the database (prefer a real test DB), time, randomness, the filesystem. Never mock your own classes or internal collaborators. An over-mocked test that mocks the thing under test passes whether or not the real behaviour is correct — worse than no test.
 
-- mocks an internal collaborator, or tests a private method;
-- asserts on call counts or call order;
-- verifies through an external back-channel (querying the DB directly) instead of the interface;
-- names *how* it works rather than *what* it does;
-- breaks on a refactor that did not change behaviour.
+## Design for testability {#testability}
 
-Verify through the interface, not behind it:
+- **Inject dependencies** — pass the external client in; don't construct it inside the unit.
+- **Return results, don't mutate** shared state.
+- **Small surface area** — the deep module: a small interface over substantial implementation. What shape a module and its seam should take is [architecture-doctrine](architecture-doctrine.md)'s question; this card owns test quality.
 
-```
-// BAD — bypasses the interface to a back-channel
-createUser({ name: "Alice" });
-row = db.query("SELECT * FROM users WHERE name = 'Alice'");   // asserts on storage internals
+## Dependency categories — the test strategy across a seam {#dependency-categories}
 
-// GOOD — verifies the observable contract
-user = createUser({ name: "Alice" });
-assert getUser(user.id).name == "Alice";                      // asserts through the public API
-```
+Classify a module's dependencies; the category determines the test strategy:
 
-## Mocking — boundaries only
+1. **In-process** — pure computation, in-memory state: merge and test through the new interface directly.
+2. **Local-substitutable** — a local stand-in exists (an embedded DB, an in-memory filesystem): test against the stand-in; the seam stays internal.
+3. **Remote but owned** — your own services across a network: define a **port** at the seam; an in-memory adapter for tests, the transport adapter for production.
+4. **True external** — third-party services you don't control: inject as a port; tests provide a mock adapter.
 
-Mock **only at system boundaries**: external APIs (payment, email), the database (prefer a real test
-DB where you can), time and randomness, the filesystem. **Never** mock your own classes, internal
-collaborators, or anything you control — mocking what you own couples the test to structure and hides
-the real behaviour.
+## The gates {#gates}
 
-Design the boundary so it is easy to mock honestly:
-
-- **Inject dependencies** — pass the external client in; do not construct it inside the unit.
-- **Prefer specific, SDK-style interfaces** over one generic fetcher — each operation is its own
-  function, so each mock returns one shape with no conditional logic in test setup, and a test visibly
-  exercises named endpoints.
-
-An over-mocked test that mocks the thing under test passes whether or not the real behaviour is correct;
-it is worse than no test because it signals coverage it does not provide.
-
-## Design for testability
-
-Behaviour is testable through a public interface only if the interface is shaped for it:
-
-- **Accept dependencies, don't create them** — inject, so a test can substitute at the boundary.
-- **Return results, don't mutate** — a function that returns a value is testable by its output; one
-  that mutates shared state is not.
-- **Small surface area** — fewer methods and fewer parameters mean fewer tests and simpler setup. The
-  underlying principle is the *deep module* (small interface over substantial implementation).
-
-> The fuller deep-modules / interface-design doctrine lives in **`architecture-doctrine`**
-> (read `architecture-doctrine` on-demand). This reference keeps only the
-> **testability slice**; for what shape a module and its seam should take, read the doctrine.
-
-## The gates
-
-- **One logical assertion per test.**
-- **Test behaviour, not shape** — never bulk-write tests of data structures or signatures ahead of the
-  code; a test written before its behaviour exists tests imagined behaviour.
-- **Never refactor while RED** — get to GREEN first. (The loop in `build` owns this timing; it is
-  restated here only as a quality gate, not as loop mechanics.)
+One logical assertion per test. Test behaviour, not shape — never bulk-write tests ahead of the behaviour they prove. Never refactor while RED (`build` owns the loop timing; the quality gate stands here).

@@ -1,13 +1,13 @@
 ---
 subject: architecture-doctrine
-title: Architecture doctrine — deep modules, seams, dependency categories
+title: Architecture doctrine — deep modules, seams, structural judgment
 provenance: vendored
 level: L2
 cadence: on-demand
 read-when: "Judging structural depth, a seam, or a deepening."
 derive-from: [architecture-doctrine]
 reviews-on: architecture-doctrine-source
-last-reviewed: 2026-07-01
+last-reviewed: 2026-08-25
 entropy: unmeasured
 status: drafted
 related: [test-discipline, ux-principles, four-risks]
@@ -15,93 +15,37 @@ related: [test-discipline, ux-principles, four-risks]
 
 # Architecture doctrine
 
-`architecture-review` reasons with this doctrine; `lens-maintainability` grounds its structural
-hunt-list in it; `test-discipline` defers its deep-module pointer here. It is the **one named
-vocabulary** for structural judgment, so depth and seams are a single contract rather than each
-node's private paraphrase.
+The one named vocabulary for structural judgment — `build`'s REFACTOR standard, `verify`'s coherence grounding, `lens-maintainability`'s hunt grounding, `architecture-review`'s substrate — a single contract, not each node's private paraphrase.
 
-## Vocabulary — use these terms exactly
+## Vocabulary — use these terms exactly {#vocabulary}
 
 Consistent language is the point. Do not substitute.
 
-- **Module** — anything with an interface and an implementation. Scale-agnostic: a function, a
-  class, a package, a tier-spanning slice. *Avoid:* unit, component, service.
-- **Interface** — everything a caller must know to use the module correctly: the type signature
-  **plus** invariants, ordering constraints, error modes, required configuration, performance
-  characteristics. *Avoid:* API, signature (those name only the type-level surface).
-- **Implementation** — the code inside a module. Distinct from adapter: a thing can be a small
-  adapter with a large implementation (a Postgres repo) or a large adapter with a small
-  implementation (an in-memory fake). Say "adapter" when the seam is the topic; "implementation"
-  otherwise.
-- **Depth** — leverage at the interface: how much behaviour a caller (or test) can exercise per
-  unit of interface they must learn. **Deep** = a lot of behaviour behind a small interface.
-  **Shallow** = interface nearly as complex as the implementation.
-- **Seam** *(Feathers)* — a place where behaviour can be altered without editing in that place;
-  the *location* at which a module's interface lives. Choosing where the seam sits is its own
-  design decision, distinct from what goes behind it. *Avoid:* boundary (overloaded with DDD's
-  bounded context).
-- **Adapter** — a concrete thing satisfying an interface at a seam. Names the *role* (what slot
-  it fills), not the substance.
-- **Leverage** — what callers get from depth: more capability per unit of interface learned; one
-  implementation pays back across N call sites and M tests.
-- **Locality** — what maintainers get from depth: change, bugs, knowledge, and verification
-  concentrate in one place. Fix once, fixed everywhere.
+- **Module** — anything with an interface and an implementation; scale-agnostic. *Avoid:* unit, component, service.
+- **Interface** — everything a caller must know to use the module correctly: the signature **plus** invariants, ordering constraints, error modes, required configuration, performance characteristics. *Avoid:* API, signature.
+- **Implementation** — the code inside a module; say "adapter" only when the seam is the topic.
+- **Depth** — leverage at the interface: how much behaviour a caller (or test) exercises per unit of interface learned. **Deep** = much behaviour behind a small interface.
+- **Seam** *(Feathers)* — where behaviour can be altered without editing in that place; where a module's interface lives. *Avoid:* boundary.
+- **Adapter** — a concrete thing satisfying an interface at a seam; names the *role*, not the substance.
+- **Leverage** — what callers get from depth. **Locality** — what maintainers get: change, bugs, knowledge, and verification concentrate in one place.
 
-### Rejected framings
+### Rejected framings {#rejected-framings}
 
-- **Depth as implementation-lines ÷ interface-lines** (Ousterhout's ratio): rewards padding the
-  implementation. Use depth-as-leverage instead.
-- **"Interface" as the language keyword or a class's public methods**: too narrow — interface
-  here is every fact a caller must know.
-- **"Boundary"**: overloaded. Say **seam** or **interface**.
+- Depth as implementation-lines ÷ interface-lines — rewards padding; use depth-as-leverage.
+- "Interface" as the language keyword or public methods — too narrow.
+- "Boundary" — overloaded; say **seam** or **interface**.
 
-## Principles
+## Principles {#principles}
 
-- **Depth is a property of the interface, not the implementation.** A deep module can be
-  internally composed of small, swappable parts — they just aren't part of the interface. A
-  module may have **internal seams** (private, used by its own tests) as well as the external
-  seam at its interface.
-- **The deletion test.** Imagine deleting the module. If complexity vanishes, it was a
-  pass-through hiding nothing. If complexity reappears across N callers, it was earning its
-  keep. Apply this to anything suspected shallow: "yes, deleting it would scatter complexity" is
-  the signal of a real module.
-- **The interface is the test surface.** Callers and tests cross the same seam. Wanting to test
-  *past* the interface means the module is probably the wrong shape.
-- **One adapter means a hypothetical seam. Two adapters means a real one.** Don't introduce a
-  seam (or a port) unless something actually varies across it — typically production + test. A
-  single-adapter seam is just indirection.
+- **Depth is a property of the interface, not the implementation** — a deep module may be internally composed of small, swappable parts; they just aren't part of the interface.
+- **The deletion test.** Imagine deleting the module: complexity vanishes → it was a pass-through hiding nothing; complexity reappears across N callers → it was earning its keep.
+- **The interface is the test surface.** Wanting to test *past* the interface means the module is probably the wrong shape.
+- **One adapter means a hypothetical seam; two means a real one.** Don't introduce a port nothing actually varies across.
 
-## Dependency categories — how a deepened module is tested across its seam
+## Dependency direction {#dependency-direction}
 
-When assessing a module (or a cluster of shallow modules) for deepening, classify its
-dependencies. The category determines the test strategy.
+Dependencies inject at seams: the deep module owns the logic; what varies (transport, vendor, store) arrives as an adapter — one port, N adapters. The per-category test strategy — the dependency-category table — lives in [test-discipline](test-discipline.md) §dependency-categories.
 
-1. **In-process** — pure computation, in-memory state, no I/O. Always deepenable: merge the
-   modules and test through the new interface directly. No adapter needed.
-2. **Local-substitutable** — dependencies with local test stand-ins (PGLite for Postgres, an
-   in-memory filesystem). Deepenable if the stand-in exists; tests run against the stand-in. The
-   seam is internal — no port at the module's external interface.
-3. **Remote but owned (ports & adapters)** — your own services across a network. Define a
-   **port** (interface) at the seam; the deep module owns the logic, the transport is injected
-   as an adapter. Tests use an in-memory adapter; production uses an HTTP/gRPC/queue adapter.
-   Recommendation shape: *"define a port at the seam, an HTTP adapter for production and an
-   in-memory adapter for testing, so the logic sits in one deep module even though it deploys
-   across a network."*
-4. **True external (mock)** — third-party services you don't control (Stripe, Twilio). The
-   deepened module takes the external dependency as an injected port; tests provide a mock
-   adapter.
+## Replace, don't layer {#replace-dont-layer}
 
-## Replace, don't layer
-
-When a deepening lands, old unit tests on the absorbed shallow modules become waste — **delete
-them**, don't keep them alongside.
-
-- Write new tests at the deepened module's interface — the interface is the test surface.
-- Tests assert observable outcomes through the interface, never internal state.
-- Tests must survive internal refactors: they describe behaviour, not implementation. A test
-  that changes when the implementation changes was testing past the interface.
-
-What makes an individual test good or bad — behaviour-through-public-interface, mocking only at
-system boundaries, one logical assertion — is `test-discipline`'s contract; this reference owns
-the structural question (what shape the module and its seam should take), not the test-quality
-rubric.
+When a deepening lands, **delete** the old unit tests on the absorbed shallow modules — never keep them alongside. New tests live at the deepened module's interface, assert observable outcomes, and survive internal refactors. What makes an individual test good is [test-discipline](test-discipline.md)'s contract; this card owns the structural question.

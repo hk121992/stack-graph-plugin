@@ -77,3 +77,18 @@ reference is the **single home** for cold-handoff message doctrine — author al
 field form. The dispatch prompt's `META:` line doubles as the **attribution source** the
 transcript-derived analytics reads (the A↔C convergence): formalising the envelope here makes a
 dispatched session's carrier/arc/IU machine-readable by construction, instead of regex-fragile prose.
+
+## The return envelope's outcome vocabulary {#outcomes}
+
+A return envelope names its `outcome` from the closed four-bucket set — `built | review-flagged | escalated | blocked` — defined here, once; consumers cite this vocabulary and restate nothing:
+
+- **`built`** — the slice is committed on its branch, acceptance evidence attached; the review
+  verdict is clean or all-deferred.
+- **`review-flagged`** — the in-session review fix loop hit its bound with **unresolved actionable
+  findings**; the ranked finding set rides the envelope.
+- **`escalated`** — a hidden fork surfaced, or a spec/design the session cannot honestly implement;
+  the signal + rationale ride the envelope, nothing enacted.
+- **`blocked`** — a scope, dependency, or environment blocker — or an under-defined carrier the
+  session could not build without asking; the reason, evidence, and options ride the envelope.
+
+What each bucket *routes to* is the consuming orchestrator's own contract, not this vocabulary's.
